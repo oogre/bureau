@@ -1,0 +1,33 @@
+<%
+	var id = controller + "-" + action;
+
+%>
+
+
+<div class="container">
+	<div id="<%= id %>" class="table-list table-responsive">
+	</div>
+</div>
+
+<script type="text/javascript">
+	
+	var  documentLoaded = function (){
+		$("#<%= id %>")
+		.append(JST["assets/templates/list.ejs"]({
+			h3 : "Liste de magasin",
+			table : {
+				name : "shop",
+				items : JSON.parse(_.unescape("<%= JSON.stringify(shops) %>"))
+			},
+			parentSelector : "<%= id %>",
+			sort : "<%= sort %>"
+ 		}))
+
+	
+	};
+
+	window.addEventListener("load", documentLoaded);
+	<% if(false === res.locals.layout){ %>
+		documentLoaded();
+	<% } %>
+</script>

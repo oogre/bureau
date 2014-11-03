@@ -1,0 +1,81 @@
+*{
+	transition: width .3s linear;
+	-webkit-transition: width .3s linear;
+	-moz-transition: width .3s linear;
+	-o-transition: width .3s linear;
+}
+
+body{
+	background: #eee;
+}
+body, html, .wrapper{
+	height: 100%;
+}
+.navbar{
+	border-radius: 0;
+	margin: 0;
+}
+.navbar.navbar-inverse h3{
+	color: #ddd;
+	margin-top: 12px;
+}
+.pannel{
+	padding: 12px 0 0 0; 
+	background: #fff;
+	height: 100%;
+	width: 100px;
+	overflow-x: hidden;
+	overflow-y: scroll;
+	border-right: solid 1px #aaa;
+	box-shadow: 0 0 10px #aaa;
+	float: left;
+}
+#workLocation:after{
+	content:'';
+    display:block;
+    clear: both;
+}
+.pannel.active{
+	width: 50%;
+}
+.table-responsive{
+	min-width: 500px;
+}
+
+
+thead th[data-db-row-order]:hover{
+	cursor: pointer;
+}
+
+td[data-db-row-name="name"]{
+	text-transform: capitalize;
+}
+
+.input-group{
+	margin-bottom: 5px;
+}
+
+.input-group-addon.bg-primary{
+	color: #fff;
+	background-color: #428bca;
+}
+
+textarea { 
+	resize:vertical;
+}
+
+.date a.btn {
+	padding: 0;
+}
+.date a.btn .add-on{
+	width: 41px;
+	height: 34px;
+}
+.date a.btn .add-on i.fa{
+	padding: 10px 14px;
+}
+
+
+.container{
+	background-color: #fff;
+}

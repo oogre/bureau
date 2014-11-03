@@ -1,0 +1,115 @@
+	<h3><%= h3 %></h3>
+
+	<hr/>
+
+	<div class="row">
+		<div class="col-sm-2">
+			<button class="btn btn-primary new" type="button">
+				Créé un magasin
+			</button>
+		</div>
+		<div class="col-sm-3">
+			<div class="input-group">
+					<a class="input-group-addon btn btn-info bg-default"><i class="fa fa-filter"></i></a>
+					<input type="text" class="form-control findByName" placeholder="Rechercher un magasin" />		
+				</div>
+		</div>
+	</div>
+	<hr/>
+	<table class="table" data-db-table-name="<%= table.name %>" >
+		<thead>
+			<tr>
+				<th data-db-row-name="brand" data-db-row-order="" >
+					<i class="fa fa-sort"></i>&nbsp; Enseigne
+				</th>
+				<th data-db-row-name="name" data-db-row-order="">
+					<i class="fa fa-sort"></i>&nbsp; Nom
+				</th>
+				<th data-db-row-name="createdAt" data-db-row-order="">
+					<i class="fa fa-sort"></i>&nbsp; Date de création
+				</th>
+				<th>
+					Action
+				</th>
+			</tr>
+		</thead>
+		<tbody>
+		<% 
+			table.items.map(function(item){
+		%>
+			<tr data-db-row-name="id" data-db-row-value="<%= item.id %>">
+				<td data-db-row-name="brand" data-db-row-value="<%= item.brand.toLowerCase() %>">
+					<%= (item.brand) %>
+				</td>
+				<td data-db-row-name="name" data-db-row-value="<%= item.name.toLowerCase() %>">
+					<%= (item.name) %>
+				</td>
+
+				<td data-db-row-name="createdAt">
+					<% var date = new Date(item.createdAt) %>
+					<%= date.getDate() + "/" + (date.getMonth() + 1) + "/" + date.getFullYear() %>
+				</td>
+				<td>
+					<button class="btn btn-info new" type="button">
+						Voir
+					</button>
+					<button class="btn btn-warning edit" type="button">
+						Editer
+					</button>
+				</td>
+			</tr>
+		<%	
+			}); 
+		%>
+		</tbody>
+	</table>
+
+	<script type="text/javascript">
+
+		var $reference = $("#<%= parentSelector %>");
+
+		var sort= "<%= sort %>";
+		if("null" != sort){
+			sort = sort.split(" ");
+			$reference
+			.find("thead [data-db-row-name='"+sort[0]+"']")
+			.attr("data-db-row-order", sort[1]||"desc")
+			.find(".fa")
+			.removeClass("fa-sort")
+			.addClass("fa-sort-"+(sort[1] == "desc" ? "asc" : "desc"));
+		}else{
+			$reference
+			.find("thead [data-db-row-name='createdAt']")
+			.attr("data-db-row-order", "desc")
+			.find(".fa")
+			.removeClass("fa-sort")
+			.addClass("fa-sort-desc");
+		}
+		$reference
+		.find("thead [data-db-row-order]")
+		.on("click", function(){
+			window.location = window.location.origin + window.location.pathname + '?sort="'+$(this).attr("data-db-row-name")+" "+ ($(this).attr("data-db-row-order") == "asc" ? "desc" : "asc")+'"';
+		})
+
+
+		
+		$reference.find(".findByName").on("keyup", function(){
+			var needle = $(this).val();
+			if(needle){
+				needle = needle.toLowerCase();
+				$reference
+				.find("tbody [data-db-row-name='name']:not([data-db-row-value*='"+needle+"'])", "tbody [data-db-row-name='brand']:not([data-db-row-value*='"+needle+"'])")
+				.parent()
+				.addClass("hide");
+				$reference
+				.find("tbody [data-db-row-name='name'][data-db-row-value*='"+needle+"'], tbody [data-db-row-name='brand'][data-db-row-value*='"+needle+"']")
+				.parent()
+				.removeClass("hide");
+			}else{
+				$reference
+				.find("[data-db-row-name='id']")
+				.removeClass("hide");
+			}
+		})
+	
+</script>
