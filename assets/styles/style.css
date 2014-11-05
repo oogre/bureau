@@ -46,8 +46,9 @@ body, html, .wrapper{
 thead th[data-db-row-order]:hover{
 	cursor: pointer;
 }
-
-td[data-db-row-name="name"]{
+input,
+address,
+td[data-db-row-name]{
 	text-transform: capitalize;
 }
 
@@ -69,7 +70,7 @@ textarea {
 }
 .date a.btn .add-on{
 	width: 41px;
-	height: 34px;
+	height: 32px;
 }
 .date a.btn .add-on i.fa{
 	padding: 10px 14px;
@@ -78,4 +79,8 @@ textarea {
 
 .container{
 	background-color: #fff;
+}
+
+#map-canvas{
+	height:300px;
 }

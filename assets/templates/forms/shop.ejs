@@ -1,0 +1,201 @@
+<form class="form-inline" role="form" action="<%= action %>"> 
+
+	<input type="hidden" name="_csrf" value="<%= _csrf %>" />
+	<fieldset class="row">
+		<label class="col-sm-2">Identification</label>
+		<div class="form-group col-sm-4">
+			<div class="input-group col-sm-12">
+				<label class="input-group-addon" for="tva" >N°TVA</label>
+				<input class="form-control" type="text" id="tva" name="tva" placeholder="ex : BE0849725938" value="<%= shop.tva || '' %>">
+			</div>
+		</div>
+	</fieldset>
+	<fieldset class="row">
+		<div class="form-group col-sm-offset-2 col-sm-4">
+			<div class="input-group col-sm-12">
+				<label class="input-group-addon" for="brand" >Enseigne</label>
+				<input class="form-control" type="text" id="brand" name="brand" placeholder="ex : Point Chaud" value="<%= shop.brand || '' %>">
+			</div>
+		</div>
+		<div class="form-group col-sm-4">
+			<div class="input-group col-sm-12">
+				<label class="input-group-addon" for="name" >Nom</label>
+				<input class="form-control" type="text" id="name" name="name" placeholder="ex : Point Chaud Waremme" value="<%= shop.name || '' %>">
+			</div>
+		</div>
+	</fieldset>
+
+	<hr/>
+
+	<fieldset class="row">
+		<input class="form-control" type="hidden" name="addres">
+		<label class="col-sm-2">Adresse</label>
+		<div class="form-group col-sm-5">
+			<div class="input-group col-sm-12">
+				<label class="input-group-addon" for="addres" >Rue</label>
+				<input class="form-control" type="text" id="addres" name="addres_street" placeholder="" value="<%= shop.addres || '' %>">
+			</div>
+		</div>
+		<div class="form-group col-sm-3">
+			<div class="input-group col-sm-12">
+				<label class="input-group-addon" for="numero" >Numéro</label>
+				<input class="form-control" type="text" id="numero" name="addres_numero" placeholder="">
+			</div>
+		</div>
+	</fieldset>
+
+	<fieldset class="row">
+		<div class="form-group col-sm-offset-2 col-sm-5">
+			<div class="input-group col-sm-12">
+				<label class="input-group-addon" for="city" >Ville</label>
+				<input class="form-control" type="text" id="city" name="city" placeholder="" value="<%= shop.city || '' %>">
+			</div>
+		</div>
+		<div class="form-group col-sm-3">
+			<div class="input-group col-sm-12">
+				<label class="input-group-addon" for="zipcode" >Code Postale</label>
+				<input class="form-control" type="text" id="zipcode" name="zipcode" placeholder="" value="<%= shop.zipcode || '' %>">
+			</div>
+		</div>
+	</fieldset>
+
+	<fieldset class="row">
+		<div class="form-group col-sm-offset-2 col-sm-4">
+			<div class="input-group col-sm-12">
+				<label class="input-group-addon" for="country" >Pays</label>
+				<input class="form-control" type="text" id="country" name="country" placeholder="" value="<%= shop.country || '' %>">
+			</div>
+		</div>
+	</fieldset>
+	
+	<hr/>
+
+	<fieldset id="contacts"></fieldset>
+	<fieldset class="row">
+		<div class="form-group col-sm-offset-2 col-sm-4">
+			<div class="input-group col-sm-12">
+				<button class="btn btn-info add-contact" >Ajouter&nbsp; <i class="fa fa-user"></i></button>
+			</div>
+		</div>
+	</fieldset>
+	
+	<hr/>
+
+	<fieldset class="row">
+		<label class="col-sm-2"></label>
+		<div class="form-group col-sm-3">
+			<div class="input-group col-sm-12">
+				<button type="submit" class="btn btn-default">Enregistrer</button>
+			</div>
+		</div>
+	</fieldset>
+
+</form>
+
+<script type="text/javascript">
+	
+	<% if(shop.contacts && shop.contacts.length > 0 ){ %>
+		<% shop.contacts.map(function(contact, n){ %>
+			$("#contacts").append(JST["assets/templates/forms/contact.ejs"]({
+				id : "<%= n %>",
+				contact : JSON.parse(_('<%= JSON.stringify(contact) %>').unescape())
+			}));
+		<% });%>
+	<% } else{ %>
+		$("#contacts").append(JST["assets/templates/forms/contact.ejs"]({
+			id : "0",
+			contact : {}
+		}));
+	<%}%>
+
+	BUREAU.tools.input.focus();
+
+	$(".add-contact")
+	.on("click", function(){
+		$("#contacts").append(JST["assets/templates/forms/contact.ejs"]({
+			id : $("fieldset#contacts fieldset[data-contact-id]").length,
+			contact : {}
+		}));
+		BUREAU.tools.input.focus();
+		return false;
+	});
+
+	$("[name='tva']")
+	.on("blur", function(){
+		var tva = $(this).val() || false;
+		if(!tva || tva.length<2){
+			return false;
+		}
+		
+		BUREAU.tools.checkTVA({
+			countryCode : tva.substring(0, 2).toUpperCase(),
+			num : _.pad(tva.substring(2).trim().replace(/\ |\./g, ""), 10, '0')
+		})
+		.done(function(data){
+			$("[name='tva']").val(data.tva);
+			$("[name='city']").val(data.city);
+			$("[name='name']").val(data.name);
+			$("[name='addres_numero']").val(data.numero);
+			$("[name='addres_street']").val(data.street);
+			$("[name='addres']").val(data.street + " " + data.numero);
+			$("[name='zipcode']").val(data.zipcode);
+		})
+		.fail(function(message){
+			console.error(message);
+		});
+	});
+
+	$("form")
+	.on("submit", function(event){
+		try{
+			var data = {
+				_csrf : event.target._csrf.value,
+				tva : (event.target.tva.value || "").trim(),
+				brand : (event.target.brand.value || "").trim(),
+				name : (event.target.name.value || "").trim(),
+				addres : ((event.target.addres_street.value || "") + " " + (event.target.addres_numero.value || "")).trim(),
+				city : (event.target.city.value || "").trim(),
+				zipcode : (event.target.zipcode.value || "").trim(),
+				country:  (event.target.country.value || "").trim(),
+				contacts : 	$(event.target)
+							.find("[data-contact-id]")
+							.toArray()
+							.map(function(contact){
+								return {
+									position : ($(contact).find("[name$='_position']").val() || "").trim(),
+									name : ($(contact).find("[name$='_name']").val() || "").trim(),
+									tel : ($(contact).find("[name$='_tel']").val() || "").trim(),
+									email : ($(contact).find("[name$='_email']").val() || "").trim(),
+								}
+							})
+			};
+
+			if(data.contacts.length == 0){
+				data.contacts.push({
+					position : "",
+					name : "",
+					tel : "",
+					email : ""
+				})
+			}
+			
+			BUREAU.tools.api({
+				url : event.target.action,
+				type : "<%= method %>",
+				data : data,
+			})
+			.done(function(data){
+				window.location = "/shop/show/"+data.id
+			})
+			.fail(function(message){
+				console.error(message);
+			});
+
+			return false;	
+		}
+		catch(e){
+			console.error("ERROR");
+			return false;	
+		}
+	});
+</script>

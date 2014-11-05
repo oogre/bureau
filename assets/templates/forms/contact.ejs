@@ -1,0 +1,52 @@
+<fieldset data-contact-id="<%= id %>">
+	<% if(id != 0){ %>
+			<br/>
+	<% } %>
+	<fieldset class="row">
+		<% if(id == 0){ %>
+		<label class="col-sm-2">Contact</label>
+		<% } %>
+		<div class="form-group <%= (id == 0) ? '' : 'col-sm-offset-2' %> col-sm-4">
+			<div class="input-group col-sm-12">
+				<label class="input-group-addon" for="contact_<%= id %>_position" >Fonction</label>
+				<input class="form-control" type="text" id="contact_<%= id %>_position" name="contact_<%= id %>_position" placeholder="" value="<%= contact.position || '' %>">
+			</div>
+		</div>
+		<div class="form-group col-sm-4">
+			<div class="input-group col-sm-12">
+				<label class="input-group-addon" for="contact_<%= id %>_name" >Nom</label>
+				<input class="form-control" type="text" id="contact_<%= id %>_name" name="contact_<%= id %>_name" placeholder="" value="<%= contact.name || '' %>">
+			</div>
+		</div>
+	</fieldset>
+	<fieldset class="row">
+		<div class="form-group col-sm-offset-2 col-sm-4">
+			<div class="input-group col-sm-12">
+				<label class="input-group-addon" for="contact_<%= id %>_tel" >Téléphone</label>
+				<input class="form-control" type="text" id="contact_<%= id %>_tel" name="contact_<%= id %>_tel" placeholder="" value="<%= contact.tel || '' %>">
+			</div>
+		</div>
+		<div class="form-group col-sm-4">
+			<div class="input-group col-sm-12">
+				<label class="input-group-addon" for="contact_<%= id %>_email" >Email</label>
+				<input class="form-control" type="text" id="contact_<%= id %>_email" name="contact_<%= id %>_email" placeholder="" value="<%= contact.email || '' %>">
+			</div>
+		</div>
+		<div class="form-group col-sm-1">
+			<div class="input-group col-sm-12">
+				<button class="btn btn-danger remove-contact" >Supprimer&nbsp; <i class="fa fa-user"></i></button>
+			</div>
+		</div>
+	</fieldset>
+</fieldset>
+
+<script type="text/javascript">
+	$("[data-contact-id='<%= id %>'] .remove-contact")
+	.on("click", function(){
+		if(prompt("Ecris SUPPRIMER pour confirmer") == "SUPPRIMER"){
+			$(this).parent().parent().parent().parent().remove();
+		}
+		return false;
+	});
+
+</script>

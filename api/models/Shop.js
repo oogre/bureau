@@ -56,7 +56,40 @@ module.exports = {
 		country :{
 			type: 'string',
 			maxLength: 32,
+		},
+
+		location : {
+			type : "object"
 		}
 	},
+
+	beforeCreate : function(values, next){
+		if(values.addres && values.zipcode && values.city && values.country){
+			var addres = values.addres+"+"+values.zipcode+"+"+values.city+"+"+values.country;
+			var location = sails.config.google.geocode(addres, function(location){
+				values.location = location;
+				return next();
+			}, function(message){
+				console.log(message);
+				return next();
+			});
+		}else{
+			return next();
+		}
+	},
+	beforeUpdate : function(values, next){
+		if(values.addres && values.zipcode && values.city && values.country){
+			var addres = values.addres+"+"+values.zipcode+"+"+values.city+"+"+values.country;
+			var location = sails.config.google.geocode(addres, function(location){
+				values.location = location;
+				return next();
+			}, function(message){
+				console.log(message);
+				return next();
+			});
+		}else{
+			return next();
+		}
+	}
 };
 

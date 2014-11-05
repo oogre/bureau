@@ -1,0 +1,29 @@
+<%
+	var id = req.session.location.controller + "-" + req.session.location.action;
+%>
+
+<div class="container">
+	<div id="<%= id %>">
+		<h3>Créer un magasins</h3>
+
+		<hr/>
+		
+	</div>
+</div>
+
+<script type="text/javascript">
+	var  documentLoaded = function (){
+
+		$("#<%= id %>").append(JST["assets/templates/forms/shop.ejs"]({
+			_csrf : "<%= _csrf %>",
+			shop : JSON.parse(_("<%= JSON.stringify(shop) %>").unescape()),
+			method : "PUT",
+			action : "/shop/update/<%= shop.id %>"
+		}));
+	};
+
+	window.addEventListener("load", documentLoaded);
+	<% if(false === res.locals.layout){ %>
+		documentLoaded();
+	<% } %>
+</script>
