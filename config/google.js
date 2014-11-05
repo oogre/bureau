@@ -8,11 +8,10 @@ module.exports.google = {
 	geocode : function(addres, success, fail){
 
 		var getGeocodeUrl = "https://maps.googleapis.com/maps/api/geocode/json?address=[ADDRES]&key=[APIKEY]";
-		var apiKey = sails.config.google.keys.server;
-
+		
 		getGeocodeUrl = getGeocodeUrl
 		.replace("[ADDRES]", addres)
-		.replace("[APIKEY]", apiKey);
+		.replace("[APIKEY]", sails.config.google.keys.server);
 		
 		var request = require('request');
 		request(getGeocodeUrl, function (err, response, body) {
