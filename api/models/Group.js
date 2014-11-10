@@ -19,6 +19,11 @@ module.exports = {
 			via: 'group'
 		},
 
+		group : {
+			collection:'group',
+			via: 'id'
+		},
+
 		owner : {
 			model : 'shop',
 			required: true

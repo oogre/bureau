@@ -47,7 +47,7 @@
 					label : "Date de création"
 				}],
 				body : [
-				<% shops.map(function(row){ %>
+				<% shops && shops.map(function(row){ %>
 					{
 						id : "<%= row.id %>",
 						data : 

@@ -1,0 +1,26 @@
+<fieldset data-contact-id="<%= id %>">
+	<% if(id != 0){ %>
+			<br/>
+	<% } %>
+	<fieldset class="row">
+		<% if(id == 0){ %>
+		<label class="col-sm-2">Contact</label>
+		<% } %>
+		<div class="form-group <%= (id == 0) ? '' : 'col-sm-offset-2' %> col-sm-10">
+			<div class="input-group col-sm-5">
+				<label class="input-group-addon"><%= contact.position || '' %></label>
+				<input disabled class="form-control" type="text" id="contact_<%= id %>_position" name="contact_<%= id %>_position" placeholder="" value="<%= contact.name || '' %>">
+			</div>
+			<div class="input-group col-sm-5 ">
+				<div class="btn-group">
+				<% if(contact.tel){ %>
+					<a class="btn btn-md btn-success" href="tel:<%= contact.tel%>"><i class="fa fa-phone"></i>&nbsp; <%= contact.tel%></a>
+				<% } %>
+				<% if(contact.email){ %>
+					<a class="btn btn-md btn-info" href="mailto:<%= contact.email%>"><i class="fa fa-envelope"></i>&nbsp; <%= contact.email%></a>
+				<% } %>
+				</div>
+			</div>
+		</div>
+	</fieldset>
+</fieldset>

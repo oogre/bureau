@@ -24,6 +24,15 @@ module.exports = {
 				elements : elements
 			});
 		});
-	}
+	},
+	"new" : function(req, res, next){
+		ElementType.find()
+		.exec(function foundElementTypes(err, elementTypes){
+			if(err) next(err);
+			return res.view({
+				elementTypes : elementTypes
+			});
+		});
+	} 
 };
 
