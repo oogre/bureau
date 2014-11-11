@@ -26,11 +26,26 @@ module.exports = {
 		});
 	},
 	"new" : function(req, res, next){
+
+		var whereShop = req.param("shop") && "undefined" != req.param("shop") ? {id : req.param("shop")} : {};
+		
+
 		ElementType.find()
 		.exec(function foundElementTypes(err, elementTypes){
-			if(err) next(err);
-			return res.view({
-				elementTypes : elementTypes
+			if(err) return next(err);
+			Shop.find(whereShop)
+			.sort("brand asc")
+			.exec(function foundShops(err, shops){
+				if(err) return next(err);
+				Group.find()
+				.exec(function foundGroups(err, groups){
+					if(err) return next(err);
+					return res.view({
+						elementTypes : elementTypes,
+						shops : shops,
+						groups : groups
+					});
+				});
 			});
 		});
 	} 

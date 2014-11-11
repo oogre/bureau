@@ -11,10 +11,16 @@ module.exports = {
 			type: 'string',
 			required: true,
 			maxLength: 128,
-		},		
+		},
+
+		serial : {
+			type: 'string',
+			maxLength: 128,
+		},
 
 		type : {
-			model : 'elementType'
+			model : 'elementType',
+			required: true,
 		},
 		
 		group : {
@@ -26,6 +32,20 @@ module.exports = {
 			required: true
 		}
 
+	},
+	afterCreate : function(values, next){
+
+		Shop.update({
+				id : values.owner
+			}, {
+				element : values.id
+			}, 
+			function updated (err, updated){
+				console.log(err);
+				console.log(updated);
+			return next();		
+			});
+		
 	},
 };
 

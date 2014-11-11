@@ -43,15 +43,49 @@
 				if(jQuery.isFunction(success)){
 					success(data);
 				}
-			}).fail(function(){
+			}).fail(function(message){
 				if(fail && jQuery.isFunction(fail)){
-					fail();
+					fail(message);
 				}
 			});
 		},
+		parse : function(jsonString){
+			if(!jsonString)return false;
+			try{
+				return JSON.parse(jsonString);
+			}catch(e){
+				return false;
+			}
+		},
+		form : {
+			submitWaiter: {
+				start : function(elem){
+					$(elem)
+					.toggleClass("btn-default")
+					.toggleClass("btn-primary")
+					.prepend("<i class='fa fa-spinner fa-spin' ></i><i>&nbsp; </i>");
+				},
+				stop : function(elem){
+					$(elem)
+					.toggleClass("btn-default")
+					.toggleClass("btn-primary")
+					.find("i")
+					.remove();
+				}
+			},
+			submitErrorHandler : function(message){
+				message = BUREAU.tools.parse(message.responseText);
+				if(message && message.invalidAttributes){
+					var invalidAttributes = Object.keys(message.invalidAttributes);
+					invalidAttributes.map(function(invalidAttribute){
+						$("[name='"+invalidAttribute+"']").parent().addClass("has-error");
+					})
+				}
+			}
+		},
 		input : {
 			focus : function(){
-				$("input")
+				$("input, select")
 				.on("focus", function(){
 					$(this)
 					.prev()

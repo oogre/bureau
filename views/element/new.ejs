@@ -1,1 +1,45 @@
-_('<%= JSON.stringify(elementTypes) %>').unescape()
+<%
+	var id = req.session.location.controller + "-" + req.session.location.action;
+
+	if("undefined" == typeof(element)){
+		var element = {};
+	}
+
+%>
+
+
+
+<div class="container">
+	<div id="<%= id %>">
+		<h3>Créer un élément frigorifique</h3>
+
+		<hr/>
+
+	</div>
+</div>
+
+
+
+
+<script type="text/javascript">
+	var  documentLoaded = function (){
+
+		var elementTypes = JSON.parse(_('<%= JSON.stringify(elementTypes) %>').unescape());
+
+		$("#<%= id %>").append(JST["assets/templates/forms/element.ejs"]({
+			_csrf : "<%= _csrf %>",
+			element : JSON.parse(_('<%= JSON.stringify(element) %>').unescape()),
+			elementTypes : JSON.parse(_('<%= JSON.stringify(elementTypes) %>').unescape()),
+			shops : JSON.parse(_('<%= JSON.stringify(shops) %>').unescape()),
+			groups : JSON.parse(_('<%= JSON.stringify(groups) %>').unescape()),
+			method : "POST",
+			action : "/element/create/"
+		}));
+
+	};
+
+	window.addEventListener("load", documentLoaded);
+	<% if(false === res.locals.layout){ %>
+		documentLoaded();
+	<% } %>
+</script>
