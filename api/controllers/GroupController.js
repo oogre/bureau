@@ -23,6 +23,22 @@ module.exports = {
 				groups : groups
 			});
 		});
-	}
+	},
+	"new" : function(req, res, next){
+
+		var whereShop = req.param("shop") && "undefined" != req.param("shop") ? {id : req.param("shop")} : {};
+		
+		Shop.find(whereShop)
+		.sort("brand asc")
+		.then(function foundShops(shops){
+			return res.view({
+				shops : shops,
+			});
+		})
+		.catch(function(err){
+			return next(err);
+		});
+		
+	} 
 };
 

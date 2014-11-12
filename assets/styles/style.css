@@ -130,3 +130,24 @@ body .container{
 	z-index: 100000;
 	background: #fff;
 }
+
+body.dragging, body.dragging * {
+  cursor: move !important;
+}
+
+.dragged {
+  position: absolute;
+  opacity: 0.5;
+  z-index: 2000;
+}
+
+ol#elements li.placeholder,
+ol#groups li.placeholder {
+  position: relative;
+  /** More li styles **/
+}
+ol#elements li.placeholder:before,
+ol#elements li.placeholder:before {
+  position: absolute;
+  /** Define arrowhead **/
+}

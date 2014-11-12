@@ -31,21 +31,6 @@ module.exports = {
 			model : 'shop',
 			required: true
 		}
-
-	},
-	afterCreate : function(values, next){
-
-		Shop.update({
-				id : values.owner
-			}, {
-				element : values.id
-			}, 
-			function updated (err, updated){
-				console.log(err);
-				console.log(updated);
-			return next();		
-			});
-		
 	},
 };
 

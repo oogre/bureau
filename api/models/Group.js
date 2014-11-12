@@ -13,6 +13,11 @@ module.exports = {
 			required: true,
 			maxLength: 128,
 		},
+		
+		serial : {
+			type: 'string',
+			maxLength: 128,
+		},
 
 		element : {
 			collection:'element',

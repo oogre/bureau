@@ -65,9 +65,21 @@
 						<a href="/group/new/?shop=<%= shop.id %>" class="btn btn-default add-element" type="button">
 							Créer un groupe&nbsp; <i class="fa fa-cogs"></i>
 						</a>
-
-						
 						</div>
+					</div>
+				</div>
+			</fieldset>
+			<fieldset class="row">
+				<div class="form-group col-sm-offset-2 col-sm-4">
+					<div class="input-group col-sm-12">
+						<ol id="elements">
+						</ol>
+					</div>
+				</div>
+				<div class="form-group col-sm-4">
+					<div class="input-group col-sm-12">
+						<ol id="groups">
+						</ol>
 					</div>
 				</div>
 			</fieldset>
@@ -79,9 +91,21 @@
 <script type="text/javascript">
 	var  documentLoaded = function (){	
 
-
-
 		var shop = JSON.parse(_('<%= JSON.stringify(shop) %>').unescape());
+
+		var $elements = $("#elements");
+		var $groups = $("#groups");
+		
+		shop.element.map(function(element){
+			$elements.append("<li id='"+element.id+"'>"+element.name + " " +element.type+"<ol></ol></li>");
+		});
+
+		shop.group.map(function(group){
+			$groups.append("<li id='"+group.id+"'>"+group.name+"<ol></ol></li>");
+		});
+
+		$("ol#groups, ol#elements").sortable()
+
 		var location = false;
 		if (navigator.geolocation) {
     	    navigator.geolocation.getCurrentPosition(function showPosition(position) {
@@ -98,8 +122,6 @@
 				contact : JSON.parse(_('<%= JSON.stringify(contact) %>').unescape())
 			}));
 		<% });%>
-
-
 
 		var mapOptions = {
 			center: shop.location,

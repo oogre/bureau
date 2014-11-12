@@ -45,16 +45,19 @@ module.exports = {
 	},
 
 	"show" : function(req, res, next){
-		Shop.findOne()
-		.where({ 
-			id : req.param("id")
-		})
-		.exec(function foundShop(err, shop){
-			if(err) return next(err);
+		Shop.findOneById(req.param("id"))
+		.populateAll()
+		.then(function (shop){
 			if(!shop) return res.redirect("/shops/index");
-			return res.view({
-				shop : shop
-			});
+			shop.populateElementType(function(err, shop){
+				if(err)return next(err);
+				return res.view({
+					shop : shop
+				});
+			})
+		})
+		.catch(function(err){
+			return next(err);
 		});
 	},
 

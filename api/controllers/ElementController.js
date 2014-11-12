@@ -31,22 +31,21 @@ module.exports = {
 		
 
 		ElementType.find()
-		.exec(function foundElementTypes(err, elementTypes){
-			if(err) return next(err);
+		.then(function foundElementTypes(elementTypes){
 			Shop.find(whereShop)
 			.sort("brand asc")
-			.exec(function foundShops(err, shops){
-				if(err) return next(err);
-				Group.find()
-				.exec(function foundGroups(err, groups){
-					if(err) return next(err);
-					return res.view({
-						elementTypes : elementTypes,
-						shops : shops,
-						groups : groups
-					});
+			.then(function foundShops(shops){
+				return res.view({
+					elementTypes : elementTypes,
+					shops : shops,
 				});
+			})
+			.catch(function(err){
+				return next(err);
 			});
+		})
+		.catch(function(err){
+			return next(err);
 		});
 	} 
 };
