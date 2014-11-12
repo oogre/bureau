@@ -24,11 +24,6 @@ module.exports = {
 			via: 'owner'
 		},
 
-		group : {
-			collection:'group',
-			via: 'owner'
-		},
-
 		contacts :{
 			type: 'array'
 		},
@@ -70,7 +65,7 @@ module.exports = {
 				if(!types){
 					return next(shop);
 				}
-				shop.element = shop
+				shop.element = 	shop
 								.element
 								.map(function(element){
 									element.type = 	types

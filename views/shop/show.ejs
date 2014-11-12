@@ -58,14 +58,9 @@
 				<label class="col-sm-2">Matériel frigorifique</label>
 				<div class="form-group col-sm-10">
 					<div class="input-group col-sm-12">
-						<div class="btn-group">
 						<a href="/element/new/?shop=<%= shop.id %>" class="btn btn-default add-element" type="button">
-							Créer un élément&nbsp; <i class="fa fa-cog"></i>
+							Créer un élément&nbsp; <i class="fa fa-cogs"></i>
 						</a>
-						<a href="/group/new/?shop=<%= shop.id %>" class="btn btn-default add-element" type="button">
-							Créer un groupe&nbsp; <i class="fa fa-cogs"></i>
-						</a>
-						</div>
 					</div>
 				</div>
 			</fieldset>
@@ -73,12 +68,6 @@
 				<div class="form-group col-sm-offset-2 col-sm-4">
 					<div class="input-group col-sm-12">
 						<ol id="elements">
-						</ol>
-					</div>
-				</div>
-				<div class="form-group col-sm-4">
-					<div class="input-group col-sm-12">
-						<ol id="groups">
 						</ol>
 					</div>
 				</div>
@@ -94,17 +83,39 @@
 		var shop = JSON.parse(_('<%= JSON.stringify(shop) %>').unescape());
 
 		var $elements = $("#elements");
-		var $groups = $("#groups");
 		
 		shop.element.map(function(element){
-			$elements.append("<li id='"+element.id+"'>"+element.name + " " +element.type+"<ol></ol></li>");
+			$elements.append("<li id='"+element.id+"' data-json='"+JSON.stringify(element)+"' >"+element.name + " " +element.type+"<ol></ol></li>");
 		});
 
-		shop.group.map(function(group){
-			$groups.append("<li id='"+group.id+"'>"+group.name+"<ol></ol></li>");
+		$("ol#elements").sortable({
+			onDrop: function  (item, targetContainer, _super) {
+				var clonedItem = $('<li/>').css({height: 0})
+				item.before(clonedItem)
+				clonedItem.animate({'height': item.height()})
+				item.animate(clonedItem.position(), function  () {
+					clonedItem.detach();
+					_super(item);
+			      	var elements = BUREAU.tools.substructure(
+			      		$("ol#elements").children("li"), 
+			      		function getData(child){
+			      			return 	JSON
+			      					.parse(	$(child)
+			      							.attr("data-json")
+			      					);
+			      		},
+			      		function getNext(child){
+			      			return 	$(child)
+			      					.children("ol")
+			      					.children("li");
+			      		});
+			      	console.log(elements);
+			    })
+   				
+			}
 		});
 
-		$("ol#groups, ol#elements").sortable()
+		
 
 		var location = false;
 		if (navigator.geolocation) {

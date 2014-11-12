@@ -132,6 +132,15 @@
 					}
 				})
 			}
+		},
+		substructure : function(children, getData, getNext){
+			return 	$(children)
+					.toArray()
+					.map(function(child){
+						var object = _.isFunction(getData) ? getData(child) : (_.isObject ? getData : {});
+						object.substructure = BUREAU.tools.substructure( _.isFunction(getNext) ? getNext(child) : [], getData, getNext );
+						return object;
+					});
 		}
 	}
 })();

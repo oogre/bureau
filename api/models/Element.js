@@ -22,9 +22,9 @@ module.exports = {
 			model : 'elementType',
 			required: true,
 		},
-		
-		group : {
-			model:'group'
+
+		substructure : {
+			type : "object"
 		},
 		
 		owner : {
