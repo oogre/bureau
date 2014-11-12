@@ -47,6 +47,38 @@ module.exports = {
 		.catch(function(err){
 			return next(err);
 		});
-	} 
+	},
+	"substructureUpdate" : function(req, res, next){
+		var elements = JSON.parse(req.param("elements"));
+
+		var setElementSubstructure = function(elements){
+			if(elements){
+				elements.map(function(element){
+					if(element){
+						return Element.findOneById(element.id)
+						.then(function(foundElement){
+							if(element.substructure){
+								foundElement.substructure = element.substructure.map(function(e){return e.id});
+							}else{
+								foundElement.substructure = [];
+							}
+							foundElement.save();
+							setElementSubstructure(element.substructure);
+						})
+						.catch(function(error){
+							console.error(error);
+						})
+					}
+				});
+			}
+		}
+
+		setElementSubstructure(	elements );
+		
+
+		return res.json({
+			success : true
+		});
+	}
 };
 

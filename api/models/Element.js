@@ -24,7 +24,7 @@ module.exports = {
 		},
 
 		substructure : {
-			type : "object"
+			type : "Array"
 		},
 		
 		owner : {

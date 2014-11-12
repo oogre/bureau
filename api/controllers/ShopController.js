@@ -35,12 +35,18 @@ module.exports = {
 		.where({ 
 			id : req.param("id")
 		})
-		.exec(function foundShop(err, shop){
-			if(err) return next(err);
-			if(!shop) return res.redirect("/shops/index");
-			return res.view({
-				shop : shop
-			});
+		.populateAll()
+		.then(function foundShop(shop){
+			if(!shop) return res.redirect("/shop/index");
+			shop.populateElementType(function(err, shop){
+				if(err)return next(err);
+				return res.view({
+					shop : shop
+				});
+			})
+		})
+		.catch(function(err){
+			return next(err);
 		});
 	},
 
@@ -48,7 +54,7 @@ module.exports = {
 		Shop.findOneById(req.param("id"))
 		.populateAll()
 		.then(function (shop){
-			if(!shop) return res.redirect("/shops/index");
+			if(!shop) return res.redirect("/shop/index");
 			shop.populateElementType(function(err, shop){
 				if(err)return next(err);
 				return res.view({

@@ -55,17 +55,8 @@
 			<hr/>
 
 			<fieldset class="row">
-				<label class="col-sm-2">Matériel frigorifique</label>
+				<label class="col-sm-2">Elements frigorifique</label>
 				<div class="form-group col-sm-10">
-					<div class="input-group col-sm-12">
-						<a href="/element/new/?shop=<%= shop.id %>" class="btn btn-default add-element" type="button">
-							Créer un élément&nbsp; <i class="fa fa-cogs"></i>
-						</a>
-					</div>
-				</div>
-			</fieldset>
-			<fieldset class="row">
-				<div class="form-group col-sm-offset-2 col-sm-4">
 					<div class="input-group col-sm-12">
 						<ol id="elements">
 						</ol>
@@ -78,54 +69,33 @@
 </div>
 
 <script type="text/javascript">
+
+
 	var  documentLoaded = function (){	
-
 		var shop = JSON.parse(_('<%= JSON.stringify(shop) %>').unescape());
-
 		var $elements = $("#elements");
 		
 		shop.element.map(function(element){
-			$elements.append("<li id='"+element.id+"' data-json='"+JSON.stringify(element)+"' >"+element.name + " " +element.type+"<ol></ol></li>");
+			$elements.append("<li id='"+element.id+"'>"+element.name + " " +element.type+"<ol></ol></li>");
 		});
 
-		$("ol#elements").sortable({
-			onDrop: function  (item, targetContainer, _super) {
-				var clonedItem = $('<li/>').css({height: 0})
-				item.before(clonedItem)
-				clonedItem.animate({'height': item.height()})
-				item.animate(clonedItem.position(), function  () {
-					clonedItem.detach();
-					_super(item);
-			      	var elements = BUREAU.tools.substructure(
-			      		$("ol#elements").children("li"), 
-			      		function getData(child){
-			      			return 	JSON
-			      					.parse(	$(child)
-			      							.attr("data-json")
-			      					);
-			      		},
-			      		function getNext(child){
-			      			return 	$(child)
-			      					.children("ol")
-			      					.children("li");
-			      		});
-			      	console.log(elements);
-			    })
-   				
+		shop.element.map(function(element){
+			if(element.substructure){
+				element.substructure.map(function(subElementId){
+					$("#"+element.id+" > ol").append($("#"+subElementId).remove());
+				})
 			}
 		});
 
-		
-
 		var location = false;
 		if (navigator.geolocation) {
-    	    navigator.geolocation.getCurrentPosition(function showPosition(position) {
-    			location = {
-    				lat : position.coords.latitude,
-    				lng : position.coords.longitude
-    			}
+			navigator.geolocation.getCurrentPosition(function showPosition(position) {
+				location = {
+					lat : position.coords.latitude,
+					lng : position.coords.longitude
+				}
 			});
-    	}
+		}
 
 		<% shop.contacts.map(function(contact, n){ %>
 			$("#contacts").append(JST["assets/templates/show/contact.ejs"]({

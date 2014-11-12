@@ -120,7 +120,7 @@
 					})
 					.done(function(data){
 						<% if(shops.length == 1){%>
-							window.location = "/shop/show/<%= shops[0].id %>";
+							window.location = "/shop/edit/<%= shops[0].id %>";
 						<% } else {%>
 							window.location = "/element/index/"+data.id;
 						<% } %>

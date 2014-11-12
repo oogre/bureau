@@ -71,6 +71,14 @@
 					.toggleClass("btn-primary")
 					.find("i")
 					.remove();
+				},
+				error : function(elem){
+					$(elem)
+					.toggleClass("btn-default")
+					.toggleClass("btn-danger")
+					.find("i")
+					.first()
+					.remove();
 				}
 			},
 			submitErrorHandler : function(message){

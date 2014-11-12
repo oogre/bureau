@@ -14,10 +14,10 @@
 			<div class="input-group col-sm-5 ">
 				<div class="btn-group">
 				<% if(contact.tel){ %>
-					<a class="btn btn-md btn-success" href="tel:<%= contact.tel%>"><i class="fa fa-phone"></i>&nbsp; <%= contact.tel%></a>
+					<a class="btn btn-md btn-default" href="tel:<%= contact.tel%>"><i class="fa fa-phone"></i>&nbsp; <%= contact.tel%></a>
 				<% } %>
 				<% if(contact.email){ %>
-					<a class="btn btn-md btn-info" href="mailto:<%= contact.email%>"><i class="fa fa-envelope"></i>&nbsp; <%= contact.email%></a>
+					<a class="btn btn-md btn-default" href="mailto:<%= contact.email%>"><i class="fa fa-envelope"></i>&nbsp; <%= contact.email%></a>
 				<% } %>
 				</div>
 			</div>

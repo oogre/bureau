@@ -141,13 +141,33 @@ body.dragging, body.dragging * {
   z-index: 2000;
 }
 
-ol#elements li.placeholder,
-ol#groups li.placeholder {
+ol#elements li.placeholder{
   position: relative;
+  border: dashed 1px #000;
+  background-color: rgba(0, 0, 0, 0.2);
   /** More li styles **/
 }
-ol#elements li.placeholder:before,
 ol#elements li.placeholder:before {
   position: absolute;
   /** Define arrowhead **/
+}
+ol:after{
+	content: '';
+	clear: both;
+}
+ol li{
+	border: solid 1px #ccc;
+	background-color: rgba(50, 50, 50, 0.1);
+	padding: 10px 15px;
+	list-style-type: none;
+	margin: 5px;
+	cursor: move;
+	float: left;
+}
+
+ol#elements{
+	padding: 0;
+}
+li>ol{
+	padding: 0 0 0 10px;
 }

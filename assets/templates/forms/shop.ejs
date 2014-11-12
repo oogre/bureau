@@ -78,8 +78,32 @@
 			</div>
 		</div>
 	</fieldset>
-	
+
 	<hr/>
+
+	<% if(shop.id) {%>
+		<fieldset class="row">
+			<label class="col-sm-2">Elements frigorifique</label>
+			<div class="form-group col-sm-10">
+				<div class="input-group col-sm-12">
+					<div class="btn-group">
+						<a href="/element/new/?shop=<%= shop.id %>" class="btn btn-default add-element" type="button">
+							Créer &nbsp; <i class="fa fa-cog"></i>
+						</a>
+					</div>
+				</div>
+			</div>
+		</fieldset>
+		<fieldset class="row">
+			<div class="form-group col-sm-offset-2 col-sm-10">
+				<div class="input-group col-sm-12">
+					<ol id="elements">
+					</ol>
+				</div>
+			</div>
+		</fieldset>
+	<hr/>
+	<% } %>
 
 	<fieldset class="row">
 		<label class="col-sm-2"></label>
@@ -93,7 +117,114 @@
 </form>
 
 <script type="text/javascript">
-	
+
+	<% if(shop.id) {%>
+		var adjustment;
+		var shop = JSON.parse(_("<%- JSON.stringify(shop) %>").unescape());
+		var $elements = $("#elements");
+		var getElementSubstructure = function(){
+			return BUREAU.tools.substructure(
+				$elements.children("li"), 
+				function getData(child){
+					return 	_.find(	shop.element, function(element){ return element.id == $(child).attr("id") });
+				},
+				function getNext(child){
+					return 	$(child)
+							.children("ol")
+							.children("li");
+				});
+		};
+		var saveElement = function(event){
+			var data = {
+				_csrf : "<%= _csrf %>",
+				elements : JSON.stringify(getElementSubstructure())
+			};
+			BUREAU.tools.form.submitWaiter.start(event.target);
+
+			BUREAU.tools.api({
+				url : "/element/substructureUpdate",
+				type : "POST",
+				data : data,
+			})
+			.done(function(data){
+				$(".save-element").next().remove();
+				$(".save-element").remove();
+			})
+			.fail(function(message){
+				BUREAU.tools.form.submitWaiter.error(event.target);
+			});
+			return false;
+		}
+		
+		shop.element.map(function(element){
+			$elements.append("<li id='"+element.id+"'>"+element.name + " " +element.type+"<ol></ol></li>");
+		});
+
+		shop.element.map(function(element){
+			if(element.substructure){
+				element.substructure.map(function(subElementId){
+					$("#"+element.id+" > ol").append($("#"+subElementId).remove());
+				})
+			}
+		});
+
+		$("ol#elements").sortable({
+			onDrop: function  (item, targetContainer, _super) {
+				var clonedItem = $('<li/>').css({height: 0})
+				item.before(clonedItem)
+				clonedItem.animate({
+					'height': item.height(),
+					'width': item.width()
+				})
+				item.animate(clonedItem.position(), function  () {
+					clonedItem.detach();
+					_super(item);
+					item.css({
+	                    backgroundColor : "#"+adjustment.color
+	                });
+				});
+				if($(".save-element").length == 0){
+					$(".add-element")
+					.after("<button class='btn btn-primary save-element'>Enregistrer&nbsp; <i class='fa fa-cogs'></i></button>")
+					.next()
+					.on("click", saveElement)
+					.after("<button class='btn btn-danger'>Annuler&nbsp; <i class='fa fa-cogs'></i></button>")
+					.next()
+					.on("click", window.location.reload);
+				}
+			},
+			onDragStart: function ($item, container, _super) {
+				var offset = $item.offset();
+				var pointer = container.rootGroup.pointer;
+
+				adjustment = {
+					width : $item.width(),
+					height : $item.height(),
+					left: pointer.left - offset.left,
+					top: pointer.top - offset.top
+				};
+				_super($item, container);
+			},
+			onDrag: function ($item, position) {
+				$item.css({
+					width : adjustment.width,
+					height : adjustment.height,
+					left: position.left - adjustment.left,
+					top: position.top - adjustment.top
+				});
+				$("ol#elements li.placeholder").css({
+					width : adjustment.width,
+					height : adjustment.height,
+				});
+			}
+		});
+	<% } %>
+
+
+
+
+
+
 	<% if(shop.contacts && shop.contacts.length > 0 ){ %>
 		<% shop.contacts.map(function(contact, n){ %>
 			$("#contacts").append(JST["assets/templates/forms/contact.ejs"]({
@@ -147,8 +278,6 @@
 
 	$("form")
 	.on("submit", function(event){
-
-
 		BUREAU.tools.form.submitWaiter.start(event.target.submit);
 
 		try{
