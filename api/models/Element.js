@@ -19,8 +19,9 @@ module.exports = {
 		},
 
 		type : {
-			model : 'elementType',
+			type: 'string',
 			required: true,
+			maxLength: 128,
 		},
 
 		substructure : {
@@ -31,6 +32,24 @@ module.exports = {
 			model : 'shop',
 			required: true
 		}
+	},
+	beforeCreate : function(values, next){
+		ElementType.findOneByName(values.type)
+		.then(function(element){
+			if(!element){
+				ElementType.create({
+					name : values.type
+				})
+				.then(function(){})
+				.catch(function(err){
+					console.error(err);
+				});
+			}
+		})
+		.catch(function(err){
+			console.error(err);
+		});
+		next();
 	},
 };
 

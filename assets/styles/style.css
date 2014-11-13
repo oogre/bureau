@@ -171,3 +171,6 @@ ol#elements{
 li>ol{
 	padding: 0 0 0 10px;
 }
+.dropdown-menu{
+	width: 100%;
+}

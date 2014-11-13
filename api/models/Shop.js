@@ -55,31 +55,6 @@ module.exports = {
 
 		location : {
 			type : "object"
-		},
-
-		populateElementType : function(next){
-			var shop = this;
-			ElementType
-			.find()
-			.then(function(types){
-				if(!types){
-					return next(shop);
-				}
-				shop.element = 	shop
-								.element
-								.map(function(element){
-									element.type = 	types
-													.map(function(type){
-														return (type.id == element.type) ? type.name : null
-													});
-									element.type = _.reduce( element.type );
-									return element;
-								});
-				return next(null, shop);
-			})
-			.catch(function(err){
-				return next(err);
-			});
 		}
 	},
 

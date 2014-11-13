@@ -34,16 +34,16 @@
 				<div class="form-group col-sm-4">
 					<div class="input-group col-sm-12">
 						<label class="input-group-addon" for="type" >Type</label>
-						<select class="form-control" id="type" name="type">
-							<option disabled selected value="">types d'élément frigorique</option>
+						<input type="text" class="form-control" data-toggle="dropdown" data-toggle-target=".dropdown-menu" aria-expanded="false" id="type" name="type" value=""/>
+						<ul class="dropdown-menu" role="menu">
 							<% elementTypes.map(function(elementType){%>
-								<option value="<%= elementType.id %>"><%= elementType.name %></option>
+								<li><a href="#" data-type="<%= elementType.name %>"><%= elementType.name %></a></li>
 							<%})%>
-						</select>
+						</ul>
 					</div>
-				</div>
+				</div>	
 			</fieldset>
-
+			
 			<fieldset class="row">
 				<div class="form-group col-sm-offset-2 col-sm-4">
 					<div class="input-group col-sm-12">
@@ -138,6 +138,22 @@
 					return false;
 				}
 			});
+
+		$("[data-type]").on("click", function(){
+			$("#type").val($(this).attr("data-type"));
+		});
+
+		$("#type").on("keyup", function(){
+			var target = $(this).attr("data-toggle-target");
+			var needle = $(this).val().toLowerCase();
+			$(target).parent().addClass("open");
+			if(needle){
+				$(target).find("[data-type]:not([data-type*='"+needle+"'])").addClass("hide");
+				$(target).find("[data-type*='"+needle+"']").removeClass("hide");
+			}else{
+				$(target).find("[data-type]").removeClass("hide");
+			}
+		});	
 
 	};
 

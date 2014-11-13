@@ -38,12 +38,9 @@ module.exports = {
 		.populateAll()
 		.then(function foundShop(shop){
 			if(!shop) return res.redirect("/shop/index");
-			shop.populateElementType(function(err, shop){
-				if(err)return next(err);
-				return res.view({
-					shop : shop
-				});
-			})
+			return res.view({
+				shop : shop
+			});
 		})
 		.catch(function(err){
 			return next(err);
@@ -55,12 +52,9 @@ module.exports = {
 		.populateAll()
 		.then(function (shop){
 			if(!shop) return res.redirect("/shop/index");
-			shop.populateElementType(function(err, shop){
-				if(err)return next(err);
-				return res.view({
-					shop : shop
-				});
-			})
+			return res.view({
+				shop : shop
+			});
 		})
 		.catch(function(err){
 			return next(err);

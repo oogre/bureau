@@ -74,7 +74,7 @@
 	<fieldset class="row">
 		<div class="form-group col-sm-offset-2 col-sm-4">
 			<div class="input-group col-sm-12">
-				<button class="btn btn-info add-contact" >Ajouter&nbsp; <i class="fa fa-user"></i></button>
+				<button class="btn btn-default add-contact" >Ajouter&nbsp; <i class="fa fa-user"></i></button>
 			</div>
 		</div>
 	</fieldset>
@@ -120,7 +120,7 @@
 
 	<% if(shop.id) {%>
 		var adjustment;
-		var shop = JSON.parse(_("<%- JSON.stringify(shop) %>").unescape());
+		window.shop = JSON.parse(_("<%- JSON.stringify(shop) %>").unescape());
 		var $elements = $("#elements");
 		var getElementSubstructure = function(){
 			return BUREAU.tools.substructure(
@@ -139,8 +139,9 @@
 				_csrf : "<%= _csrf %>",
 				elements : JSON.stringify(getElementSubstructure())
 			};
-			BUREAU.tools.form.submitWaiter.start(event.target);
-
+			if(_.isObject(event)){
+				BUREAU.tools.form.submitWaiter.start(event.target);
+			}
 			BUREAU.tools.api({
 				url : "/element/substructureUpdate",
 				type : "POST",
@@ -151,22 +152,60 @@
 				$(".save-element").remove();
 			})
 			.fail(function(message){
-				BUREAU.tools.form.submitWaiter.error(event.target);
+				if(_.isObject(event)){
+					BUREAU.tools.form.submitWaiter.error(event.target);
+				}
 			});
 			return false;
 		}
 		
-		shop.element.map(function(element){
-			$elements.append("<li id='"+element.id+"'>"+element.name + " " +element.type+"<ol></ol></li>");
-		});
+		var buildElementStructure = function(){
+			$elements.empty();
+			shop.element.map(function(element){
+				$elements.append("<li id='"+element.id+"'>"+element.name + " " +element.type+"<ol></ol></li>");
+			});
 
-		shop.element.map(function(element){
-			if(element.substructure){
-				element.substructure.map(function(subElementId){
-					$("#"+element.id+" > ol").append($("#"+subElementId).remove());
+			shop.element.map(function(element){
+				if(element.substructure){
+					element.substructure.map(function(subElementId){
+						subElementId = _.isObject(subElementId) ? subElementId.id : subElementId;
+						$("#"+element.id+" > ol").append($("#"+subElementId).remove());
+					})
+				}
+			});	
+			$("ol#elements li").on("dblclick", destroyElement);
+		}
+
+		var destroyElement = function(){
+			var $this = $(this);
+			var _id = $this.attr("id");
+			if(prompt("Ecris SUPPRIMER pour confirmer") == "SUPPRIMER"){
+				BUREAU.tools.api({
+					url : "/element/destroy/"+$this.attr("id"),
+					type : "delete",
+					data : {
+						_csrf : "<%= _csrf %>"
+					}
 				})
+				.done(function(){
+
+					for(var k = 0 ; k < shop.element.length ; k++){
+						if(_id == shop.element[k].id){
+							shop.element.splice(k, 1);
+							break;
+						}
+					}
+					buildElementStructure();
+					saveElement();
+				})
+				.fail(function(message){
+					console.log("ERROR");
+				});
 			}
-		});
+			return false;
+		}
+		
+		buildElementStructure();
 
 		$("ol#elements").sortable({
 			onDrop: function  (item, targetContainer, _super) {
