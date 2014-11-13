@@ -12,7 +12,7 @@ module.exports = {
 		var sort = req.param("sort") && "undefined" != req.param("sort") ? JSON.parse(req.param("sort")) : null;
 		var skip = req.param("skip") && "undefined" != req.param("skip") ? JSON.parse(req.param("skip")) : null;
 
-		Works.find()
+		Work.find()
 		.where(where)
 		.sort(sort)
 		.limit(limit)
