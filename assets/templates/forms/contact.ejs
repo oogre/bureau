@@ -41,6 +41,7 @@
 </fieldset>
 
 <script type="text/javascript">
+	BUREAU.tools.link();
 	$("[data-contact-id='<%= id %>'] .remove-contact")
 	.on("click", function(){
 		if(prompt("Ecris SUPPRIMER pour confirmer") == "SUPPRIMER"){

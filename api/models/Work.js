@@ -13,7 +13,8 @@ module.exports = {
 			required : true,
 		},
 		element : {
-			model : 'element',
+			collection : 'element',
+			via : "id",
 			required : true
 		},
 		type : {
@@ -44,7 +45,7 @@ module.exports = {
 			via : "id"
 		}
 	},
-	beforeUpdate : function(values, next){
+	beforeCreate : function(values, next){
 		next();
 	}
 };

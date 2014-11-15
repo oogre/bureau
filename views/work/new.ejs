@@ -1,0 +1,41 @@
+<%
+	var id = req.session.location.controller + "-" + req.session.location.action;
+
+	if("undefined" == typeof(work)){
+		var work = {};
+	}
+
+%>
+
+<div class="container">
+	<div id="<%= id %>">
+		<h3>Créer un travail</h3>
+
+		<hr/>
+
+	</div>
+</div>
+
+
+
+
+<script type="text/javascript">
+	var  documentLoaded = function (){
+
+		$("#<%= id %>").append(JST["assets/templates/forms/work.ejs"]({
+			_csrf : "<%= _csrf %>",
+			work : JSON.parse(_("<%= JSON.stringify(work) %>").unescape()),
+			shops : JSON.parse(_("<%= JSON.stringify(shops) %>").unescape()),
+			workTypes : JSON.parse(_("<%= JSON.stringify(workTypes) %>").unescape()),
+			workers : JSON.parse(_("<%= JSON.stringify(workers) %>").unescape()),
+			method : "POST",
+			action : "/work/create/"
+		}));
+
+	};
+
+	window.addEventListener("load", documentLoaded);
+	<% if(false === res.locals.layout){ %>
+		documentLoaded();
+	<% } %>
+</script>

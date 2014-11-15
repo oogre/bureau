@@ -5,6 +5,13 @@
 	window.BUREAU = window.BUREAU || {};
 
 	BUREAU.tools = {
+		link : function(){
+			$("a").on("click", function(){
+				window.location = $(this).attr("href");
+				return false;
+			});
+		},
+
 		ajax : {
 			json : function(request){
 				request.dataType = "json";
@@ -93,15 +100,17 @@
 		},
 		input : {
 			focus : function(){
-				$("input, select")
+				$("input, select, textarea")
 				.on("focus", function(){
 					$(this)
-					.prev()
+					.parent()
+					.find("label")
 					.addClass("bg-primary")
 				})
 				.on("blur", function(){
 					$(this)
-					.prev()
+					.parent()
+					.find("label")
 					.removeClass("bg-primary")
 				});
 			}
@@ -149,6 +158,24 @@
 						object.substructure = BUREAU.tools.substructure( _.isFunction(getNext) ? getNext(child) : [], getData, getNext );
 						return object;
 					});
+		},
+
+		find : {
+			element : function(where){
+				return BUREAU.tools.api({
+					url : "/element/find/?where="+JSON.stringify(where),
+					type : "get",
+				})
+				.pipe(function(data){
+					console.log(data);
+					return $.Deferred().resolve(data);
+				}, function(data){
+					console.error(data);
+					return $.Deferred().reject(data);
+				});
+			}
 		}
 	}
+
+	$(document).on("ready", BUREAU.tools.link);
 })();

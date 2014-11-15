@@ -3,7 +3,7 @@
 	<input type="hidden" name="_csrf" value="<%= _csrf %>" />
 	<fieldset class="row">
 		<label class="col-sm-2">Identification</label>
-		<div class="form-group col-sm-4">
+		<div class="form-group col-sm-5">
 			<div class="input-group col-sm-12">
 				<label class="input-group-addon" for="tva" >N°TVA</label>
 				<input class="form-control" type="text" id="tva" name="tva" placeholder="ex : BE0849725938" value="<%= shop.tva || '' %>">
@@ -11,13 +11,13 @@
 		</div>
 	</fieldset>
 	<fieldset class="row">
-		<div class="form-group col-sm-offset-2 col-sm-4">
+		<div class="form-group col-sm-offset-2 col-sm-5">
 			<div class="input-group col-sm-12">
 				<label class="input-group-addon" for="brand" >Enseigne</label>
 				<input class="form-control" type="text" id="brand" name="brand" placeholder="ex : Point Chaud" value="<%= shop.brand || '' %>">
 			</div>
 		</div>
-		<div class="form-group col-sm-4">
+		<div class="form-group col-sm-5">
 			<div class="input-group col-sm-12">
 				<label class="input-group-addon" for="name" >Nom</label>
 				<input class="form-control" type="text" id="name" name="name" placeholder="ex : Point Chaud Waremme" value="<%= shop.name || '' %>">
@@ -30,13 +30,13 @@
 	<fieldset class="row">
 		<input class="form-control" type="hidden" name="addres">
 		<label class="col-sm-2">Adresse</label>
-		<div class="form-group col-sm-5">
+		<div class="form-group col-sm-6">
 			<div class="input-group col-sm-12">
 				<label class="input-group-addon" for="addres" >Rue</label>
 				<input class="form-control" type="text" id="addres" name="addres_street" placeholder="" value="<%= shop.addres || '' %>">
 			</div>
 		</div>
-		<div class="form-group col-sm-3">
+		<div class="form-group col-sm-4">
 			<div class="input-group col-sm-12">
 				<label class="input-group-addon" for="numero" >Numéro</label>
 				<input class="form-control" type="text" id="numero" name="addres_numero" placeholder="">
@@ -45,13 +45,13 @@
 	</fieldset>
 
 	<fieldset class="row">
-		<div class="form-group col-sm-offset-2 col-sm-5">
+		<div class="form-group col-sm-offset-2 col-sm-6">
 			<div class="input-group col-sm-12">
 				<label class="input-group-addon" for="city" >Ville</label>
 				<input class="form-control" type="text" id="city" name="city" placeholder="" value="<%= shop.city || '' %>">
 			</div>
 		</div>
-		<div class="form-group col-sm-3">
+		<div class="form-group col-sm-4">
 			<div class="input-group col-sm-12">
 				<label class="input-group-addon" for="zipcode" >Code Postale</label>
 				<input class="form-control" type="text" id="zipcode" name="zipcode" placeholder="" value="<%= shop.zipcode || '' %>">
@@ -60,7 +60,7 @@
 	</fieldset>
 
 	<fieldset class="row">
-		<div class="form-group col-sm-offset-2 col-sm-4">
+		<div class="form-group col-sm-offset-2 col-sm-6">
 			<div class="input-group col-sm-12">
 				<label class="input-group-addon" for="country" >Pays</label>
 				<input class="form-control" type="text" id="country" name="country" placeholder="" value="<%= shop.country || '' %>">
@@ -97,8 +97,8 @@
 		<fieldset class="row">
 			<div class="form-group col-sm-offset-2 col-sm-10">
 				<div class="input-group col-sm-12">
-					<ol id="elements">
-					</ol>
+					<label rel="elements" class="input-group-addon" >Elements</label>
+					<ol id="elements"></ol>
 				</div>
 			</div>
 		</fieldset>
@@ -117,6 +117,7 @@
 </form>
 
 <script type="text/javascript">
+	BUREAU.tools.link();
 
 	<% if(shop.id) {%>
 		var adjustment;
@@ -162,7 +163,7 @@
 		var buildElementStructure = function(){
 			$elements.empty();
 			shop.element.map(function(element){
-				$elements.append("<li id='"+element.id+"'>"+element.name + " " +element.type+"<ol></ol></li>");
+				$elements.append(JST["assets/templates/show/element.ejs"]({element : element}));
 			});
 
 			shop.element.map(function(element){
@@ -229,7 +230,10 @@
 					.on("click", saveElement)
 					.after("<button class='btn btn-danger'>Annuler&nbsp; <i class='fa fa-cogs'></i></button>")
 					.next()
-					.on("click", window.location.reload);
+					.on("click", function(){
+						window.location.reload();
+						return false
+					});
 				}
 			},
 			onDragStart: function ($item, container, _super) {

@@ -1,1 +1,95 @@
-<%= _csrf %>
+<%
+	var id = req.session.location.controller + "-" + req.session.location.action;
+%>
+
+<div class="container">
+	<div id="<%= id %>" class="table-list table-responsive">
+		<h3>Liste de travaux</h3>
+
+		<hr/>
+		
+		<div class="row">
+			<div class="col-sm-2">
+				<a href="/<%= req.session.location.controller %>/new" class="btn btn-primary new" type="button">
+					Créé un travail
+				</a>
+			</div>
+			<div class="col-sm-3">
+				<div class="input-group">
+						<a class="input-group-addon btn btn-info bg-default"><i class="fa fa-filter"></i></a>
+						<input type="text" class="form-control findByName" placeholder="Rechercher un travail" />		
+					</div>
+			</div>
+		</div>
+
+		<hr/>
+
+		<table class="table" data-db-table-name="<%= req.session.location.controller %>" ></table>
+	</div>
+</div>
+
+<script type="text/javascript">
+	
+	var  documentLoaded = function (){
+		var table = $("#<%= id %> table[data-db-table-name='<%= req.session.location.controller %>']");
+		table.append(JST["assets/templates/list.ejs"]({
+			table : {
+				head : [{
+					name : "type",
+					label : "Type"
+				},{
+					name : "brand",
+					label : "Enseigne"
+				},
+				{
+					name : "wiki",
+					label : "Instruction"
+				},
+				{
+					name : "deadLineAt",
+					label : "Date d'échéance"
+				}],
+				body : [
+				<% works && works.map(function(row){ 
+					console.log(row);
+					%>
+					{
+						id : "<%= row.id %>",
+						data : 
+						[
+							{
+								name : "type",
+								value : "<%= row.type.name %>"
+							},
+							{
+								name : "brand",
+								value : "<%= row.shop.brand %>"
+							},
+							{
+								name : "name",
+								value : _("<%= row.wiki[0] && row.wiki[0].description %>").trunc(25)
+							},
+							{
+								name : "deadLineAt",
+								value : "<% var date = new Date(row.deadLine); %> <%= date.getDate() + '/' + (date.getMonth() + 1) + '/' + date.getFullYear() %>"
+							}
+						]
+					},
+				<% }) %>
+				],
+			},
+			parentSelector : table.selector,
+			sort : "<%= sort %>",
+			controller : "<%= req.session.location.controller %>",
+			_csrf : "<%= _csrf %>"
+ 		}));
+
+		BUREAU.tools.table.filter($("#<%= id %> table"), $("#<%= id %> .findByName"), ["name", "brand"]);
+ 		
+	};
+
+	window.addEventListener("load", documentLoaded);
+	<% if(false === res.locals.layout){ %>
+		documentLoaded();
+	<% } %>
+</script>

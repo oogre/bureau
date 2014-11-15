@@ -1,0 +1,224 @@
+<%
+	if("undefined" == typeof(work)){
+		var work = {
+			shop : {}
+		};
+	}
+	if("undefined" == typeof(work.shop)){
+		work.shop = {
+			
+		};
+	}
+	if("undefined" == typeof(shops)){
+		shops = [];
+	}
+	
+%>
+
+<form class="form-inline" role="form" action="<%= action %>"> 
+
+	<input type="hidden" name="_csrf" value="<%= _csrf %>" />
+	<fieldset class="row">
+		<label class="col-sm-2">Identification</label>
+		<div class="form-group col-sm-5">
+			<div class="input-group col-sm-12">
+				<label class="input-group-addon" for="type" >Type</label>
+				<select class="form-control" id="type" name="type" required pattern="[a-zA-Z]|\d">
+					<option disabled selected value="" >Séléctionner un type de travail</option>
+					<% workTypes.map(function(workType){ %>
+						<option value="<%= workType.id %>"><%= workType.name %></option>
+					<% }) %>
+				</select>
+			</div>
+		</div>
+	</fieldset>
+
+	<fieldset class="row">
+		<div class="form-group col-sm-offset-2 col-sm-5">
+			<div class="input-group col-sm-12">
+				<label class="input-group-addon" for="shopName" >Magasin</label>
+				<input type="hidden" class="form-control" name="shop" id="shop" value="" required pattern="[a-zA-Z]|\d"/>
+				<ul id="shop-name-list" class="dropdown-menu" role="menu">
+					<% shops.map(function(shop){%>
+						<li data-id="<%= shop.id %>" rel="shopName" data-name="<%= shop.brand.toLowerCase() +" - "+ shop.name.toLowerCase() %>"><%= shop.brand +" - "+ shop.name %></li>
+					<%})%>
+				</ul>
+				<input type="text" class="form-control" data-toggle="dropdown" data-toggle-target="#shop-name-list" aria-expanded="false" id="shopName" name="shopName" autocomplete="off" required/>
+			</div>
+		</div>
+	</fieldset>
+
+	<fieldset class="row">
+		<div class="form-group col-sm-offset-2 col-sm-10">
+			<div class="input-group col-sm-12">
+				<label rel="elements" class="input-group-addon" >Element(s)</label>
+				<ol id="elements"></ol>
+			</div>
+		</div>
+	</fieldset>
+
+	<hr/>
+
+	<fieldset class="row">
+		<label class="col-sm-2">Echéance</label>
+		<div class="form-group col-sm-5">
+			<div class="input-group col-sm-12">
+				<label class="input-group-addon" for="deadLine">Date</label>
+				<input class="form-control" type="text" name="deadLine" id="deadLine" value="" data-date-format="dd/mm/yyyy" readonly autocomplete="off" required>
+			</div>
+		</div>
+	</fieldset>
+
+	<hr/>	
+
+	<fieldset class="row">
+		<label class="col-sm-2">Homme(s)</label>
+		<div class="form-group col-sm-5">
+			<div class="input-group col-sm-12">
+				<label class="input-group-addon" for="workers" >Nom</label>
+				<select multiple="multiple" id="workers" name="workers">
+					<% workers.map(function(worker){%>
+						<option value="<%= worker.id %>" name="<%= worker.name.toLowerCase() %>" ><%= worker.name %></option>
+					<%})%>
+				</select>
+			</div>
+		</div>
+	</fieldset>
+
+	<hr/>
+	
+	<fieldset class="row">
+		<label class="col-sm-2">Wiki</label>
+		<div class="form-group col-sm-10">
+			<div class="input-group col-sm-12">
+				<label class="input-group-addon" for="wiki" >Note</label>
+				<textarea class="form-control" id="wiki" name="wiki" autocomplete="off" required pattern="[a-zA-Z]|\d"></textarea>
+			</div>
+		</div>
+	</fieldset>
+
+	<hr/>	
+
+	<fieldset class="row">
+		<label class="col-sm-2"></label>
+		<div class="form-group col-sm-3">
+			<div class="input-group col-sm-12">
+				<button type="submit" name="submit" class="btn btn-default">Enregistrer</button>
+			</div>
+		</div>
+	</fieldset>
+
+</form>
+
+<script type="text/javascript">
+	BUREAU.tools.link();
+	window.work = JSON.parse(_("<%- JSON.stringify(work) %>").unescape());
+
+	var date = new Date();
+
+	$('#deadLine')
+	.val(date.getDate() + "/" + (date.getMonth() + 1) + "/" + date.getFullYear())
+	.datepicker()
+	.datepicker('update', new Date(date.getFullYear(), date.getMonth() + 1, date.getDate()));
+	
+	$('#workers').multiselect({
+		buttonWidth: '100%', 
+		includeSelectAllOption: true,
+		allSelectedText: 'Tout le monde',
+		selectAllText : "Tout le monde",
+		nonSelectedText : "Aucun homme"
+	});
+
+	var buildElementStructure = function(parent, array){
+		var $elements = $(parent);
+		$elements.empty();
+		array.map(function(element){
+			$elements.append(JST["assets/templates/show/element.ejs"]({element : element}));
+		});
+
+		array.map(function(element){
+			if(element.substructure){
+				element.substructure.map(function(subElementId){
+					subElementId = _.isObject(subElementId) ? subElementId.id : subElementId;
+					$("#"+element.id+" > ol").append($("#"+subElementId).remove());
+				})
+			}
+		});	
+		return $elements.find("li");
+	}
+
+
+	$("[rel='shopName']").on("click", function(){
+		console.log($(this).attr("data-id"));
+		var shopId = $(this).attr("data-id");
+		var shopName = $(this).attr("data-name");
+
+		$("#shopName").val(shopName);
+		$("#shop").val(shopId);
+
+		BUREAU.tools.find.element({
+			owner : shopId
+		})
+		.done(function(data){
+			buildElementStructure("ol#elements", data)
+			.on("click", function(event){
+				 event.stopPropagation();
+				$(this).toggleClass("selected");
+			});
+		});
+	});
+
+	$("[data-toggle='dropdown']").on("keyup", function(){
+		var target = $(this).attr("data-toggle-target");
+		var needle = $(this).val().toLowerCase();
+		$(target).parent().addClass("open");
+		if(needle){
+			$(target).find("[data-name]:not([data-name*='"+needle+"'])").addClass("hide");
+			$(target).find("[data-name*='"+needle+"']").removeClass("hide");
+		}else{
+			$(target).find("[data-name]").removeClass("hide");
+		}
+	});
+
+
+	BUREAU.tools.input.focus();
+
+	$("form")
+	.on("submit", function(event){
+		if(!event.target.checkValidity()){
+			return false;
+		}
+		BUREAU.tools.form.submitWaiter.start(event.target.submit);
+		var data = {
+			_csrf : event.target._csrf.value,
+			type : (event.target.type.value || "").trim(),
+			shop : (event.target.shop.value || "").trim(),
+			element : 	$("#elements li.selected")
+						.toArray()
+						.map(function(element){
+							return $(element).attr("id");
+						}),
+			deadLine : new Date(event.target.deadLine.value.split("/")[2], event.target.deadLine.value.split("/")[1], event.target.deadLine.value.split("/")[0]).toISOString(),
+			worker : $('#workers').val(),
+			wiki : {
+				name : "instruction",
+				description : (event.target.wiki.value || "").trim()
+			}
+		}
+		BUREAU.tools.api({
+			url : event.target.action,
+			type : "<%= method %>",
+			data : data,
+		})
+		.done(function(data){
+			window.location = "/work"
+		})
+		.fail(function(message){
+			BUREAU.tools.form.submitErrorHandler(message);
+			BUREAU.tools.form.submitWaiter.stop(event.target.submit);
+		});
+		return false;
+	});
+
+
+</script>

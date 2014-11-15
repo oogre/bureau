@@ -41,7 +41,7 @@
 </tbody>
 
 <script type="text/javascript">
-
+	BUREAU.tools.link();
 		var $reference = $("<%= parentSelector %>");
 
 		var sort= "<%= sort %>";
@@ -68,7 +68,8 @@
 		});
 
 		$("a[href*=destroy]")
-		.on("click", function(){
+		.on("click", function(event){
+			event.preventdefault();
 			if(prompt("Ecris SUPPRIMER pour confirmer") == "SUPPRIMER"){
 				var url = $(this).attr("href");
 				BUREAU.tools.api({

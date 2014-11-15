@@ -48,7 +48,10 @@ module.exports = {
 	},
 
 	"show" : function(req, res, next){
-		Shop.findOneById(req.param("id"))
+		Shop.findOne()
+		.where({ 
+			id : req.param("id")
+		})
 		.populateAll()
 		.then(function (shop){
 			if(!shop) return res.redirect("/shop/index");

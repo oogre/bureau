@@ -17,12 +17,77 @@ module.exports = {
 		.sort(sort)
 		.limit(limit)
 		.skip(skip)
+		.populateAll()
 		.exec(function foundWorks(err, works){
 			if(err) next(err);
 			return res.view({
+				sort : sort,
 				works : works
 			});
 		});
-	}
+	},
+
+	"new" : function(req, res, next){
+		Shop.find()
+		.populateAll()
+		.then(function foundShops(shops){
+			var workTypes = WorkType.find()
+							.then(function(workTypes){
+								return workTypes;
+							});
+			return [shops, workTypes];
+		})
+		.spread(function (shops, workTypes){
+			var workers = Worker.find()
+							.then(function(workers){
+								return workers;
+							});
+			return [shops, workTypes, workers];
+		})
+		.spread(function(shops, workTypes, workers){
+			return res.view({
+				shops : shops,
+				workTypes : workTypes,
+				workers : workers
+			});
+		})
+		.catch(function(err){
+			return next(err);
+		});
+	},
+
+	"edit" : function(req, res, next){
+		Work.findOne()
+		.where({ 
+			id : req.param("id")
+		})
+		.populateAll()
+		.then(function foundWork(work){
+			if(!work) return res.redirect("/work/index");
+			return res.view({
+				work : work
+			});
+		})
+		.catch(function(err){
+			return next(err);
+		});
+	},
+
+	"show" : function(req, res, next){
+		Work.findOne()
+		.where({ 
+			id : req.param("id")
+		})
+		.populateAll()
+		.then(function (work){
+			if(!work) return res.redirect("/work/index");
+			return res.view({
+				work : work
+			});
+		})
+		.catch(function(err){
+			return next(err);
+		});
+	},
 };
 

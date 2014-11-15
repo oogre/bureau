@@ -76,7 +76,7 @@
 		var $elements = $("#elements");
 		
 		shop.element.map(function(element){
-			$elements.append("<li id='"+element.id+"'>"+element.name + " " +element.type+"<ol></ol></li>");
+			$elements.append(JST["assets/templates/show/element.ejs"]({element : element}));
 		});
 
 		shop.element.map(function(element){
