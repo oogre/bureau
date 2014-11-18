@@ -6,7 +6,7 @@
 
 	BUREAU.tools = {
 		link : function(){
-			$("a").on("click", function(){
+			$("a:not([href*=destroy])").on("click", function(){
 				window.location = $(this).attr("href");
 				return false;
 			});
@@ -167,10 +167,8 @@
 					type : "get",
 				})
 				.pipe(function(data){
-					console.log(data);
 					return $.Deferred().resolve(data);
 				}, function(data){
-					console.error(data);
 					return $.Deferred().reject(data);
 				});
 			}

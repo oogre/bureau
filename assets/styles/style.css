@@ -216,9 +216,9 @@ li>ol{
 	margin: 5px;
 }
 .dropdown-menu{
-	min-width: 100%;
+	/*min-width: 100%;
 	max-height: 200px;
-	overflow: auto;
+	overflow: auto;*/
 }
 
 .datepicker.dropdown-menu{

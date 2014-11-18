@@ -26,7 +26,7 @@
 				<select class="form-control" id="type" name="type" required pattern="[a-zA-Z]|\d">
 					<option disabled selected value="" >Séléctionner un type de travail</option>
 					<% workTypes.map(function(workType){ %>
-						<option value="<%= workType.id %>"><%= workType.name %></option>
+						<option value="<%= workType.id %>" ><%= workType.name %></option>
 					<% }) %>
 				</select>
 			</div>
@@ -57,33 +57,67 @@
 		</div>
 	</fieldset>
 
-	<hr/>
 
-	<fieldset class="row">
-		<label class="col-sm-2">Echéance</label>
-		<div class="form-group col-sm-5">
-			<div class="input-group col-sm-12">
-				<label class="input-group-addon" for="deadLine">Date</label>
-				<input class="form-control" type="text" name="deadLine" id="deadLine" value="" data-date-format="dd/mm/yyyy" readonly autocomplete="off" required>
+	<div class="maintenance-hide">
+		<hr/>
+		<fieldset class="row ">
+			<label class="col-sm-2">Horaires</label>
+			<div class="form-group col-sm-5">
+				<div class="input-group col-sm-12">
+					<label class="input-group-addon" for="rendezvous">Rendez-vous</label>
+					<input class="form-control" type="text" name="rendezvous" id="rendezvous" value=""  data-date-format="dd-DD/MM/YY HH:mm" readonly autocomplete="off" required>
+				</div>
 			</div>
-		</div>
-	</fieldset>
-
-	<hr/>	
-
-	<fieldset class="row">
-		<label class="col-sm-2">Homme(s)</label>
-		<div class="form-group col-sm-5">
-			<div class="input-group col-sm-12">
-				<label class="input-group-addon" for="workers" >Nom</label>
-				<select multiple="multiple" id="workers" name="workers">
-					<% workers.map(function(worker){%>
-						<option value="<%= worker.id %>" name="<%= worker.name.toLowerCase() %>" ><%= worker.name %></option>
-					<%})%>
-				</select>
+			<div class="form-group col-sm-5">
+				<div class="input-group col-sm-12">
+					<label class="input-group-addon" for="time">Duré du travail</label>
+					<input class="form-control" type="number" name="time" id="time" value="0" autocomplete="off" required>
+				</div>
 			</div>
-		</div>
-	</fieldset>
+		</fieldset>
+	</div>
+
+	<div class="maintenance-show">
+		<hr/>
+		<fieldset class="row ">
+			<label class="col-sm-2">Récurence</label>
+			<div class="form-group col-sm-3">
+				<div class="input-group col-sm-12">
+					<label class="input-group-addon" for="interval">Intervale</label>
+					<input class="form-control" type="number" name="interval" id="interval" value="0" autocomplete="off" required>
+				</div>
+			</div>
+			<div class="form-group col-sm-3">
+				<div class="input-group col-sm-12">
+					<label class="input-group-addon" for="duration">Duré</label>
+					<input class="form-control" type="number" name="duration" id="duration" value="0" autocomplete="off" required>
+				</div>
+			</div>
+			<div class="form-group col-sm-4">
+				<div class="input-group col-sm-12">
+					<label class="input-group-addon" for="deadLine">Première Echéhance</label>
+					<input class="form-control" type="text" name="deadLine" id="deadLine" value=""  data-date-format="dd-DD/MM/YY" readonly autocomplete="off" required>
+				</div>
+			</div>
+		</fieldset>
+	</div>
+		
+	<div class="maintenance-hide">
+		<hr/>
+		<fieldset class="row">
+			<label class="col-sm-2">Homme(s)</label>
+			<div class="form-group col-sm-5">
+				<div class="input-group col-sm-12">
+					<label class="input-group-addon" for="workers" >Nom</label>
+					<select multiple="multiple" id="workers" name="workers">
+						<% workers.map(function(worker){%>
+							<option value="<%= worker.id %>" name="<%= worker.name.toLowerCase() %>" ><%= worker.name %></option>
+						<%})%>
+					</select>
+				</div>
+			</div>
+		</fieldset>
+	</div>
 
 	<hr/>
 	
@@ -112,16 +146,47 @@
 
 <script type="text/javascript">
 	BUREAU.tools.link();
-	window.work = JSON.parse(_("<%- JSON.stringify(work) %>").unescape());
+	var work = JSON.parse(_("<%- JSON.stringify(work) %>").unescape());
+	var workTypes = JSON.parse(_("<%- JSON.stringify(workTypes) %>").unescape());
 
-	var date = new Date();
+	var maintenance = _.find(workTypes, function(workType){
+		return workType.name == "maintenance"
+	});
 
-	$('#deadLine')
-	.val(date.getDate() + "/" + (date.getMonth() + 1) + "/" + date.getFullYear())
-	.datepicker()
-	.datepicker('update', new Date(date.getFullYear(), date.getMonth() + 1, date.getDate()));
-	
-	$('#workers').multiselect({
+	$("[name='type']").on("change", function(){
+		if($(this).val() == maintenance.id){
+			$(".maintenance-show").removeClass("hide");
+			$(".maintenance-hide").addClass("hide");
+		}else{
+			$(".maintenance-hide").removeClass("hide");
+			$(".maintenance-show").addClass("hide");
+		}
+	});
+
+	$('#deadLine').datetimepicker({
+		icons: {
+			time: "fa fa-clock-o",
+			date: "fa fa-calendar",
+			up: "fa fa-arrow-up",
+			down: "fa fa-arrow-down"
+		},
+		language : "fr",
+		pickTime : false,
+		defaultDate : moment().add(1, 'days')
+	});
+
+	$("#rendezvous").datetimepicker({
+		icons: {
+			time: "fa fa-clock-o",
+			date: "fa fa-calendar",
+			up: "fa fa-arrow-up",
+			down: "fa fa-arrow-down"
+		},
+		language : "fr",
+		defaultDate : moment().add(1, 'days').hour("08").minute("00")
+	});
+
+	$("#workers").multiselect({
 		buttonWidth: '100%', 
 		includeSelectAllOption: true,
 		allSelectedText: 'Tout le monde',
@@ -149,7 +214,6 @@
 
 
 	$("[rel='shopName']").on("click", function(){
-		console.log($(this).attr("data-id"));
 		var shopId = $(this).attr("data-id");
 		var shopName = $(this).attr("data-name");
 
@@ -198,25 +262,65 @@
 						.map(function(element){
 							return $(element).attr("id");
 						}),
-			deadLine : new Date(event.target.deadLine.value.split("/")[2], event.target.deadLine.value.split("/")[1], event.target.deadLine.value.split("/")[0]).toISOString(),
+			rendezvous : moment(event.target.rendezvous.value, $(event.target.rendezvous).attr("data-date-format")).toISOString(),
+			time : (event.target.time.value || "").trim(),
+			interval : (event.target.interval.value || "").trim(),
+			duration : (event.target.duration.value || "").trim(),
+			deadLine : moment(event.target.deadLine.value, $(event.target.deadLine).attr("data-date-format")).toISOString(),
 			worker : $('#workers').val(),
 			wiki : {
 				name : "instruction",
-				description : (event.target.wiki.value || "").trim()
+				description : (event.target.wiki.value || "").trim(),
+				author : "<%= session.worker ? session.worker.id : ''  %>" || null
 			}
 		}
-		BUREAU.tools.api({
-			url : event.target.action,
-			type : "<%= method %>",
-			data : data,
-		})
-		.done(function(data){
-			window.location = "/work"
-		})
-		.fail(function(message){
-			BUREAU.tools.form.submitErrorHandler(message);
-			BUREAU.tools.form.submitWaiter.stop(event.target.submit);
-		});
+		
+		if(maintenance.id == data.type){
+			delete data.rendezvous;
+			delete data.time;
+
+			var deadLine = moment(data.deadLine);
+			var last = moment(data.deadLine).add(data.duration, "year");
+			var ajaxStack = [];
+
+			while(deadLine.isBefore(last)){
+				data.deadLine = deadLine.toISOString();
+				deadLine.add(data.interval, "month");
+				ajaxStack.push(BUREAU.tools.api({
+					url : event.target.action,
+					type : "<%= method %>",
+					data : data,
+				}));
+			}
+			$.when.call($, ajaxStack)
+			.done(function(data){
+				window.location = "/work"
+			})
+			.fail(function(message){
+				BUREAU.tools.form.submitErrorHandler(message);
+				BUREAU.tools.form.submitWaiter.stop(event.target.submit);
+			});
+
+			return false;
+		}
+		else{	
+			delete data.interval;
+			delete data.duration;
+			data.deadLine = data.rendezvous;
+
+			BUREAU.tools.api({
+				url : event.target.action,
+				type : "<%= method %>",
+				data : data,
+			})
+			.done(function(data){
+				window.location = "/work"
+			})
+			.fail(function(message){
+				BUREAU.tools.form.submitErrorHandler(message);
+				BUREAU.tools.form.submitWaiter.stop(event.target.submit);
+			});
+		}
 		return false;
 	});
 

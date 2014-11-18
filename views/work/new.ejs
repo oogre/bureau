@@ -16,9 +16,6 @@
 	</div>
 </div>
 
-
-
-
 <script type="text/javascript">
 	var  documentLoaded = function (){
 
@@ -28,6 +25,7 @@
 			shops : JSON.parse(_("<%= JSON.stringify(shops) %>").unescape()),
 			workTypes : JSON.parse(_("<%= JSON.stringify(workTypes) %>").unescape()),
 			workers : JSON.parse(_("<%= JSON.stringify(workers) %>").unescape()),
+			session : JSON.parse(_("<%= JSON.stringify(req.session) %>").unescape()),
 			method : "POST",
 			action : "/work/create/"
 		}));

@@ -18,6 +18,10 @@ module.exports = {
 			type: 'string',
 			required: true,
 			maxLength: 1024
+		},
+		author : {
+			model : 'worker',
+			//required : true
 		}
 	}
 };

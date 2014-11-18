@@ -34,6 +34,13 @@ module.exports = {
 			collection : 'workSchedule',
 			via : "work"
 		},
+		rendezvous : {
+			type: 'datetime'
+		},
+		time : {
+			// theorical time needed to finish it in hour
+			type: 'int'
+		},
 		deadLine : {
 			type: 'datetime'
 		},

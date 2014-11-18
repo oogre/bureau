@@ -69,9 +69,11 @@
 
 		$("a[href*=destroy]")
 		.on("click", function(event){
-			event.preventdefault();
+			event.preventDefault();
 			if(prompt("Ecris SUPPRIMER pour confirmer") == "SUPPRIMER"){
+			
 				var url = $(this).attr("href");
+
 				BUREAU.tools.api({
 					url : url,
 					type : "DELETE",
@@ -80,13 +82,13 @@
 					}
 				})
 				.done(function(){
-					window.location.reload()
+					window.location.reload();
 				})
 				.fail(function(message){
-					console.error(message);
+					console.log("ERROR");
 				});
 			}
 			return false;
-		})
+		});
 
 </script>

@@ -46,7 +46,7 @@
 					label : "Instruction"
 				},
 				{
-					name : "deadLineAt",
+					name : "deadLine",
 					label : "Date d'échéance"
 				}],
 				body : [
@@ -70,7 +70,7 @@
 								value : _("<%= row.wiki[0] && row.wiki[0].description %>").trunc(25)
 							},
 							{
-								name : "deadLineAt",
+								name : "deadLine",
 								value : "<% var date = new Date(row.deadLine); %> <%= date.getDate() + '/' + (date.getMonth() + 1) + '/' + date.getFullYear() %>"
 							}
 						]
