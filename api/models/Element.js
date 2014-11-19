@@ -31,9 +31,15 @@ module.exports = {
 		owner : {
 			model : 'shop',
 			required: true
+		},
+
+		wiki : {
+			collection : 'wiki',
+			via : "id"
 		}
 	},
 	beforeCreate : function(values, next){
+		values.type = values.type.toLowerCase();
 		ElementType.findOneByName(values.type)
 		.then(function(element){
 			if(!element){

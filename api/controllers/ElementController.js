@@ -17,12 +17,28 @@ module.exports = {
 		.sort(sort)
 		.limit(limit)
 		.skip(skip)
-		.populate('type')
+		.populateAll()
 		.exec(function foundElements(err, elements){
 			if(err) next(err);
 			return res.view({
 				elements : elements
 			});
+		});
+	},
+	"show" : function(req, res, next){
+		Element.findOne()
+		.where({ 
+			id : req.param("id")
+		})
+		.populateAll()
+		.then(function (element){
+			if(!element) return res.redirect("/element/index");
+			return res.view({
+				element : element
+			});
+		})
+		.catch(function(err){
+			return next(err);
 		});
 	},
 	"new" : function(req, res, next){

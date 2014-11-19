@@ -49,6 +49,7 @@
         <div class="col-xs-2 sidebar-offcanvas" id="sidebar" role="navigation">
           
             <ul class="nav">
+              <li><a href="/back" class="<%= req.session.location.controller == 'index' ? 'active' : '' %>"><i class="fa fa-fw fa-2x fa-chevron-left"></i>&nbsp; Back</a></li>
               <li><a href="/" class="<%= req.session.location.controller == 'index' ? 'active' : '' %>"><i class="fa fa-fw fa-2x fa-home"></i>&nbsp; Bureau</a></li>
               <li><a href="/shop" class="<%= req.session.location.controller == 'shop' ? 'active' : '' %>"><i class="fa fa-fw fa-2x fa-smile-o"></i>&nbsp; Magasins</a></li>
               <li><a href="/work" class="<%= req.session.location.controller == 'work' ? 'active' : '' %>"><i class="fa fa-fw fa-2x fa-wrench"></i>&nbsp; Travaux</a></li>

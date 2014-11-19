@@ -38,7 +38,7 @@ module.exports = {
 			return [shops, workTypes];
 		})
 		.spread(function (shops, workTypes){
-			var workers = Worker.find()
+			var workers = 	Worker.find()
 							.then(function(workers){
 								return workers;
 							});
@@ -81,8 +81,20 @@ module.exports = {
 		.populateAll()
 		.then(function (work){
 			if(!work) return res.redirect("/work/index");
+			var workers = 	Worker.find()
+							.where({
+								id: {
+									"!" : work.worker.map(function(worker){ return worker.id })
+								}
+							})
+							.then(function(workers){
+								return workers;
+							});
+			return [work, workers];
+		}).spread(function (work, workers){
 			return res.view({
-				work : work
+				work : work,
+				workers : workers
 			});
 		})
 		.catch(function(err){

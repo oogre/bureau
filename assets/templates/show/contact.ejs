@@ -11,7 +11,7 @@
 				<label class="input-group-addon"><%= contact.position || '' %></label>
 				<input disabled class="form-control" type="text" id="contact_<%= id %>_position" name="contact_<%= id %>_position" placeholder="" value="<%= contact.name || '' %>">
 			</div>
-			<div class="input-group col-sm-5 ">
+			<div class="input-group col-sm-6 ">
 				<div class="btn-group">
 				<% if(contact.tel){ %>
 					<a class="btn btn-md btn-default" href="tel:<%= contact.tel%>"><i class="fa fa-phone"></i>&nbsp; <%= contact.tel%></a>

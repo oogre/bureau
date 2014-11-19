@@ -162,7 +162,7 @@ ol li{
 	border: solid 1px #ccc;
 }
 
-label[rel=elements]{
+.input-group label.input-group-addon[rel=elements]{
 	float: left;
 	padding-top: 9px;
 	padding-bottom: 9px;
@@ -232,4 +232,12 @@ li>ol{
 #shop-name-list li{
 	padding: 7px 20px;
 
+}
+
+.schedule[data-schedule-id] .scheduleStart{
+	display: none;
+}
+
+.schedule:not([data-schedule-id]) .scheduleStop{
+	display: none;
 }

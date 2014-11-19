@@ -7,7 +7,11 @@
 	BUREAU.tools = {
 		link : function(){
 			$("a:not([href*=destroy])").on("click", function(){
-				window.location = $(this).attr("href");
+				var href = $(this).attr("href")
+				if(href == "/back"){
+					href = document.referrer;
+				}
+				window.location.href = href;
 				return false;
 			});
 		},

@@ -146,8 +146,11 @@
 
 <script type="text/javascript">
 	BUREAU.tools.link();
+	var QG = JSON.parse(_("<%- JSON.stringify(QG) %>").unescape());
 	var work = JSON.parse(_("<%- JSON.stringify(work) %>").unescape());
+	var shops = JSON.parse(_("<%- JSON.stringify(shops) %>").unescape());
 	var workTypes = JSON.parse(_("<%- JSON.stringify(workTypes) %>").unescape());
+	var routeTiming = 0;
 
 	var maintenance = _.find(workTypes, function(workType){
 		return workType.name == "maintenance"
@@ -220,6 +223,9 @@
 		$("#shopName").val(shopName);
 		$("#shop").val(shopId);
 
+
+		calculateDistance(_.find(shops, function(shop){ return shop.id == shopId }));
+
 		BUREAU.tools.find.element({
 			owner : shopId
 		})
@@ -272,17 +278,18 @@
 				name : "instruction",
 				description : (event.target.wiki.value || "").trim(),
 				author : "<%= session.worker ? session.worker.id : ''  %>" || null
-			}
+			},
+			route : routeTiming
 		}
 		
-		if(maintenance.id == data.type){
-			delete data.rendezvous;
-			delete data.time;
 
+		var ajaxStack = [];
+		if(maintenance.id == data.type){
 			var deadLine = moment(data.deadLine);
 			var last = moment(data.deadLine).add(data.duration, "year");
-			var ajaxStack = [];
-
+			delete data.time;
+			delete data.duration;
+			delete data.rendezvous;
 			while(deadLine.isBefore(last)){
 				data.deadLine = deadLine.toISOString();
 				deadLine.add(data.interval, "month");
@@ -292,37 +299,47 @@
 					data : data,
 				}));
 			}
-			$.when.call($, ajaxStack)
-			.done(function(data){
-				window.location = "/work"
-			})
-			.fail(function(message){
-				BUREAU.tools.form.submitErrorHandler(message);
-				BUREAU.tools.form.submitWaiter.stop(event.target.submit);
-			});
-
-			return false;
 		}
 		else{	
 			delete data.interval;
 			delete data.duration;
 			data.deadLine = data.rendezvous;
-
-			BUREAU.tools.api({
+			ajaxStack.push(BUREAU.tools.api({
 				url : event.target.action,
 				type : "<%= method %>",
 				data : data,
-			})
-			.done(function(data){
-				window.location = "/work"
-			})
-			.fail(function(message){
-				BUREAU.tools.form.submitErrorHandler(message);
-				BUREAU.tools.form.submitWaiter.stop(event.target.submit);
-			});
+			}));
 		}
+		$.when.call($, ajaxStack)
+		.done(function(data){
+			window.location = "/work"
+		})
+		.fail(function(message){
+			BUREAU.tools.form.submitErrorHandler(message);
+			BUREAU.tools.form.submitWaiter.stop(event.target.submit);
+		});
 		return false;
 	});
 
+	var calculateDistance = function(shop){
+		origin      = new google.maps.LatLng(QG.location.lat,QG.location.lng);
+		destination = new google.maps.LatLng(shop.location.lat,shop.location.lng);
+		if(origin && destination){
+			var request = {
+				origin      : origin,
+				destination : destination,
+				travelMode  : google.maps.DirectionsTravelMode.DRIVING // Type de transport
+			}
+			var directionsService = new google.maps.DirectionsService(); // Service de calcul d'itinéraire
+			directionsService.route(request, function(response, status){ // Envoie de la requête pour calculer le parcours
+				if(status == google.maps.DirectionsStatus.OK){
+					routeTiming = response.routes[0].legs[0].duration.value;
+				}
+			});
+		}
+	}
 
 </script>
+
+
+

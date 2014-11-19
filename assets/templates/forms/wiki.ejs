@@ -1,0 +1,37 @@
+<div id="<%= id %>">
+	<fieldset class="row">
+		<div class="form-group col-sm-offset-2 col-sm-8">
+			<div class="input-group col-sm-12">
+				<label class="input-group-addon" for="name_<%= id %>" >Name</label>
+				<input class="form-control" type="text" id="name_<%= id %>" name="name" value="" autocomplete="off">
+			</div>
+		</div>
+		<label class="col-sm-2"><button class="btn btn-danger deleteWiki">Supprimer</button></label>
+	</fieldset>
+	<fieldset class="row">
+		<div class="form-group col-sm-offset-2 col-sm-8">
+			<div class="input-group col-sm-12">
+				<label class="input-group-addon" for="description_<%= id %>" >Description</label>
+				<textarea  class="form-control" id="description_<%= id %>" name="description"></textarea>
+			</div>
+		</div>
+	</fieldset>
+</div>
+
+
+<script type="text/javascript">
+	$("#<%= id %> .deleteWiki").one("click", function(){
+		if(prompt("Ecris SUPPRIMER pour confirmer") == "SUPPRIMER"){
+			$(this)
+			.parent()
+			.parent()
+			.parent()
+			.remove();
+
+			if(!$("[id^='new_wiki_']").length && !$("button.saveWiki").hasClass("fix")){
+				$("button.saveWiki").addClass("hide");
+			}
+		}
+		return false;
+	});
+</script>
