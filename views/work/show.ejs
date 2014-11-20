@@ -138,7 +138,7 @@
 				<div class="form-group col-sm-10">
 					<div class="input-group col-sm-12">
 						<label class="input-group-addon" for="wiki_<%= work.wiki[0].id %>" ><%= work.wiki[0].name %></label>
-						<textarea disabled class="form-control" id="wiki_<%= work.wiki[0].id %>" data-wiki-id="<%= work.wiki[0].id %>" name="wiki_<%= work.wiki[0].id %>"><%= work.wiki[0].description %></textarea>
+						<div class="form-control" id="wiki_<%= work.wiki[0].id %>" data-wiki-id="<%= work.wiki[0].id %>" name="wiki_<%= work.wiki[0].id %>"><%- work.wiki[0].description %></div>
 					</div>
 				</div>
 			</fieldset>
@@ -164,7 +164,7 @@
 						<div class="form-group col-sm-offset-2 col-sm-8">
 							<div class="input-group col-sm-12">
 								<label class="input-group-addon" for="wiki_<%= wiki.id %>" ><%= wiki.name %></label>
-								<textarea disabled class="form-control" id="wiki_<%= wiki.id %>" data-wiki-id="<%= wiki.id %>" name="wiki_<%= wiki.id %>"><%= wiki.description %></textarea>
+								<div class="form-control" id="wiki_<%= wiki.id %>" data-wiki-id="<%= wiki.id %>" name="wiki_<%= wiki.id %>"><%- wiki.description %></div>
 							</div>
 						</div>
 						<label class="col-sm-2"><button class="btn btn-danger deleteWiki">Supprimer</button></label>
@@ -175,11 +175,13 @@
 	</div>
 </div>
 
-
 <script type="text/javascript">
 
 	var  documentLoaded = function (){
-		window.work = JSON.parse(_("<%= JSON.stringify(work) %>").unescape());
+
+		window.work = _("<%=JSON.stringify(work) %>").unescape().replace("\n", "");
+
+		window.work = JSON.parse(work);
 
 		$("#rendezvous").datetimepicker({
 			icons: {
@@ -235,7 +237,7 @@
 									.map(function(wiki){
 										return {
 											name : $(wiki).find("[name='name']").val(),
-											description : $(wiki).find("[name='description']").val(),
+											description : $(wiki).find("textarea").val().trim(),
 											author : "<%= session.worker ? session.worker.id : ''  %>" || null
 										}
 									})

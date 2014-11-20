@@ -11,17 +11,21 @@
 	<fieldset class="row">
 		<div class="form-group col-sm-offset-2 col-sm-8">
 			<div class="input-group col-sm-12">
+				<input type="file" id="take-picture" class="hide" accept="image/*">
 				<label class="input-group-addon" for="description_<%= id %>" >Description</label>
-				<textarea  class="form-control" id="description_<%= id %>" name="description"></textarea>
+				<textarea class="form-control ckeditor" id="description_<%= id %>" name="description_<%= id %>"></textarea>
 			</div>
 		</div>
-	</fieldset>
+	</fieldset>	
 </div>
 
 
 <script type="text/javascript">
 	$("#<%= id %> .deleteWiki").one("click", function(){
 		if(prompt("Ecris SUPPRIMER pour confirmer") == "SUPPRIMER"){
+
+			CKEDITOR.remove(CKEDITOR.instances["description_<%= id %>"]);
+
 			$(this)
 			.parent()
 			.parent()
@@ -34,4 +38,50 @@
 		}
 		return false;
 	});
+
+
+
+
+	$("#take-picture").on("change", function (event) {
+		// Get a reference to the taken picture or chosen file
+		var files = event.target.files;
+		if (files && files.length > 0) {
+			var file = files[0]
+			// Get window.URL object
+			var URL = window.URL || window.webkitURL;
+			// Create ObjectURL
+			var imgURL = URL.createObjectURL(file);
+			// Set img src to ObjectURL
+
+
+			var value = CKEDITOR.instances["description_<%= id %>"].getData() + "<img src='"+imgURL+"' />";
+
+
+
+
+			CKEDITOR.instances["description_<%= id %>"].setData(value);
+			URL.revokeObjectURL(imgURL);
+			
+		}
+	});
+
+	$("#description_<%= id %>").ckeditor()
+
+	CKEDITOR.instances["description_<%= id %>"].ui.addButton( 'PicturePicker', {
+		label: 'Ajouter une image',
+		command: 'picturePicking',
+		//toolbar: 'links,1',
+		icon: '/js/ckeditor/image_b.png'
+	} );
+	CKEDITOR
+	.instances["description_<%= id %>"]
+	.addCommand('picturePicking', { 
+		exec: function(){
+			$("#take-picture").click()
+		} 
+	});
+
 </script>
+
+ 
+                    

@@ -241,3 +241,8 @@ li>ol{
 .schedule:not([data-schedule-id]) .scheduleStop{
 	display: none;
 }
+
+div.form-control[data-wiki-id]{
+	min-height: 50px;
+	min-width: 205px;
+}
