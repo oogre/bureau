@@ -121,16 +121,9 @@
 
 	<hr/>
 	
-	<fieldset class="row">
-		<label class="col-sm-2">Wiki</label>
-		<div class="form-group col-sm-10">
-			<div class="input-group col-sm-12">
-				<label class="input-group-addon" for="wiki" >Note</label>
-				<textarea class="form-control" id="wiki" name="wiki" autocomplete="off" required pattern="[a-zA-Z]|\d"></textarea>
-			</div>
-		</div>
-	</fieldset>
 
+	<fieldset id="wiki"></fieldset>
+	
 	<hr/>	
 
 	<fieldset class="row">
@@ -155,6 +148,12 @@
 	var maintenance = _.find(workTypes, function(workType){
 		return workType.name == "maintenance"
 	});
+
+	$("#wiki").append(JST["assets/templates/forms/wiki.ejs"]({
+		id : _.uniqueId('new_wiki_'),
+		name : "instruction",
+		_csrf : "<%= _csrf %>"
+	}))
 
 	$("[name='type']").on("change", function(){
 		if($(this).val() == maintenance.id){
@@ -259,6 +258,8 @@
 			return false;
 		}
 		BUREAU.tools.form.submitWaiter.start(event.target.submit);
+
+		var editor = CKEDITOR.instances[$("#wiki").find("textarea").attr("name")];
 		var data = {
 			_csrf : event.target._csrf.value,
 			type : (event.target.type.value || "").trim(),
@@ -275,8 +276,8 @@
 			deadLine : moment(event.target.deadLine.value, $(event.target.deadLine).attr("data-date-format")).toISOString(),
 			worker : $('#workers').val(),
 			wiki : {
-				name : "instruction",
-				description : (event.target.wiki.value || "").trim(),
+				name : $("#wiki").find("[name='name']").val().trim(),
+				description : editor.innerHTML,
 				author : "<%= session.worker ? session.worker.id : ''  %>" || null
 			},
 			route : routeTiming

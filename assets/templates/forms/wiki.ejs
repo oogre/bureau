@@ -3,7 +3,7 @@
 		<div class="form-group col-sm-offset-2 col-sm-8">
 			<div class="input-group col-sm-12">
 				<label class="input-group-addon" for="name_<%= id %>" >Name</label>
-				<input class="form-control" type="text" id="name_<%= id %>" name="name" value="" autocomplete="off">
+				<input class="form-control" type="text" id="name_<%= id %>" name="name" value="<%= name || '' %>" autocomplete="off">
 			</div>
 		</div>
 		<label class="col-sm-2"><button class="btn btn-danger deleteWiki">Supprimer</button></label>
