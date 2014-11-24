@@ -245,4 +245,5 @@ li>ol{
 div.form-control[data-wiki-id]{
 	min-height: 50px;
 	min-width: 205px;
+	display: inherit;
 }

@@ -179,7 +179,7 @@
 
 	var  documentLoaded = function (){
 
-		window.work = _("<%=JSON.stringify(work) %>").unescape().replace("\n", "");
+		window.work = _("<%=JSON.stringify(work) %>").unescape().replace(/\n|\\/g, "");
 
 		window.work = JSON.parse(work);
 
@@ -235,9 +235,10 @@
 									.toArray()
 									.reverse()
 									.map(function(wiki){
+										var editor = CKEDITOR.instances[$(wiki).find("textarea").attr("name")];
 										return {
 											name : $(wiki).find("[name='name']").val(),
-											description : $(wiki).find("textarea").val().trim(),
+											description : editor.innerHTML,
 											author : "<%= session.worker ? session.worker.id : ''  %>" || null
 										}
 									})

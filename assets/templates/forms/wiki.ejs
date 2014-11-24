@@ -17,9 +17,7 @@
 				</form>
 
 				<label class="input-group-addon" for="description_<%= id %>" >Description</label>
-				<textarea class="form-control ckeditor" id="description_<%= id %>" name="description_<%= id %>">
-					<img src="http://ogre.local:1337/public/files/000/10593230_10152768498883970_6313993110534532604_n.jpg">
-				</textarea>
+				<textarea class="form-control ckeditor" id="description_<%= id %>" name="description_<%= id %>"></textarea>
 			</div>
 		</div>
 	</fieldset>	
@@ -54,7 +52,7 @@
 		$.ajax({
 			url: $form.attr("action"),
 			type: $form.attr("method"),
-			data: new FormData($form[0]), // TAKE CARE TO PUSH ALL TEXT PARAMETERS BEFORE PICTURES
+			data: new FormData($form[0]), // TAKE CARE TO PUSH ALL TEXTS PARAMETER BEFORE PICTURES
 			cache: false,
 			contentType: false,
 			processData: false
@@ -69,7 +67,8 @@
 					.attr("name")
 				]
 				if(editor){
-					editor.insertHtml("<img src='"+file.src+"'' style='max-width: 100%;max-height: 300px;'/>", "unfiltered_html");
+					var element = CKEDITOR.dom.element.createFromHtml( "<img src='"+file.src+"'' style='max-width:100%;max-height:300px;'/>" );
+					editor.insertElement( element );
 				}
 			});
 		})
@@ -80,7 +79,10 @@
 
 	$("#description_<%= id %>").ckeditor()
 
-	CKEDITOR.instances["description_<%= id %>"].ui.addButton( 'PicturePicker', {
+	CKEDITOR
+	.instances["description_<%= id %>"]
+	.ui
+	.addButton( 'PicturePicker', {
 		label: 'Ajouter une image',
 		command: 'picturePicking',
 		icon: '/js/ckeditor/image_b.png'
@@ -91,6 +93,12 @@
 		exec: function(){
 			$("#take-picture").click()
 		} 
+	});
+	CKEDITOR.instances["description_<%= id %>"].innerHTML="";
+	CKEDITOR
+	.instances["description_<%= id %>"]
+	.on('change', function(data){
+		CKEDITOR.instances["description_<%= id %>"].innerHTML = data.editor.document.$.body.innerHTML.replace(/'=\"\"/g, "").replace(/\"/g,"'");
 	});
 
 </script>

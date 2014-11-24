@@ -21,8 +21,10 @@ module.exports = {
 		.upload(function whenDone(err, uploadedFiles) {
 			if (err) return res.serverError(err);
 
-			var fs = require('fs');
+			var fs = require('node-fs/lib/fs');
 
+			var shortId = require('shortid');
+			
 			var promise = require('promised-io/promise');
 			var Deferred = promise.Deferred;
 			promise
@@ -31,11 +33,13 @@ module.exports = {
 						file.author = req.param("author") ? req.param("author") : "000";
 						file.dest = "public/files/"+file.author;
 						file.dest = file.fd.split(".tmp/uploads")[0]+file.dest;
-						file.src = "/public/files/"+file.author+"/"+file.filename;
+						file.type = file.filename.split(".").pop();
+						file.name = shortId.generate()+"."+file.type;
+						file.src = "/public/files/"+file.author+"/"+file.name;
 						file.deferred = new Deferred();
 						file.finish = function(){
 							var _this = this;
-							_this.dest += ("/"+_this.filename);
+							_this.dest += ("/"+_this.name);
 							fs.rename( _this.fd, _this.dest, function(err){
 								if(err) console.warn(err);
 								delete _this.finish;
@@ -44,11 +48,13 @@ module.exports = {
 						};
 						fs.exists(file.dest , function (exists) {
 							if(!exists){
-								fs.mkdir(file.dest, 0777, function(){;
-									file.finish()
+								fs.mkdir(file.dest, 0777, true, function(){;
+									file.finish();
 								});
 							}
-							file.finish();
+							else{
+								file.finish();	
+							}
 						});
 						return file;
 					})
