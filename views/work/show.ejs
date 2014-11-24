@@ -265,7 +265,8 @@
 			.parent()
 			.parent()
 			.after(JST["assets/templates/forms/wiki.ejs"]({
-				id : _.uniqueId('new_wiki_')
+				id : _.uniqueId('new_wiki_'),
+				_csrf : "<%= _csrf %>"
 			}));
 			return false;
 		});

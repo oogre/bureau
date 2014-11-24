@@ -36,6 +36,10 @@ module.exports.routes = {
     view: 'homepage'
   },
 
+  'get /public/files/*': function(req, res, next) {
+    return res.sendfile(sails.config.appPath+req.path);
+  }
+
   /***************************************************************************
   *                                                                          *
   * Custom routes here...                                                    *

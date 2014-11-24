@@ -11,9 +11,15 @@
 	<fieldset class="row">
 		<div class="form-group col-sm-offset-2 col-sm-8">
 			<div class="input-group col-sm-12">
-				<input type="file" id="take-picture" class="hide" accept="image/*">
+				<form id="uploadForm" enctype="multipart/form-data" class="hide"  action="/file/upload" method="post">
+    				<input type="hidden" id="userPhotoInput" name="_csrf" value="<%= _csrf %>" />
+    				<input type="file" id="take-picture" name="avatar" accept="image/*"/>
+				</form>
+
 				<label class="input-group-addon" for="description_<%= id %>" >Description</label>
-				<textarea class="form-control ckeditor" id="description_<%= id %>" name="description_<%= id %>"></textarea>
+				<textarea class="form-control ckeditor" id="description_<%= id %>" name="description_<%= id %>">
+					<img src="http://ogre.local:1337/public/files/000/10593230_10152768498883970_6313993110534532604_n.jpg">
+				</textarea>
 			</div>
 		</div>
 	</fieldset>	
@@ -44,25 +50,32 @@
 
 	$("#take-picture").on("change", function (event) {
 		// Get a reference to the taken picture or chosen file
-		var files = event.target.files;
-		if (files && files.length > 0) {
-			var file = files[0]
-			// Get window.URL object
-			var URL = window.URL || window.webkitURL;
-			// Create ObjectURL
-			var imgURL = URL.createObjectURL(file);
-			// Set img src to ObjectURL
-
-
-			var value = CKEDITOR.instances["description_<%= id %>"].getData() + "<img src='"+imgURL+"' />";
-
-
-
-
-			CKEDITOR.instances["description_<%= id %>"].setData(value);
-			URL.revokeObjectURL(imgURL);
-			
-		}
+		$form = $("#uploadForm");
+		$.ajax({
+			url: $form.attr("action"),
+			type: $form.attr("method"),
+			data: new FormData($form[0]), // TAKE CARE TO PUSH ALL TEXT PARAMETERS BEFORE PICTURES
+			cache: false,
+			contentType: false,
+			processData: false
+		})
+		.done(function(files){
+			files.map(function(file){				
+				var editor =
+				CKEDITOR.instances[
+					$form
+					.parent()
+					.find("textarea")
+					.attr("name")
+				]
+				if(editor){
+					editor.insertHtml("<img src='"+file.src+"'' style='max-width: 100%;max-height: 300px;'/>", "unfiltered_html");
+				}
+			});
+		})
+		.fail(function(data){
+			console.warn(data);
+		});
 	});
 
 	$("#description_<%= id %>").ckeditor()
@@ -70,7 +83,6 @@
 	CKEDITOR.instances["description_<%= id %>"].ui.addButton( 'PicturePicker', {
 		label: 'Ajouter une image',
 		command: 'picturePicking',
-		//toolbar: 'links,1',
 		icon: '/js/ckeditor/image_b.png'
 	} );
 	CKEDITOR
