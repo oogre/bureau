@@ -65,7 +65,7 @@
 			<div class="form-group col-sm-5">
 				<div class="input-group col-sm-12">
 					<label class="input-group-addon" for="rendezvous">Rendez-vous</label>
-					<input class="form-control" type="text" name="rendezvous" id="rendezvous" value=""  data-date-format="dd-DD/MM/YY HH:mm" readonly autocomplete="off" required>
+					<input class="form-control" type="text" name="rendezvous" id="rendezvous" value=""  data-date-format="<%= config.appconfig.format.datetime %>" readonly autocomplete="off" required>
 				</div>
 			</div>
 			<div class="form-group col-sm-5">
@@ -96,7 +96,7 @@
 			<div class="form-group col-sm-4">
 				<div class="input-group col-sm-12">
 					<label class="input-group-addon" for="deadLine">Première Echéhance</label>
-					<input class="form-control" type="text" name="deadLine" id="deadLine" value=""  data-date-format="dd-DD/MM/YY" readonly autocomplete="off" required>
+					<input class="form-control" type="text" name="deadLine" id="deadLine" value=""  data-date-format="<%= config.appconfig.format.date %>" readonly autocomplete="off" required>
 				</div>
 			</div>
 		</fieldset>
@@ -139,7 +139,7 @@
 
 <script type="text/javascript">
 	BUREAU.tools.link();
-	var QG = JSON.parse(_("<%- JSON.stringify(QG) %>").unescape());
+	var config = JSON.parse(_("<%- JSON.stringify(config) %>").unescape());
 	var work = JSON.parse(_("<%- JSON.stringify(work) %>").unescape());
 	var shops = JSON.parse(_("<%- JSON.stringify(shops) %>").unescape());
 	var workTypes = JSON.parse(_("<%- JSON.stringify(workTypes) %>").unescape());
@@ -254,9 +254,8 @@
 
 	$("form")
 	.on("submit", function(event){
-		if(!event.target.checkValidity()){
-			return false;
-		}
+		$(event.target).find(".has-error").removeClass("has-error");
+
 		BUREAU.tools.form.submitWaiter.start(event.target.submit);
 
 		var editor = CKEDITOR.instances[$("#wiki").find("textarea").attr("name")];
@@ -282,16 +281,22 @@
 			},
 			route : routeTiming
 		}
-		
+
+		if(!data.wiki.description){
+			$("textarea").parent().addClass("has-error").get(0).scrollIntoView(true);;
+			BUREAU.tools.form.submitWaiter.stop(event.target.submit);
+			return false;
+		}
 
 		var ajaxStack = [];
 		if(maintenance.id == data.type){
 			var deadLine = moment(data.deadLine);
 			var last = moment(data.deadLine).add(data.duration, "year");
+			var onlyOne = data.duration == 0;
 			delete data.time;
 			delete data.duration;
 			delete data.rendezvous;
-			while(deadLine.isBefore(last)){
+			while(deadLine.isBefore(last) || onlyOne){
 				data.deadLine = deadLine.toISOString();
 				deadLine.add(data.interval, "month");
 				ajaxStack.push(BUREAU.tools.api({
@@ -299,6 +304,7 @@
 					type : "<%= method %>",
 					data : data,
 				}));
+				if(onlyOne)break;
 			}
 		}
 		else{	
@@ -313,7 +319,10 @@
 		}
 		$.when.call($, ajaxStack)
 		.done(function(data){
-			window.location = "/work"
+			setTimeout(function(){
+				window.location = "/work"	
+			}, 100);
+			
 		})
 		.fail(function(message){
 			BUREAU.tools.form.submitErrorHandler(message);
@@ -323,7 +332,7 @@
 	});
 
 	var calculateDistance = function(shop){
-		origin      = new google.maps.LatLng(QG.location.lat,QG.location.lng);
+		origin      = new google.maps.LatLng(config.qg.location.lat,config.qg.location.lng);
 		destination = new google.maps.LatLng(shop.location.lat,shop.location.lng);
 		if(origin && destination){
 			var request = {

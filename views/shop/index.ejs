@@ -62,7 +62,7 @@
 							},
 							{
 								name : "createdAt",
-								value : "<% var date = new Date(row.createdAt); %> <%= date.getDate() + '/' + (date.getMonth() + 1) + '/' + date.getFullYear() %>"
+								value : moment(new Date("<%= row.createdAt %>")).format("<%= sails.config.appconfig.format.datetime %>")
 							}
 						]
 					},

@@ -26,7 +26,10 @@
 			workTypes : JSON.parse(_("<%= JSON.stringify(workTypes) %>").unescape()),
 			workers : JSON.parse(_("<%= JSON.stringify(workers) %>").unescape()),
 			session : JSON.parse(_("<%= JSON.stringify(req.session) %>").unescape()),
-			QG : JSON.parse(_("<%= JSON.stringify(sails.config.qg) %>").unescape()),
+			config : {
+				qg : JSON.parse(_("<%= JSON.stringify(sails.config.qg) %>").unescape()),
+				appconfig : JSON.parse(_("<%= JSON.stringify(sails.config.appconfig) %>").unescape())
+			},
 			method : "POST",
 			action : "/work/create/"
 		}));

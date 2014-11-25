@@ -179,5 +179,13 @@
 		}
 	}
 
-	$(document).on("ready", BUREAU.tools.link);
+	$(document).on("ready", function(){
+		_.mixin(_.str.exports());
+		_.mixin({
+			includeString: _.str.include,
+			reverseString: _.str.reverse
+		});
+
+		BUREAU.tools.link();
+	});
 })();

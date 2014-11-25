@@ -97,6 +97,11 @@
 			}
 		});
 
+		$("ol#elements").find("li").on("click", function(){
+			window.location.href = "/element/show/"+$(this).attr("id");
+			return false;
+		});
+
 		var location = QG.location;
 
 		if (navigator.geolocation) {

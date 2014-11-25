@@ -50,9 +50,7 @@
 					label : "Date d'échéance"
 				}],
 				body : [
-				<% works && works.map(function(row){ 
-					console.log(row);
-					%>
+				<% works && works.map(function(row){ %>
 					{
 						id : "<%= row.id %>",
 						data : 
@@ -67,11 +65,11 @@
 							},
 							{
 								name : "name",
-								value : _("<%= row.wiki[0] && row.wiki[0].description %>").trunc(25)
+								value : _("<%= row.wiki[0] && row.wiki[0].description %>").chain().unescapeHTML().stripTags().truncate(25).value()
 							},
 							{
 								name : "deadLine",
-								value : "<% var date = new Date(row.deadLine); %> <%= date.getDate() + '/' + (date.getMonth() + 1) + '/' + date.getFullYear() %>"
+								value : moment(new Date("<%= row.deadLine %>")).format("<%= sails.config.appconfig.format.datetime %>")
 							}
 						]
 					},
@@ -84,7 +82,7 @@
 			_csrf : "<%= _csrf %>"
  		}));
 
-		BUREAU.tools.table.filter($("#<%= id %> table"), $("#<%= id %> .findByName"), ["name", "brand"]);
+		BUREAU.tools.table.filter($("#<%= id %> table"), $("#<%= id %> .findByName"), ["name", "brand", "type"]);
  		
 	};
 

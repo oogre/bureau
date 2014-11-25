@@ -14,9 +14,22 @@ module.exports = {
 		},
 		element : {
 			collection : 'element',
-			via : "id",
-			required : true
+			via : "id"
 		},
+		task : {
+			type : "array"
+			/*
+			 	when an element's task is done push its reference here.
+				[{ 
+					element_id
+					task_id
+				},{
+					element_id
+					task_id
+				}]
+			*/ 
+		},
+
 		type : {
 			model : 'workType',
 			required : true

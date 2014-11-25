@@ -27,6 +27,11 @@ module.exports = {
 		substructure : {
 			type : "Array"
 		},
+
+		task : {
+			collection : 'task',
+			via : "id"
+		},
 		
 		owner : {
 			model : 'shop',
