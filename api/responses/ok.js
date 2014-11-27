@@ -22,7 +22,9 @@ module.exports = function sendOK (data, options) {
 
   // Set status code
   res.status(200);
-
+  // Disable layout
+  res.locals.layout = false;
+  
   // If appropriate, serve data as JSON(P)
   if (req.wantsJSON) {
     return res.jsonx(data);

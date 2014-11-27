@@ -4,6 +4,22 @@
 	if("undefined" == typeof(element)){
 		var element = {};
 	}
+
+	var taskMultiselectOption = 
+	_
+	.keys(tasks)
+	.map(function(groupName){
+		return {
+			label : groupName,
+			children : 	tasks[groupName]
+						.map(function(task){
+							return {
+								label: task.name, 
+								value: task.id
+							}
+						})
+		};
+	});
 %>
 
 <div class="container">
@@ -12,7 +28,7 @@
 
 		<hr/>
 
-		<form class="form-inline" role="form" action="/element/create"> 
+		<form class="form-inline" role="form" > 
 
 			<input type="hidden" name="_csrf" value="<%= _csrf %>" />
 			<fieldset class="row">
@@ -28,13 +44,13 @@
 				<div class="form-group col-sm-offset-2 col-sm-4">
 					<div class="input-group col-sm-12">
 						<label class="input-group-addon" for="name" >Nom</label>
-						<input class="form-control" type="text" id="name" name="name" value="<%= element.name || '' %>">
+						<input class="form-control" type="text" id="name" name="element_name" value="<%= element.name || '' %>">
 					</div>
 				</div>
 				<div class="form-group col-sm-4">
 					<div class="input-group col-sm-12">
-						<label class="input-group-addon" for="type" >Type</label>
-						<input type="text" class="form-control" data-toggle="dropdown" data-toggle-target=".dropdown-menu" aria-expanded="false" id="type" name="type" value=""/>
+						<label class="input-group-addon" for="elementType" >Type</label>
+						<input type="text" class="form-control" data-toggle="dropdown" data-toggle-target=".dropdown-menu" aria-expanded="false" id="elementType" name="elementType" value=""/>
 						<ul class="dropdown-menu" role="menu">
 							<% elementTypes.map(function(elementType){%>
 								<li><a href="#" data-type="<%= elementType.name %>"><%= elementType.name %></a></li>
@@ -60,6 +76,40 @@
 			
 			<hr/>
 
+
+			<fieldset class="row">
+				<label class="col-sm-2">Tâches</label>
+				<div class="form-group col-sm-4">
+					<div class="input-group col-sm-12">
+						<label class="input-group-addon" for="tasks" >Nom</label>
+						<select multiple="multiple" id="tasks" name="tasks"></select>
+					</div>
+				</div>
+			</fieldset>
+			<fieldset id="newTasks"></fieldset>
+			<fieldset class="row">
+				<div class="form-group col-sm-offset-2 col-sm-4">
+					<div class="input-group col-sm-12">
+						<button class="btn btn-default add-task" >Ajouter&nbsp; tâche</button>
+					</div>
+				</div>
+			</fieldset>
+
+			<hr/>
+
+			<fieldset id="wiki" class="row">
+				<label class="col-sm-2">Wiki</label>
+				<div class="form-group col-sm-8">
+					<div class="input-group btn-group col-sm-12">
+						<button class="btn btn-default add-wiki" >
+							<i class="fa fa-file-text-o"></i>&nbsp; Ajouter un wiki
+						</button>
+					</div>
+				</div>
+			</fieldset>
+	
+			<hr/>	
+
 			<fieldset class="row">
 				<label class="col-sm-2"></label>
 				<div class="form-group col-sm-3">
@@ -82,6 +132,38 @@
 
 		BUREAU.tools.input.focus();
 
+		$("#tasks").multiselect({
+			buttonWidth: '100%', 
+			includeSelectAllOption: true,
+			allSelectedText: 'Toute les tâches',
+			selectAllText : "Toute les tâches",
+			nonSelectedText : "Aucune tâche"
+		});
+		
+		$("#tasks").multiselect('dataprovider', JSON.parse(_("<%= JSON.stringify(taskMultiselectOption) %>").unescape()));
+
+		$(".add-task").on("click", function(){
+			$("#newTasks").append(JST["assets/templates/forms/task.ejs"]({
+				id : _.uniqueId('new_task_'),
+			}));
+			BUREAU.tools.input.focus();
+			return false;
+
+		});
+		_.uniqueId('new_wiki_');
+		$("button.add-wiki").on("click", function(){
+			$("button.saveWiki").removeClass("hide");
+			$(this)
+			.parent()
+			.parent()
+			.parent()
+			.after(JST["assets/templates/forms/wiki.ejs"]({
+				id : _.uniqueId('new_wiki_'),
+				_csrf : "<%= _csrf %>"
+			}));
+			return false;
+		});
+
 			<% if(shops.length == 1){%>
 				$("[name='owner']")
 				.attr("disabled", "disabled")
@@ -97,35 +179,54 @@
 				try{
 
 					BUREAU.tools.form.submitWaiter.start(event.target.submit);
-
+					
 					var data = {
 						_csrf : event.target._csrf.value,
 						serial : (event.target.serial.value || "").trim(),
-						name : (event.target.name.value || "").trim(),
-						type : event.target.type.value || null,
+						name : (event.target.element_name.value || "").trim(),
+						elementType : event.target.elementType.value.toLowerCase() || null,
+						task: 	($("#tasks").val() || [])
+								.concat( 	$("[id^='new_task_']")
+											.toArray()
+											.map(function(task){
+												return{
+													name : $(task).find("[name='task_name']").val(),
+													link : $(task).find("[name='typeLinked']").is(":checked")
+												}
+											})),
+						wiki : 	$("[id^='new_wiki_']")
+								.toArray()
+								.map(function(wiki){
+									return {
+										name : $(wiki).find("[name='name']").val().trim(),
+										description : CKEDITOR.instances[$(wiki).find("textarea").attr("name")].innerHTML,
+										author : "<%= session.worker ? session.worker.id : ''  %>" || null
+									}
+								}),
 						owner : event.target.owner.value || null
 					};
 
-					if(!data.group){
-						delete data.group;
-					}
+					console.log(data);
+
 					if(!data.owner){
 						delete data.owner;
 					}
 
 					BUREAU.tools.api({
-						url : event.target.action,
+						url : "/element/create",
 						type : "POST",
 						data : data,
 					})
 					.done(function(data){
+						console.log("done");
 						<% if(shops.length == 1){%>
-							window.location = "/shop/edit/<%= shops[0].id %>";
+							//window.location = "/shop/edit/<%= shops[0].id %>";
 						<% } else {%>
-							window.location = "/element/index/"+data.id;
+							//window.location = "/element/index/"+data.id;
 						<% } %>
 					})
 					.fail(function(message){
+						console.log("fails");
 						BUREAU.tools.form.submitErrorHandler(message);
 						BUREAU.tools.form.submitWaiter.stop(event.target.submit);
 					});
@@ -140,10 +241,10 @@
 			});
 
 		$("[data-type]").on("click", function(){
-			$("#type").val($(this).attr("data-type"));
+			$("#elementType").val($(this).attr("data-type"));
 		});
 
-		$("#type").on("keyup", function(){
+		$("#elementType").on("keyup", function(){
 			var target = $(this).attr("data-toggle-target");
 			var needle = $(this).val().toLowerCase();
 			$(target).parent().addClass("open");

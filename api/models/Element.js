@@ -19,9 +19,7 @@ module.exports = {
 		},
 
 		type : {
-			type: 'string',
-			required: true,
-			maxLength: 128,
+			model : 'elementType'
 		},
 
 		substructure : {
@@ -43,24 +41,14 @@ module.exports = {
 			via : "id"
 		}
 	},
+	/*
 	beforeCreate : function(values, next){
-		values.type = values.type.toLowerCase();
-		ElementType.findOneByName(values.type)
-		.then(function(element){
-			if(!element){
-				ElementType.create({
-					name : values.type
-				})
-				.then(function(){})
-				.catch(function(err){
-					console.error(err);
-				});
-			}
-		})
-		.catch(function(err){
-			console.error(err);
-		});
-		next();
+		console.log(values);
+		
 	},
+	afterCreate : function(values, next){
+		console.log(JSON.stringify(values));
+		next();
+	}*/
 };
 

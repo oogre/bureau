@@ -24,7 +24,9 @@ module.exports = function badRequest(data, options) {
 
   // Set status code
   res.status(400);
-
+  // Disable layout
+  res.locals.layout = false;
+  
   // Log error to console
   if (data !== undefined) {
     sails.log.verbose('Sending 400 ("Bad Request") response: \n',data);

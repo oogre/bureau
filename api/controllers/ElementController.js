@@ -45,28 +45,155 @@ module.exports = {
 
 		var whereShop = req.param("shop") && "undefined" != req.param("shop") ? {id : req.param("shop")} : {};
 		
-
 		ElementType.find()
 		.then(function foundElementTypes(elementTypes){
-			Shop.find(whereShop)
-			.sort("brand asc")
-			.then(function foundShops(shops){
-				return res.view({
-					elementTypes : elementTypes,
-					shops : shops,
-				});
-			})
-			.catch(function(err){
-				return next(err);
-			});
+			return [elementTypes];
+		})
+		.spread(function (elementTypes){
+			var shops = 	Shop.find(whereShop)
+							.sort("brand asc")
+							.then(function foundShops(shops){
+								return shops;
+							})
+							.catch(function(err){
+								return next(err);
+							});
+			return [elementTypes, shops];
+		})
+		.spread(function (elementTypes, shops){
+			var tasks = Task.find()
+						.populateAll()
+						.then(function foundTasks(tasks){
+							return _.groupBy(tasks, function(task){
+								return task.elementType != undefined ? task.elementType.name : "-";
+							});
+						})
+						.catch(function(err){
+							return next(err);
+						});
+			return [elementTypes, shops, tasks];
+		})
+		.spread(function (elementTypes, shops, tasks){
+			return res.view({
+						elementTypes : elementTypes,
+						shops : shops,
+						tasks : tasks
+					});
 		})
 		.catch(function(err){
 			return next(err);
 		});
 	},
+	"create" : function(req, res, next){
+		var data = req.params.all();
+
+		data.elementType = data.elementType.toLowerCase();
+		data.task = data.task || [];
+		data.wiki = data.wiki || [];
+		ElementType.findOneByName(data.elementType)
+		.then(function(foundElementType){
+			var elementType = foundElementType;
+			if(!foundElementType){
+				elementType = 
+				ElementType
+				.create({
+					name : data.elementType
+				})
+				.then(function(newElementType){
+					return newElementType
+				})
+				.catch(function(err){
+					return next(err);
+				});
+			}
+			return [elementType];
+			
+		})
+		.spread(function(elementType){
+			var promise = require('promised-io/promise');
+			var Deferred = promise.Deferred;
+
+			promise
+			.all(	data
+					.task
+					.map(function(task){
+						if(_.isString(task)){
+							return Task.findOne({
+								id : task
+							})
+							.then(function(foundTask){
+								return foundTask;
+							}).catch(function(err){
+								return next(err);
+							});
+						}
+						else if(_.isObject(task)){
+							return Task.create(task)
+							.then(function(newTask){
+								newTask.link = task.link;
+								return newTask;
+							}).catch(function(err){
+								return next(err);
+							});
+						}
+					})
+			)
+			.then(function(tasks){
+				tasks.map(function(task){
+					if(task.link){
+						task.elementType = elementType.id;
+						task.save();
+						delete task.link;
+					}
+				});
+
+				promise
+				.all(	data
+						.wiki
+						.map(function(wiki){
+							if(_.isString(wiki)){
+								return Wiki.findOne({
+									id : wiki
+								})
+								.then(function(foundWiki){
+									return foundWiki;
+								}).catch(function(err){
+									return next(err);
+								});
+							}
+							else if(_.isObject(wiki)){
+								return Wiki.create(wiki)
+								.then(function(newWiki){
+									return newWiki;
+								}).catch(function(err){
+									return next(err);
+								});
+							}
+						})
+				)
+				.then(function(wikis){
+					return [wikis, tasks, elementType]	
+					Element.create({
+						name : data.name.toLowerCase(),
+						serial : data.name,
+						type: elementType.id,
+						task: tasks.map(function(task){return task.id}),
+						owner: data.owner,
+						wiki: wikis.map(function(wiki){return wiki.id}),
+					})
+					.then(function(newElement){
+						console.log(newElement);
+						return res.json(newElement);
+					});
+				});
+			});
+		})
+		.catch(function(err){
+			console.error(err);
+		});
+	},
 	"substructureUpdate" : function(req, res, next){
 		var elements = JSON.parse(req.param("elements"));
-
 		var setElementSubstructure = function(elements){
 			if(elements){
 				elements.map(function(element){

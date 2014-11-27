@@ -13,9 +13,8 @@ module.exports = {
 		required: true,
 		maxLength: 128,
 	},
-	element : {
-		collection : 'element',
-		via : "id"
+	elementType : {
+		model : 'elementType'
 	}
   }
 };

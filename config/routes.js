@@ -38,7 +38,17 @@ module.exports.routes = {
 
   'get /public/files/*': function(req, res, next) {
     return res.sendfile(sails.config.appPath+req.path);
-  }
+  },
+
+  "get /element/create?" : function(req, res, next){
+    return res.forbidden();
+  },
+  "put /element/create?" : function(req, res, next){
+    return res.forbidden();
+  },
+  "delete /element/create?" : function(req, res, next){
+    return res.forbidden();
+  },
 
   /***************************************************************************
   *                                                                          *

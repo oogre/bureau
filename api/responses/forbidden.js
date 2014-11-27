@@ -21,7 +21,8 @@ module.exports = function forbidden (data, options) {
 
   // Set status code
   res.status(403);
-
+  // Disable layout
+  res.locals.layout = false;
   // Log error to console
   if (data !== undefined) {
     sails.log.verbose('Sending 403 ("Forbidden") response: \n',data);

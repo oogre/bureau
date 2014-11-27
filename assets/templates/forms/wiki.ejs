@@ -1,6 +1,12 @@
 <div id="<%= id %>">
 	<fieldset class="row">
+	<% if (id.match(/_1$/)){%>
+		<label class="col-sm-2">Wiki</label>
+		<div class="form-group col-sm-8">
+	<% }
+	else {%>
 		<div class="form-group col-sm-offset-2 col-sm-8">
+	<% }%>
 			<div class="input-group col-sm-12">
 				<label class="input-group-addon" for="name_<%= id %>" >Name</label>
 				<input class="form-control" type="text" id="name_<%= id %>" name="name" value="<%= name || '' %>" autocomplete="off">

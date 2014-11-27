@@ -20,13 +20,13 @@ module.exports = {
 			type : "array"
 			/*
 			 	when an element's task is done push its reference here.
-				[{ 
-					element_id
-					task_id
-				},{
-					element_id
-					task_id
-				}]
+				[
+					{
+						done : TRUE || FALSE,
+						element_id
+						task_id
+					}
+				]
 			*/ 
 		},
 
