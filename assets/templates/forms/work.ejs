@@ -214,27 +214,56 @@
 		return $elements.find("li");
 	}
 
+	var createTaskList = function($this, elementId, idRoot){
+		BUREAU.tools.api({
+			url : "/element/find/",
+			data : {
+				where : JSON.stringify({id : elementId})
+			},
+			type : "GET"
+		})
+		.done(function(data){
+			if(data.length && data[0].task){
+				$this.children("ol").before(JST["assets/templates/show/task.ejs"]({
+					id : _.uniqueId(idRoot),
+					element : data[0]
+				}));
+			}
+		});
+	}
+	var destroyTaskList = function($this, idRoot){
+		$this.children("[id^='"+idRoot+"']").remove();
+	}
 
-	$("[rel='shopName']").on("click", function(){
-		var shopId = $(this).attr("data-id");
-		var shopName = $(this).attr("data-name");
+	var elementToggleSelection = function(event){
+		event.stopPropagation();
+		var $this = $(event.target).parent();
+		var id = $this.attr("id");
+		var idRoot = "task_list_";
+		if($this.toggleClass("selected").hasClass("selected"))
+			createTaskList($this, id, idRoot);
+		else
+			destroyTaskList($this, idRoot);
+	}
 
-		$("#shopName").val(shopName);
-		$("#shop").val(shopId);
-
-
-		calculateDistance(_.find(shops, function(shop){ return shop.id == shopId }));
-
+	var elementIntroducing = function(shopId){
 		BUREAU.tools.find.element({
 			owner : shopId
 		})
 		.done(function(data){
 			buildElementStructure("ol#elements", data)
-			.on("click", function(event){
-				 event.stopPropagation();
-				$(this).toggleClass("selected");
-			});
+			.find(".elementHead")
+			.on("click", elementToggleSelection);
 		});
+	};
+
+	$("[rel='shopName']").on("click", function(){
+		var shopId = $(this).attr("data-id");
+		var shopName = $(this).attr("data-name");
+		$("#shopName").val(shopName);
+		$("#shop").val(shopId);
+		calculateDistance(_.find(shops, function(shop){ return shop.id == shopId }));
+		elementIntroducing(shopId);
 	});
 
 	$("[data-toggle='dropdown']").on("keyup", function(){
@@ -263,7 +292,7 @@
 			_csrf : event.target._csrf.value,
 			type : (event.target.type.value || "").trim(),
 			shop : (event.target.shop.value || "").trim(),
-			element : 	$("#elements li.selected")
+			element : 	$("ol#elements>li.selected, ol#elements ol>li.selected")
 						.toArray()
 						.map(function(element){
 							return $(element).attr("id");
@@ -279,7 +308,23 @@
 				description : editor.innerHTML,
 				author : "<%= session.worker ? session.worker.id : ''  %>" || null
 			},
-			route : routeTiming
+			route : routeTiming,
+			task : _.flatten(	$("ol#elements>li.selected, ol#elements ol>li.selected")
+								.toArray()
+								.map(function(element){
+									var tasks =	$(element)
+												.children("[id^='task_list_']")
+												.find("select[name='task']")
+												.val() || [];
+									return	tasks
+											.map(function(task){
+												return {
+													element :	$(element).attr("id"),
+													task : task
+												}
+											})
+								})
+					),
 		}
 
 		if(!data.wiki.description){

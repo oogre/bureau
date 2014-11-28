@@ -79,7 +79,8 @@
 
 
 	var  documentLoaded = function (){	
-		var shop = JSON.parse(_('<%= JSON.stringify(shop) %>').unescape());
+		window.shop = JSON.parse(_('<%= JSON.stringify(shop) %>').unescape());
+		shop.element = JSON.parse(_('<%= JSON.stringify(element) %>').unescape());
 		var QG = JSON.parse(_('<%= JSON.stringify(sails.config.qg) %>').unescape());
 
 		

@@ -135,13 +135,15 @@ body.dragging, body.dragging * {
   z-index: 2000;
 }
 
-ol#elements li.placeholder{
+ol#elements>li.placeholder, 
+ol#elements ol>li.placeholder{
   position: relative;
   border: dashed 1px #000;
   background-color: rgba(0, 0, 0, 0.2);
   /** More li styles **/
 }
-ol#elements li.placeholder:before {
+ol#elements>li.placeholder:before,
+ol#elements ol>li.placeholder:before {
   position: absolute;
   /** Define arrowhead **/
 }
@@ -151,11 +153,10 @@ ol:after{
 	display:block;
 }
 
-ol li{
+ol>li{
 	background-color: #eee;
 	list-style-type: none;
 	margin: 5px;
-	cursor: move;
 	float: left;
 	border-radius: 4px;
 	min-height: 100px;
@@ -168,8 +169,7 @@ ol li{
 	padding-bottom: 9px;
 	width: 15%;
 }
-
-ol li .elementHead{
+ol>li .elementHead{
 	border-top-left-radius: 4px;
 	border-top-right-radius: 4px;
 	background: #ccc;
@@ -180,16 +180,22 @@ ol li .elementHead{
 	border: solid 1px #ccc;
 }
 
-ol li.selected>.elementHead{
+ol>li.selected>.elementHead{
 	color: #fff;
 	background-color: #428bca;
 	border-color: #357ebd;
 }
-#work-new ol li{
+
+
+#shop-edit ol>li .elementHead{
+	cursor: move;
+}
+
+#work-new ol>li .elementHead{
 	cursor: pointer;
 }
 
-#work-new ol li.selected{
+#work-new ol>li.selected{
 	border-color: #66afe9;
 	-webkit-box-shadow: 0 0 8px rgba(2,75,233,.6);
 	box-shadow: 0 0 8px rgba(2,75,233,.6);
@@ -212,9 +218,14 @@ ol#elements{
 	border-top-left-radius: 0;
 }
 li>ol{
-	padding: 0 0 0 10px;
+	padding: 0;
 	margin: 5px;
 }
+.taskSelectorWrapper{
+	margin: 10px;
+}
+
+
 .dropdown-menu{
 	/*min-width: 100%;
 	max-height: 200px;
@@ -233,6 +244,7 @@ li>ol{
 	padding: 7px 20px;
 
 }
+
 
 .schedule[data-schedule-id] .scheduleStart{
 	display: none;

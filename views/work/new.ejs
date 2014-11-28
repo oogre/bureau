@@ -18,7 +18,7 @@
 
 <script type="text/javascript">
 	var  documentLoaded = function (){
-
+		window.shops = JSON.parse(_("<%= JSON.stringify(shops) %>").unescape());
 		$("#<%= id %>").append(JST["assets/templates/forms/work.ejs"]({
 			_csrf : "<%= _csrf %>",
 			work : JSON.parse(_("<%= JSON.stringify(work) %>").unescape()),

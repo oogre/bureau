@@ -22,7 +22,7 @@ module.exports = {
 			 	when an element's task is done push its reference here.
 				[
 					{
-						done : TRUE || FALSE,
+						done : TRUE || FALSE || float,
 						element_id
 						task_id
 					}

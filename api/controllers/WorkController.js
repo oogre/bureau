@@ -91,7 +91,8 @@ module.exports = {
 								return workers;
 							});
 			return [work, workers];
-		}).spread(function (work, workers){
+		})
+		.spread(function (work, workers){
 			return res.view({
 				work : work,
 				workers : workers

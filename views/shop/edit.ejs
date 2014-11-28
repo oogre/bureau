@@ -13,10 +13,11 @@
 
 <script type="text/javascript">
 	var  documentLoaded = function (){
-
+		var shop = JSON.parse(_("<%= JSON.stringify(shop) %>").unescape());
+		shop.element = JSON.parse(_("<%= JSON.stringify(element) %>").unescape());
 		$("#<%= id %>").append(JST["assets/templates/forms/shop.ejs"]({
 			_csrf : "<%= _csrf %>",
-			shop : JSON.parse(_("<%= JSON.stringify(shop) %>").unescape()),
+			shop : shop,
 			method : "PUT",
 			action : "/shop/update/<%= shop.id %>"
 		}));

@@ -1,0 +1,17 @@
+<div id="<%= id %>" class="taskSelectorWrapper">
+	<select multiple="multiple" name="task">
+		<% element.task.map(function(task){%>
+			<option value="<%= task.id %>" name="<%= task.name.toLowerCase() %>" ><%= task.name %></option>
+		<%})%>
+	</select>
+</div>
+
+<script type="text/javascript">
+	$("#<%= id %> select[name='task']").multiselect({
+		buttonWidth: '100%', 
+		includeSelectAllOption: true,
+		allSelectedText: 'Toutes les tâches',
+		selectAllText : "Toutes les tâches",
+		nonSelectedText : "Aucune tâche"
+	});
+</script>
