@@ -93,14 +93,105 @@ module.exports = {
 			return [work, workers];
 		})
 		.spread(function (work, workers){
-			return res.view({
-				work : work,
-				workers : workers
-			});
+			var promise = require('promised-io/promise');
+			var Deferred = promise.Deferred;
+
+			promise
+			.all([	promise
+					.all(	(work
+							.element || [])
+							.map(function(element){
+								return Element.findOne({
+									id : element.id
+								})
+								.populateAll()
+								.then(function(data){
+									return data;
+								})
+								.catch(function(err){
+									return next(err);
+								});
+							})
+					)
+					.then(function(elements){
+						return elements;
+					}),
+					promise
+					.all(	(work
+							.task || [])
+							.map(function(task){
+								return Task.findOne({
+									id : task.task
+								})
+								.populateAll()
+								.then(function(data){
+									data.value = task.value;
+									return { 
+										element: task.element,
+       									task: data
+       								};
+								})
+								.catch(function(err){
+									return next(err);
+								});
+							})
+					)
+					.then(function(tasks){
+						return tasks;
+					})
+			])
+			.then(function(data){
+				work = _.clone(work);
+				work.element = data[0];
+				work.task = data[1];
+				work.element = work.element.map(function(element){
+					delete element.task;
+					return _.clone(element);	
+				});
+
+				work.task.map(function(task){
+					var i = 0;
+					for(; i < work.element.length ; i++){
+						 if(work.element[i].id == task.element){
+						 	break;
+						 }
+					}
+					work.element[i].task = work.element[i].task || [];
+					work.element[i].task.push(_.clone(task));
+				});
+				delete work.task;
+
+				return res.view({
+					work : work,
+					workers : workers
+				});
+			});				
 		})
 		.catch(function(err){
 			return next(err);
 		});
 	},
+
+	"checkTask" : function(req, res, next){
+		var data = req.params.all();
+		Work.findOne({
+			id : data.id
+		})
+		.then(function(foundWork){
+			if(!foundWork) return res.send(404);
+			var task = _.find(foundWork.task, function(task){
+				return task.element == data.element && task.task == data.task;
+			})
+			task.value = data.value;
+			foundWork.save();
+			return res.json(_.clone(task));
+		})
+		.catch(function(err){
+			return next(err);
+		})
+
+
+		
+	}
 };
 

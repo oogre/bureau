@@ -1,0 +1,59 @@
+<div id="<%= id %>" class="taskSelectorWrapper">
+	<input class="form-control" type="hidden" name="elementId" value="<%= element.id %>">
+	<input class="form-control" type="hidden" name="workId" value="<%= work.id %>">
+	<% (element.task || []).map(function(task){ 
+
+		task = task.task;
+		if(task.value === "false"){
+			task.value = false;
+		}
+		if(task.value === "true"){
+			task.value = true;
+		}
+		%>
+		<fieldset class="row">
+			<div class="form-group col-sm-12">
+				<div class="input-group">
+					<label class="input-group-addon" for="taskValue" ><%= task.name %></label>
+					<input class="form-control" type="hidden" name="taskId" value="<%= task.id %>">
+					<input class="form-control" type="text" name="taskValue" id="taskValue" value="<%= _.isUndefined(task.value) || _.isBoolean(task.value) ? '' : task.value %>">
+					<span class="input-group-btn">
+						<button class="btn <%= task.value ? 'btn-success' : 'btn-default'%>" type="button"><i class="fa <%= task.value ? 'fa-check-square-o': 'fa-square-o' %>"></i></button>
+					</span>
+				</div>
+			</div>
+		</fieldset>
+	<%})%>
+</div>
+
+<script type="text/javascript">
+	$("#<%= id %>")
+	.find("button")
+	.on("click", function(){
+		$this = $(this);
+		var data = {
+			value : $this.parent().parent().find("[name='taskValue']").val() || !$this.hasClass("btn-success"),
+			task : $this.parent().parent().find("[name='taskId']").val(),
+			element : $("#<%= id %>").find("[name='elementId']").val(),
+			_csrf : "<%= _csrf %>"
+		}
+
+		BUREAU.tools.api({
+			url : "/work/checkTask/"+$("#<%= id %>").find("[name='workId']").val(),
+			type : "PUT",
+			data : data
+		})
+		.done(function(data){
+			if(data.value === "false"){
+				$this.removeClass("btn-success").addClass("btn-default").find("i").addClass("fa-square-o").removeClass("fa-check-square-o");	
+				//$this.parent().parent().find("[name='taskValue']").removeAttr("disabled");
+			}
+			else if(data.value){
+				$this.addClass("btn-success").removeClass("btn-default").find("i").removeClass("fa-square-o").addClass("fa-check-square-o");	
+				//$this.parent().parent().find("[name='taskValue']").attr("disabled", "disabled");
+			}
+			
+		});
+		return false;
+	});
+</script>

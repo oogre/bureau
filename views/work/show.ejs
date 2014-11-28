@@ -194,13 +194,23 @@
 			defaultDate : moment(work.rendezvous)
 		});
 
+		var createTaskList = function($this, idRoot, element){
+			$this.children("ol").before(JST["assets/templates/show/task2.ejs"]({
+				id : _.uniqueId(idRoot),
+				element : element,
+				work : work,
+				_csrf : "<%= _csrf %>"
+			}));
+		};
+
 		var $elements = $("ol#elements");
 		$elements.empty();
 		work.element.map(function(element){
 			$elements.append(JST["assets/templates/show/element.ejs"]({element : element}));
+			createTaskList($("#"+element.id), "task_list", element);
 		});
 
-		$elements.find("li").on("click", function(){
+		$elements.find("li .elementHead").on("click", function(){
 			window.location.href = "/element/show/"+$(this).attr("id");
 			return false;
 		});

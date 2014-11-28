@@ -191,7 +191,8 @@ ol>li.selected>.elementHead{
 	cursor: move;
 }
 
-#work-new ol>li .elementHead{
+#work-new ol>li .elementHead, 
+#work-show ol>li .elementHead{
 	cursor: pointer;
 }
 
