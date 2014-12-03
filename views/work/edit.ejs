@@ -1,0 +1,609 @@
+<%
+	var id = req.session.location.controller + "-" + req.session.location.action;
+
+	var title = "Fiche ";
+	if(work.type.name == "installation"){
+		title+="d'";
+	}
+	else{
+		title+="de "
+	}
+	title += work.type.name;
+	
+%>
+
+<div class="container">
+	<div id="<%= id %>">
+		<h3><%= title %></h3>
+
+		<form class="form-inline" role="form"> 
+			<fieldset class="row">
+				<label class="col-sm-2">Client</label>
+				<div class="form-group col-sm-8">
+					<div class="input-group col-sm-12">
+						<label class="input-group-addon" for="brand" >Enseigne</label>
+						<input disabled class="form-control" type="text" id="brand" name="brand" value="<%= work.shop.brand || '' %>">
+					</div>
+				</div>
+			</fieldset>
+			<fieldset class="row">
+				<div class="form-group col-sm-offset-2 col-sm-8">
+					<div class="input-group col-sm-12">
+						<label class="input-group-addon" for="name" >Nom</label>
+						<input disabled class="form-control" type="text" id="name" name="name" value="<%= work.shop.name || '' %>">
+					</div>
+				</div>
+				<label class="col-sm-2"><a href="/shop/show/<%= work.shop.id %>" class="btn btn-default">Fiche magasin</a></label>
+			</fieldset>
+			<fieldset class="row">
+				<div class="form-group col-sm-offset-2 col-sm-8">
+					<div class="input-group col-sm-12">
+						<label class="input-group-addon" for="rendezvous" >Rendez-vous</label>
+						<input class="form-control" type="text" id="rendezvous" name="rendezvous" value="" data-date-format="<%= sails.config.appconfig.format.datetime %>" readonly autocomplete="off" >
+					</div>
+				</div>
+				<label class="col-sm-2"><button class="btn btn-primary save-rendez-vous hide">Enregistrer le rendez-vous</button></label>
+			</fieldset>
+			
+			<fieldset class="row">
+				<div class="form-group col-sm-offset-2 col-sm-8">
+					<div class="input-group col-sm-12">
+						<label rel="elements" class="input-group-addon" >Element(s)</label>
+						<ol id="elements"></ol>
+					</div>
+				</div>
+				
+				<div class="btn-group-vertical col-sm-2" role="group" >
+					<button class="btn btn-default add-element">Modifier</button>
+					<button class="btn btn-primary save-element hide" >Enregistrer</button>
+				</div>
+			</fieldset>
+			<hr/>
+
+			<fieldset class="row">
+				<label class="col-sm-2">Hommes</label>
+				<div class="form-group col-sm-10">
+					<div class="input-group col-sm-12">
+						<table class="table" data-db-table-name="<%= req.session.location.controller %>" >
+							<thead>
+								<tr>
+									<th data-db-row-name="worker_id">
+										Id
+									</th>
+									<th data-db-row-name="worker_name">
+										Nom
+									</th>
+									<th>
+										Action
+									</th>
+									<th>
+										Travail
+									</th>
+								</tr>
+							</thead>
+							<tbody>
+							<% 
+								work.worker.map(function(worker){
+							%>
+								<tr data-db-row-name="worker_id" data-db-row-value="<%= worker.id %>">
+									<td data-db-row-name="worker_id" data-db-row-value="<%= worker.id %>">
+										<%= worker.id %>
+									</td>
+									<td data-db-row-name="worker_name" data-db-row-value="<%= worker.name %>">
+										<%= worker.name %>
+									</td>
+									<td>
+										<%
+											var currentWorkerSchedule = _.find(work.schedule, function(schedule){
+												return schedule.worker == worker.id && !schedule.stoped
+											});
+											if(currentWorkerSchedule){ %>
+												<button class="btn btn-success schedule" data-worker-id="<%= worker.id %>" data-schedule-id="<%= currentWorkerSchedule.id %>">
+													<span class="scheduleStop"><i class="fa fa-stop"></i>&nbsp; Stop</span>
+													<span class="scheduleStart"><i class="fa fa-play"></i>&nbsp; Start</span>
+												</button>
+											<%}
+											else{ %>
+												<button class="btn btn-default schedule" data-worker-id="<%= worker.id %>" >
+													<span class="scheduleStop"><i class="fa fa-stop"></i>&nbsp; Stop</span>
+													<span class="scheduleStart"><i class="fa fa-play"></i>&nbsp; Start</span>
+												</button>
+											<%}
+										%>
+									</td>
+									<td>
+										<span class="schedule-worker" data-worker-id="<%= worker.id %>">00:00:00</span>
+										<button class="btn btn-link schedule-details" data-worker-id="<%= worker.id %>">
+											Détail
+										</button>
+									</td>
+								</tr>
+							<%	
+								}); 
+							%>
+
+							<tr>
+								<td>
+								</td>
+								<td>
+								</td>
+								<td>
+								</td>
+								<td>
+									<span class="schedule-total">00:00:00</span>
+								</td>
+							</tr>
+
+							<% if(workers.length > 0){%>
+								<tr>
+									<td>
+										<div class="input-group col-sm-12">
+											<label class="input-group-addon" for="workers" >Ajouter</label>
+											<select multiple="multiple" id="workers" name="workers">
+												<% workers.map(function(worker){%>
+													<option value="<%= worker.id %>" name="<%= worker.name.toLowerCase() %>" ><%= worker.name %></option>
+												<%})%>
+											</select>
+										</div>
+									</td>
+									<td>
+										<button class="btn btn-primary addWorkers hide">
+											Ajouter
+										</button>
+									</td>
+									<td>
+									</td>
+									</td>
+									<td>
+								</tr>
+							<%}%>
+							</tbody>
+						</table>
+					</div>
+				</div>
+			</fieldset>
+			<hr/>
+			<fieldset class="row">
+				<label class="col-sm-2">Instruction</label>
+				<div class="form-group col-sm-10">
+					<div class="input-group col-sm-12">
+						<div class="form-control" id="wiki_<%= work.wiki[0].id %>" data-wiki-id="<%= work.wiki[0].id %>" name="wiki_<%= work.wiki[0].id %>"><%- work.wiki[0].description %></div>
+					</div>
+				</div>
+			</fieldset>
+<hr/>
+			<fieldset class="row">
+				<label class="col-sm-2">Wiki</label>
+				<div class="form-group col-sm-8">
+					<div class="input-group btn-group col-sm-12">
+						<button class="btn btn-default addWiki" >
+							<i class="fa fa-file-text-o"></i>&nbsp; Ajouter un wiki
+						</button>
+						<button class="btn btn-primary saveWiki hide" >
+							Enregistrer les wikis
+						</button>
+					</div>
+				</div>
+			</fieldset>
+			<% 
+				var wikis = work.wiki.slice(0);
+				wikis.shift();
+				wikis.reverse().map(function(wiki){ %>
+					<fieldset class="row">
+						<div class="form-group col-sm-offset-2 col-sm-8">
+							<div class="input-group col-sm-12">
+								<label class="input-group-addon" for="wiki_<%= wiki.id %>" ><%= wiki.name %></label>
+								<div class="form-control" id="wiki_<%= wiki.id %>" data-wiki-id="<%= wiki.id %>" name="wiki_<%= wiki.id %>"><%- wiki.description %></div>
+							</div>
+						</div>
+						<label class="col-sm-2"><button class="btn btn-danger deleteWiki">Supprimer</button></label>
+					</fieldset>
+				<%})
+			%>
+
+	</div>
+</div>
+
+<script type="text/javascript">
+
+	var  documentLoaded = function (){
+
+		window.work = _("<%=JSON.stringify(work) %>").unescape().replace(/\n|\\/g, "");
+
+		window.work = JSON.parse(work);
+
+		$("#rendezvous").datetimepicker({
+			icons: {
+				time: "fa fa-clock-o",
+				date: "fa fa-calendar",
+				up: "fa fa-arrow-up",
+				down: "fa fa-arrow-down"
+			},
+			language : "fr",
+			defaultDate : moment(work.rendezvous)
+		}).on("dp.change",function (e) {
+           $('.save-rendez-vous').removeClass("hide");
+        });
+
+
+		$(".save-element")
+		.on("click", function(){
+			var $this = $(this);
+			var data = {
+				_csrf : "<%= _csrf %>",
+				element : 	$("ol#elements>li.selected, ol#elements ol>li.selected")
+							.toArray()
+							.map(function(element){
+								return $(element).attr("id");
+							}),
+				task : _.flatten(	$("ol#elements>li.selected, ol#elements ol>li.selected")
+									.toArray()
+									.map(function(element){
+										var tasks =	$(element)
+													.children("[id^='task_list_']")
+													.find("select[name='task']")
+													.val() || [];
+										return	tasks
+												.map(function(task){
+													return {
+														element :	$(element).attr("id"),
+														task : task
+													}
+												})
+									})
+						)
+			}
+
+			BUREAU.tools.api({
+				url : "/work/updateElementTask/"+work.id,
+				type : "PUT",
+				data : data,
+			})
+			.done(function(data){
+				window.location.href = window.location.href;
+			})
+			.fail(function(data){
+				console.error(data);	
+			});
+			return false;
+		});
+
+        $(".add-element")
+        .on("click", function(){
+        	var $this = $(this);
+        	$(".save-element").removeClass("hide");
+        	BUREAU.tools.find.element({
+				owner : work.shop.id
+			})
+			.done(function(data){
+				$this.text("Reset");
+				buildElementStructure("ol#elements", data)
+				.find(".elementHead")
+				.on("click", elementToggleSelection);
+			});
+
+        	return false;
+        });
+
+
+        var buildElementStructure = function(parent, array){
+			var $elements = $(parent);
+			$elements.empty();
+			array.map(function(element){
+				$elements.append(JST["assets/templates/show/element.ejs"]({element : element}));
+			});
+
+			array.map(function(element){
+				if(element.substructure){
+					element.substructure.map(function(subElementId){
+						subElementId = _.isObject(subElementId) ? subElementId.id : subElementId;
+						$("#"+element.id+" > ol").append($("#"+subElementId).remove());
+					})
+				}
+			});	
+			work.element.map(function(element){
+				var id = element.id;
+				var idRoot = "task_list_";
+				var task = element.task
+				createTaskList($elements.find("li#"+element.id).addClass("selected"), id, idRoot, task);
+			})
+
+
+			return $elements.find("li");
+		}
+
+		var createTaskList = function($this, elementId, idRoot, checkedTask){
+			BUREAU.tools.api({
+				url : "/element/find/",
+				data : {
+					where : JSON.stringify({id : elementId})
+				},
+				type : "GET"
+			})
+			.done(function(data){
+				if(data.length && data[0].task){
+					$this.children("ol").before(JST["assets/templates/show/task.ejs"]({
+						id : _.uniqueId(idRoot),
+						element : data[0],
+						checkedTask :checkedTask
+					}));
+				}
+			});
+		}
+		var destroyTaskList = function($this, idRoot){
+			$this.children("[id^='"+idRoot+"']").remove();
+		}
+
+		var elementToggleSelection = function(event){
+			event.stopPropagation();
+			var $this = $(event.target).parent();
+			var id = $this.attr("id");
+			var idRoot = "task_list_";
+			if($this.toggleClass("selected").hasClass("selected"))
+				createTaskList($this, id, idRoot);
+			else
+				destroyTaskList($this, idRoot);
+		}
+
+        $('.save-rendez-vous')
+        .on("click", function(){
+    		BUREAU.tools.api({
+				url : "/work/update/<%= work.id %>",
+				type : "PUT",
+				data : {
+					rendezvous : moment($("#rendezvous").val(), $("#rendezvous").attr("data-date-format")).toISOString(),
+					_csrf : "<%= _csrf %>"
+				}
+			})
+			.done(function(data){
+				window.location.href = window.location.href;
+			});
+			return false;
+        })
+
+		var createTask2List = function($this, idRoot, element){
+			$this.children("ol").before(JST["assets/templates/show/task2.ejs"]({
+				id : _.uniqueId(idRoot),
+				element : element,
+				work : work,
+				_csrf : "<%= _csrf %>"
+			}));
+		};
+
+		var $elements = $("ol#elements");
+		$elements.empty();
+		work.element.map(function(element){
+			$elements.append(JST["assets/templates/show/element.ejs"]({element : element}));
+			createTask2List($("#"+element.id), "task_list", element);
+		});
+
+		$elements.find("li .elementHead").on("click", function(){
+			window.location.href = "/element/show/"+$(this).attr("id");
+			return false;
+		});
+
+
+		$("button.deleteWiki").on("click", function(){
+			if(prompt("Ecris SUPPRIMER pour confirmer") == "SUPPRIMER"){
+				$(this)
+				.parent()
+				.parent()
+				.remove();
+				$("button.saveWiki").removeClass("hide").addClass("fix");
+			}
+			return false;
+		})
+
+		$("button.saveWiki").on("click", function(){
+			var wikis = [ $(	$("[id^=wiki_]")
+								.toArray()
+								.shift()
+							)
+							.attr("data-wiki-id")
+						]
+						.concat(	$("[id^=wiki_]")
+									.toArray()
+									.slice(1)
+									.reverse()
+									.map(function(wiki){
+										return $(wiki).attr("data-wiki-id");
+									}))
+						.concat(	$("[id^='new_wiki_']")
+									.toArray()
+									.reverse()
+									.map(function(wiki){
+										var editor = CKEDITOR.instances[$(wiki).find("textarea").attr("name")];
+										return {
+											name : $(wiki).find("[name='name']").val(),
+											description : editor.innerHTML,
+											author : "<%= session.worker ? session.worker.id : ''  %>" || null
+										}
+									})
+						);
+			
+			BUREAU.tools.api({
+				url : "/work/update/<%= work.id %>",
+				type : "PUT",
+				data : {
+					wiki : 	wikis,
+					_csrf : "<%= _csrf %>"
+				}
+			})
+			.done(function(data){
+				window.location.href = window.location.href;
+			});
+
+			return false;
+		});
+		_.uniqueId('new_wiki_');
+		$("button.addWiki").on("click", function(){
+			$("button.saveWiki").removeClass("hide");
+			$(this)
+			.parent()
+			.parent()
+			.parent()
+			.after(JST["assets/templates/forms/wiki.ejs"]({
+				id : _.uniqueId('new_wiki_'),
+				_csrf : "<%= _csrf %>"
+			}));
+			return false;
+		});
+
+		$("#workers").multiselect({
+			buttonWidth: '100%', 
+			includeSelectAllOption: true,
+			allSelectedText: 'Tout le monde',
+			selectAllText : "Tout le monde",
+			nonSelectedText : "Aucun Homme",
+			onChange: function(option, checked, select) {
+                if(checked){
+                	$(".addWorkers").removeClass("hide");
+                }
+                else{
+                	$(".addWorkers").addClass("hide");
+                }
+            }
+		});
+
+		$("button.addWorkers").on("click", function(){
+			BUREAU.tools.api({
+				url : "/work/update/<%= work.id %>",
+				type : "PUT",
+				data : {
+					worker : 	work.worker.map(function(worker){ 
+									return worker.id 
+								}).concat($("#workers").val()),
+					_csrf : "<%= _csrf %>"
+				}
+			})
+			.done(function(data){
+				window.location.reload();
+			});
+			return false;
+		});
+
+		var realTime = new 	BUREAU.tools.realTime()
+							.display(function(duration){
+								$(".schedule-total")
+								.text(
+									_.pad(duration.hours(), 2, "0") + ":" +
+									_.pad(duration.minutes(), 2, "0") + ":" +
+									_.pad(duration.seconds(), 2, "0")
+								);
+							});
+
+		var workerRealTime = {};
+
+		work.worker.map(function(worker){
+			workerRealTime[worker.id] = new	BUREAU.tools.realTime()
+											.display(function(duration){
+												$(".schedule-worker[data-worker-id='"+worker.id+"']")
+												.text(
+													_.pad(duration.hours(), 2, "0") + ":" +
+													_.pad(duration.minutes(), 2, "0") + ":" +
+													_.pad(duration.seconds(), 2, "0")
+												);
+											});
+		});
+
+
+
+
+		work.schedule.map(function(schedule){
+			var started = moment(new Date(schedule.started));
+			var stoped = schedule.stoped ? moment(new Date(schedule.stoped)) : moment(new Date());
+			var diff = stoped.diff(started, 'seconds');
+																			
+			workerRealTime[schedule.worker].inc(diff);
+			realTime.inc(diff);
+
+			if(!schedule.stoped){
+				realTime.startTimer();
+				workerRealTime[schedule.worker].startTimer(false);
+			}
+		});
+
+		$("button.schedule-details")
+		.on("click", function(){
+			var _button = this;
+			
+			if($(_button).next("ul").length > 0){
+				$(_button).next("ul").remove();
+			}else{
+				$(_button).after("<ul class='list-unstyled'></ul>"); 
+				_.filter(work.schedule, function(schedule){
+					return schedule.worker == $(_button).attr('data-worker-id')
+				}).reverse().map(function(schedule){
+					var started = moment(new Date(schedule.started));
+					var stoped = schedule.stoped ? moment(new Date(schedule.stoped)) : moment(new Date());
+					$(_button).next("ul").append(	"<li>"+started.format("LLL") + stoped.format(" > HH:mm") + "</li>");
+				});
+			}
+			return false;
+			
+		});
+
+		$("button.schedule").on("click", function(){
+			var _button = this;
+			var scheduleId = $(_button).attr('data-schedule-id');
+			var deferred;
+			if (typeof scheduleId !== typeof undefined && scheduleId !== false) {
+				deferred = BUREAU.tools.api({
+					url : "/workSchedule/update/"+scheduleId,
+					type : "PUT",
+					data : {
+						stoped : moment().toISOString(),
+						_csrf : "<%= _csrf %>"
+					}
+				}).done(function(data){
+					realTime.stopTimer();
+					workerRealTime[data.worker.id].stopTimer();
+					work.schedule = work.schedule.map(function(schedule){
+						if(schedule.id = data.id){
+							schedule.stoped = data.stoped;
+						}
+						return schedule;
+					});
+					$(_button).removeAttr('data-schedule-id');
+				});
+			}
+			else{
+				deferred = BUREAU.tools.api({
+					url : "/workSchedule/create",
+					type : "POST",
+					data : {
+						worker : {
+							id : $(_button).attr("data-worker-id")
+						},
+						work : {
+							id : "<%= work.id %>"
+						},
+						started : moment().toISOString(),
+						_csrf : "<%= _csrf %>"
+					},
+				}).done(function(data){
+					realTime.startTimer();
+					workerRealTime[data.worker].startTimer();
+					work.schedule.push(data);
+					$(_button).attr('data-schedule-id', data.id);
+				});
+			}
+				
+			deferred.done(function(data){
+				$(_button)
+				.toggleClass("btn-default")
+				.toggleClass("btn-success");
+			})
+			.fail(function(message){
+				console.log(message);
+			});
+			 return false;
+		});
+	};
+
+	window.addEventListener("load", documentLoaded);
+	<% if(false === res.locals.layout){ %>
+		documentLoaded();
+	<% } %>
+
+</script>

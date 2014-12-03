@@ -211,19 +211,13 @@
 					if(!data.owner){
 						delete data.owner;
 					}
-
 					BUREAU.tools.api({
-						url : "/element/create",
+						url : "/element/create/",
 						type : "POST",
 						data : data,
 					})
 					.done(function(data){
 						console.log("done");
-						<% if(shops.length == 1){%>
-							//window.location = "/shop/edit/<%= shops[0].id %>";
-						<% } else {%>
-							//window.location = "/element/index/"+data.id;
-						<% } %>
 					})
 					.fail(function(message){
 						console.log("fails");

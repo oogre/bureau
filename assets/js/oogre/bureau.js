@@ -5,6 +5,40 @@
 	window.BUREAU = window.BUREAU || {};
 
 	BUREAU.tools = {
+		realTime : function(){
+			var _timers = [];
+			var _value = moment.duration(0, "seconds");
+			var _display = function(duration){};
+			return {
+				display : function(cb){
+					_display = cb;
+					return this;
+				},
+				inc : function(durationInSeconds){
+					if(durationInSeconds){
+						_value = _value.add(durationInSeconds, 'seconds');
+						_display(_value);
+					}
+					return this;
+				},
+				startTimer : function(multiTimer){
+					multiTimer = multiTimer || _.isUndefined(multiTimer) || _.isNull(multiTimer) ? true : false; 
+					var _this = this;
+					if(multiTimer || _timers.length == 0){
+						_timers.push( setInterval(function(){
+								_this.inc(1);
+							}, 1000)
+						);
+					}
+					return this;
+				},
+				stopTimer : function(){
+					clearInterval(_timers[0]);
+					_timers.shift();
+					return this;
+				}
+			}
+		},
 		link : function(){
 			$("a:not([href*=destroy])").on("click", function(){
 				var href = $(this).attr("href")

@@ -107,7 +107,6 @@ module.exports = {
 				});
 			}
 			return [elementType];
-			
 		})
 		.spread(function(elementType){
 			var promise = require('promised-io/promise');
@@ -172,7 +171,6 @@ module.exports = {
 						})
 				)
 				.then(function(wikis){
-					return [wikis, tasks, elementType]	
 					Element.create({
 						name : data.name.toLowerCase(),
 						serial : data.name,
@@ -182,8 +180,10 @@ module.exports = {
 						wiki: wikis.map(function(wiki){return wiki.id}),
 					})
 					.then(function(newElement){
-						console.log(newElement);
 						return res.json(newElement);
+					})
+					.catch(function(err){
+						return next(err);
 					});
 				});
 			});
@@ -205,8 +205,15 @@ module.exports = {
 							}else{
 								foundElement.substructure = [];
 							}
-							foundElement.save();
-							setElementSubstructure(element.substructure);
+							foundElement
+							.save()
+							.then(function(){
+								setElementSubstructure(element.substructure);	
+							})
+							.catch(function(error){
+								console.error(error);
+							})
+							
 						})
 						.catch(function(error){
 							console.error(error);

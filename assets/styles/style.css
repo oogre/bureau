@@ -39,6 +39,11 @@
 thead th[data-db-row-order]:hover{
 	cursor: pointer;
 }
+
+input.form-control.not-visible[name='taskValue']{
+	width: 0;
+	padding: 0;
+};
 input,
 address,
 td[data-db-row-name]{

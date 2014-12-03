@@ -39,7 +39,7 @@
 				<div class="form-group col-sm-offset-2 col-sm-8">
 					<div class="input-group col-sm-12">
 						<label class="input-group-addon" for="rendezvous" >Rendez-vous</label>
-						<input disabled class="form-control" type="text" id="rendezvous" name="rendezvous" value="">
+						<input disabled class="form-control" type="text" id="rendezvous" name="rendezvous" value=""  data-date-format="<%= sails.config.appconfig.format.datetime %>" readonly autocomplete="off" >
 					</div>
 				</div>
 			</fieldset>
@@ -66,6 +66,9 @@
 									</th>
 									<th data-db-row-name="worker_name">
 										Nom
+									</th>
+									<th>
+										Action
 									</th>
 									<th>
 										Travail
@@ -102,10 +105,29 @@
 											<%}
 										%>
 									</td>
+									<td>
+										<span class="schedule-worker" data-worker-id="<%= worker.id %>">00:00:00</span>
+										<button class="btn btn-link schedule-details" data-worker-id="<%= worker.id %>">
+											Détail
+										</button>
+									</td>
 								</tr>
 							<%	
 								}); 
 							%>
+
+							<tr>
+								<td>
+								</td>
+								<td>
+								</td>
+								<td>
+								</td>
+								<td>
+									<span class="schedule-total">00:00:00</span>
+								</td>
+							</tr>
+
 							<% if(workers.length > 0){%>
 								<tr>
 									<td>
@@ -125,6 +147,8 @@
 									</td>
 									<td>
 									</td>
+									</td>
+									<td>
 								</tr>
 							<%}%>
 							</tbody>
@@ -134,17 +158,17 @@
 			</fieldset>
 			<hr/>
 			<fieldset class="row">
-				<label class="col-sm-2">Wiki</label>
+				<label class="col-sm-2">Instruction</label>
 				<div class="form-group col-sm-10">
 					<div class="input-group col-sm-12">
-						<label class="input-group-addon" for="wiki_<%= work.wiki[0].id %>" ><%= work.wiki[0].name %></label>
 						<div class="form-control" id="wiki_<%= work.wiki[0].id %>" data-wiki-id="<%= work.wiki[0].id %>" name="wiki_<%= work.wiki[0].id %>"><%- work.wiki[0].description %></div>
 					</div>
 				</div>
 			</fieldset>
-
+<hr/>
 			<fieldset class="row">
-				<div class="form-group col-sm-offset-2 col-sm-8">
+				<label class="col-sm-2">Wiki</label>
+				<div class="form-group col-sm-8">
 					<div class="input-group btn-group col-sm-12">
 						<button class="btn btn-default addWiki" >
 							<i class="fa fa-file-text-o"></i>&nbsp; Ajouter un wiki
@@ -155,7 +179,6 @@
 					</div>
 				</div>
 			</fieldset>
-
 			<% 
 				var wikis = work.wiki.slice(0);
 				wikis.shift();
@@ -315,6 +338,67 @@
 			return false;
 		});
 
+		var realTime = new 	BUREAU.tools.realTime()
+							.display(function(duration){
+								$(".schedule-total")
+								.text(
+									_.pad(duration.hours(), 2, "0") + ":" +
+									_.pad(duration.minutes(), 2, "0") + ":" +
+									_.pad(duration.seconds(), 2, "0")
+								);
+							});
+
+		var workerRealTime = {};
+
+		work.worker.map(function(worker){
+			workerRealTime[worker.id] = new	BUREAU.tools.realTime()
+											.display(function(duration){
+												$(".schedule-worker[data-worker-id='"+worker.id+"']")
+												.text(
+													_.pad(duration.hours(), 2, "0") + ":" +
+													_.pad(duration.minutes(), 2, "0") + ":" +
+													_.pad(duration.seconds(), 2, "0")
+												);
+											});
+		});
+
+
+
+
+		work.schedule.map(function(schedule){
+			var started = moment(new Date(schedule.started));
+			var stoped = schedule.stoped ? moment(new Date(schedule.stoped)) : moment(new Date());
+			var diff = stoped.diff(started, 'seconds');
+																			
+			workerRealTime[schedule.worker].inc(diff);
+			realTime.inc(diff);
+
+			if(!schedule.stoped){
+				realTime.startTimer();
+				workerRealTime[schedule.worker].startTimer(false);
+			}
+		});
+
+		$("button.schedule-details")
+		.on("click", function(){
+			var _button = this;
+			
+			if($(_button).next("ul").length > 0){
+				$(_button).next("ul").remove();
+			}else{
+				$(_button).after("<ul class='list-unstyled'></ul>"); 
+				_.filter(work.schedule, function(schedule){
+					return schedule.worker == $(_button).attr('data-worker-id')
+				}).reverse().map(function(schedule){
+					var started = moment(new Date(schedule.started));
+					var stoped = schedule.stoped ? moment(new Date(schedule.stoped)) : moment(new Date());
+					$(_button).next("ul").append(	"<li>"+started.format("LLL") + stoped.format(" > HH:mm") + "</li>");
+				});
+			}
+			return false;
+			
+		});
+
 		$("button.schedule").on("click", function(){
 			var _button = this;
 			var scheduleId = $(_button).attr('data-schedule-id');
@@ -327,7 +411,15 @@
 						stoped : moment().toISOString(),
 						_csrf : "<%= _csrf %>"
 					}
-				}).done(function(){
+				}).done(function(data){
+					realTime.stopTimer();
+					workerRealTime[data.worker.id].stopTimer();
+					work.schedule = work.schedule.map(function(schedule){
+						if(schedule.id = data.id){
+							schedule.stoped = data.stoped;
+						}
+						return schedule;
+					});
 					$(_button).removeAttr('data-schedule-id');
 				});
 			}
@@ -346,6 +438,9 @@
 						_csrf : "<%= _csrf %>"
 					},
 				}).done(function(data){
+					realTime.startTimer();
+					workerRealTime[data.worker].startTimer();
+					work.schedule.push(data);
 					$(_button).attr('data-schedule-id', data.id);
 				});
 			}

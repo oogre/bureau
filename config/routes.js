@@ -36,10 +36,11 @@ module.exports.routes = {
     view: 'homepage'
   },
 
+
   'get /public/files/*': function(req, res, next) {
     return res.sendfile(sails.config.appPath+req.path);
   },
-
+  "post /element/create?" : "elementController.create",
   "get /element/create?" : function(req, res, next){
     return res.forbidden();
   },
@@ -47,6 +48,17 @@ module.exports.routes = {
     return res.forbidden();
   },
   "delete /element/create?" : function(req, res, next){
+    return res.forbidden();
+  },
+
+  "put /work/updateElementTask/:id?" : "workController.updateElementTask",
+  "get /work/updateElementTask?" : function(req, res, next){
+    return res.forbidden();
+  },
+  "post /work/updateElementTask?" : function(req, res, next){
+    return res.forbidden();
+  },
+  "delete /work/updateElementTask?" : function(req, res, next){
     return res.forbidden();
   },
 

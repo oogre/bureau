@@ -21,7 +21,7 @@ module.exports.http = {
   *                                                                           *
   ****************************************************************************/
 
-  // middleware: {
+  middleware: {
 
   /***************************************************************************
   *                                                                          *
@@ -30,23 +30,42 @@ module.exports.http = {
   *                                                                          *
   ***************************************************************************/
 
-    // order: [
-    //   'startRequestTimer',
-    //   'cookieParser',
-    //   'session',
-    //   'myRequestLogger',
-    //   'bodyParser',
-    //   'handleBodyParserError',
-    //   'compress',
-    //   'methodOverride',
-    //   'poweredBy',
-    //   '$custom',
-    //   'router',
-    //   'www',
-    //   'favicon',
-    //   '404',
-    //   '500'
-    // ],
+     order: [
+       'startRequestTimer',
+       'cookieParser',
+       'session',
+       'addRouterListener',
+       'bodyParser',
+       'handleBodyParserError',
+       'compress',
+       'methodOverride',
+       'poweredBy',
+       '$custom',
+       'router',
+       'www',
+       'favicon',
+       '404',
+       '500'
+     ],
+
+
+    addRouterListener: function (req, res, next) {
+      
+      sails.on('router:route', function (args) {
+        
+          // Proceed to changing your params here
+          // It would also be wise to check the route or the controller
+          if (args.options.controller === 'work' && args.options.action === "update"){
+              if(_.isObject(args.req.params["task"])){
+                  args.req.params["task"] = _.values(args.req.params["task"])
+              }
+          }
+
+      });
+
+      return next();
+    }
+
 
   /****************************************************************************
   *                                                                           *
@@ -69,9 +88,9 @@ module.exports.http = {
   *                                                                          *
   ***************************************************************************/
 
-    // bodyParser: require('skipper')
+  //   bodyParser: require('skipper')
 
-  // },
+   },
 
   /***************************************************************************
   *                                                                          *

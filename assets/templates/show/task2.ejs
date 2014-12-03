@@ -14,9 +14,9 @@
 		<fieldset class="row">
 			<div class="form-group col-sm-12">
 				<div class="input-group">
-					<label class="input-group-addon" for="taskValue" ><%= task.name %></label>
+					<label class="input-group-addon" for="taskValue_<%= task.id %>_<%= id %>" ><%= task.name %></label>
 					<input class="form-control" type="hidden" name="taskId" value="<%= task.id %>">
-					<input class="form-control" type="text" name="taskValue" id="taskValue" value="<%= _.isUndefined(task.value) || _.isBoolean(task.value) ? '' : task.value %>">
+					<input class="form-control <%= _.isUndefined(task.value) || _.isBoolean(task.value) ? 'not-visible' : '' %>" type="text" name="taskValue" id="taskValue_<%= task.id %>_<%= id %>" value="<%= _.isUndefined(task.value) || _.isBoolean(task.value) ? '' : task.value %>">
 					<span class="input-group-btn">
 						<button class="btn <%= task.value ? 'btn-success' : 'btn-default'%>" type="button"><i class="fa <%= task.value ? 'fa-check-square-o': 'fa-square-o' %>"></i></button>
 					</span>
@@ -56,4 +56,9 @@
 		});
 		return false;
 	});
+	$("input[name='taskValue']")
+	.on("focus", function(){
+		$(this).removeClass("not-visible");
+	});
+
 </script>

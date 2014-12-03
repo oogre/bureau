@@ -22,7 +22,7 @@ module.exports = {
 			 	when an element's task is done push its reference here.
 				[
 					{
-						value : TRUE || FALSE || float,
+						value : TRUE || FALSE || input type text,
 						element_id
 						task_id
 					}

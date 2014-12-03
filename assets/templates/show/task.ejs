@@ -1,3 +1,15 @@
+<%  
+	if(typeof(checkedTask) == typeof(undefined)){
+		checkedTask = [];
+	}
+	checkedTask = 	checkedTask
+					.map(function(task){
+						return task.task.id
+					});
+%>
+
+
+
 <div id="<%= id %>" class="taskSelectorWrapper">
 	<select multiple="multiple" name="task">
 		<% element.task.map(function(task){%>
@@ -7,11 +19,14 @@
 </div>
 
 <script type="text/javascript">
+	var checkedTask = JSON.parse('<%=JSON.stringify(checkedTask) %>');
+
 	$("#<%= id %> select[name='task']").multiselect({
 		buttonWidth: '100%', 
 		includeSelectAllOption: true,
 		allSelectedText: 'Toutes les tâches',
 		selectAllText : "Toutes les tâches",
 		nonSelectedText : "Aucune tâche"
-	});
+	})
+	.multiselect('select', checkedTask);
 </script>
