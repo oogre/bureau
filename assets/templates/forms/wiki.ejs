@@ -18,7 +18,8 @@
 		<div class="form-group col-sm-offset-2 col-sm-8">
 			<div class="input-group col-sm-12">
 				<form id="uploadForm" enctype="multipart/form-data" class="hide"  action="/file/upload" method="post">
-    				<input type="hidden" id="userPhotoInput" name="_csrf" value="<%= _csrf %>" />
+    				<input type="hidden" name="_csrf" value="<%= _csrf %>" />
+    				<input type="hidden" name="author" value="<%= typeof(author) != typeof(undefine) ? author.id : '' %>" />
     				<input type="file" id="take-picture" name="avatar" accept="image/*"/>
 				</form>
 
@@ -65,7 +66,7 @@
 			processData: false
 		})
 		.done(function(files){
-			files.map(function(file){				
+			files.map(function(file){
 				var editor =
 				CKEDITOR.instances[
 					$form
