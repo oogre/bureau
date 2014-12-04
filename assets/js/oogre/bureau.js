@@ -5,6 +5,15 @@
 	window.BUREAU = window.BUREAU || {};
 
 	BUREAU.tools = {
+		canvasToForm : function(canvas){
+			var blobBin = atob(canvas.toDataURL("image/png").split(',')[1]);
+			var array = [];
+			for(var i = 0; i < blobBin.length; i++) {
+    			array.push(blobBin.charCodeAt(i));
+			}
+			return new Blob([new Uint8Array(array)], {type: 'image/png'});
+		},
+
 		realTime : function(){
 			var _timers = [];
 			var _value = moment.duration(0, "seconds");

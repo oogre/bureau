@@ -60,6 +60,12 @@ module.exports = {
 		closedAt : {
 			type: 'datetime'
 		},
+		signature_client : {
+			type: 'object'
+		},
+		signature_adf : {
+			type: 'object'
+		},
 		wiki : {
 			collection : 'wiki',
 			via : "id"

@@ -43,15 +43,18 @@
 					</div>
 				</div>
 			</fieldset>
-			
+
+			<hr/>
+
 			<fieldset class="row">
-				<div class="form-group col-sm-offset-2 col-sm-10">
+				<label class="col-sm-2">Instruction</label>
+				<div class="form-group col-sm-10">
 					<div class="input-group col-sm-12">
-						<label rel="elements" class="input-group-addon" >Element(s)</label>
-						<ol id="elements"></ol>
+						<div class="form-control" id="wiki_<%= work.wiki[0].id %>" data-wiki-id="<%= work.wiki[0].id %>" name="wiki_<%= work.wiki[0].id %>"><%- work.wiki[0].description %></div>
 					</div>
 				</div>
 			</fieldset>
+
 			<hr/>
 
 			<fieldset class="row">
@@ -156,20 +159,82 @@
 					</div>
 				</div>
 			</fieldset>
+
 			<hr/>
+			
 			<fieldset class="row">
-				<label class="col-sm-2">Instruction</label>
+				<label class="col-sm-2">Object</label>
 				<div class="form-group col-sm-10">
 					<div class="input-group col-sm-12">
-						<div class="form-control" id="wiki_<%= work.wiki[0].id %>" data-wiki-id="<%= work.wiki[0].id %>" name="wiki_<%= work.wiki[0].id %>"><%- work.wiki[0].description %></div>
+						<label rel="elements" class="input-group-addon" >Element(s)</label>
+						<ol id="elements"></ol>
 					</div>
 				</div>
 			</fieldset>
-<hr/>
+			
+			<hr/>
+
+			<fieldset class="row">
+				<div class="form-group col-sm-offset-2 col-sm-10">
+					<blockquote class="blockquote">Pour accord heures, matériaux, outillage</blockquote>
+				</div>
+			</fieldset>
+			<fieldset class="row">
+				<div class="form-group col-sm-offset-2 col-sm-5">
+					<div class="input-group col-sm-12">
+						<label class="input-group-addon" for="client-name" >Nom du client</label>
+						<input class="form-control" type="text" id="client-name" name="client-name" value="">
+					</div>
+				</div>
+				<div class="form-group col-sm-5">
+					<div class="input-group col-sm-12">
+						<label class="input-group-addon" for="adf-name" >Nom du technicien</label>
+						<input class="form-control" type="text" id="adf-name" name="adf-name" value="">
+					</div>
+				</div>
+			</fieldset>
+			<fieldset class="row">
+				<label class="col-sm-2">Signature</label>
+				<div class="form-group col-sm-5">
+					<div class="input-group col-sm-12">
+						<canvas class="signature" id="signature-client"></canvas>
+						<button class="btn btn-default reset" data-target="client" >
+							Reset
+						</button>
+					</div>
+				</div>
+				<div class="form-group col-sm-5">
+					<div class="input-group col-sm-12">
+						<canvas class="signature" id="signature-atelier-du-froid"></canvas>
+						<button class="btn btn-default reset" data-target="adf">
+							Reset
+						</button>
+					</div>
+				</div>
+			</fieldset>
+
+			<hr/>
+
+			<fieldset class="row">
+				<label class="col-sm-2">Travail terminé</label>
+				<div class="form-group col-sm-10">
+					<div class="col-sm-5">
+					<button class="btn btn-primary finishWork disabled" >
+						travail terminé
+					</button>
+					</div>
+					<div class="input-group col-sm-6">
+					<blockquote class="blockquote">Ajouter un wiki si "non" <br/> expliquer la cause.</blockquote>
+					</div>
+				</div>
+			</fieldset>
+
+			<hr/>
+
 			<fieldset class="row">
 				<label class="col-sm-2">Wiki</label>
-				<div class="form-group col-sm-8">
-					<div class="input-group btn-group col-sm-12">
+				<div class="form-group col-sm-10">
+					<div class="col-sm-5">
 						<button class="btn btn-default addWiki" >
 							<i class="fa fa-file-text-o"></i>&nbsp; Ajouter un wiki
 						</button>
@@ -177,6 +242,10 @@
 							Enregistrer les wikis
 						</button>
 					</div>
+					<div class="input-group col-sm-6">
+						<blockquote class="blockquote">Ajouter un wiki <br/>pour documenter les travaux réalisés constatation, cause, action prise, remarques...</blockquote>
+					</div>
+					
 				</div>
 			</fieldset>
 			<% 
@@ -205,6 +274,107 @@
 		window.work = _("<%=JSON.stringify(work) %>").unescape().replace(/\n|\\/g, "");
 
 		window.work = JSON.parse(work);
+
+
+
+		var signatureClient = $("#signature-client");
+		signatureClient.get(0).width = signatureClient.width();
+		signatureClient.get(0).height = 210;
+
+		var signatureADF = $("#signature-atelier-du-froid");
+		signatureADF.get(0).width = signatureADF.width();
+		signatureADF.get(0).height = 210;
+
+		window.signaturePad = {
+			client : new SignaturePad(signatureClient.get(0)),
+			adf : new SignaturePad(signatureADF.get(0))
+		}
+
+
+		window.signaturePad.client.onEnd = function(){
+			if(!window.signaturePad.adf.isEmpty()){
+				$(".finishWork").removeClass("disabled");
+			}else{
+				$(".finishWork").addClass("disabled");
+			}
+		}
+
+		window.signaturePad.adf.onEnd = function(){
+			if(!window.signaturePad.client.isEmpty()){
+				$(".finishWork").removeClass("disabled");
+			}else{
+				$(".finishWork").addClass("disabled");
+			}
+		}
+
+		$(".reset").on("click", function(){
+			if(prompt("Ecris SUPPRIMER pour confirmer") == "SUPPRIMER"){
+				window.signaturePad[$(this).attr("data-target")].clear();
+				$(".finishWork").addClass("disabled");
+			}
+			return false;
+		});
+
+		var sendSignature = function(canvas){
+			var form = new FormData();
+			form.append("_csrf", "<%= _csrf %>");
+			form.append("author", "<%= session.worker ? session.worker.id : ''  %>");
+			form.append("avatar", BUREAU.tools.canvasToForm(canvas), "signature.png");
+			
+
+			return $.ajax({
+				url: "/file/upload",
+				type: "POST",
+				data: form, // TAKE CARE TO PUSH ALL TEXTS PARAMETER BEFORE PICTURES
+				cache: false,
+				contentType: false,
+				processData: false
+			})
+		}
+		
+		$("button.finishWork").on("click", function(){
+			if(_.isEmpty($("#client-name").val())){
+				$("#client-name").parent().addClass("has-error");
+				return false;
+			}
+			if(_.isEmpty($("#adf-name").val())){
+				$("#adf-name").parent().addClass("has-error");
+				return false;
+			}
+
+			$.when(sendSignature(window.signaturePad.client), sendSignature(window.signaturePad.adf))
+			.done(function(client, adf){
+				var data = {
+					_csrf : "<%= _csrf %>",
+					closedAt : moment().toISOString(),
+					signature_client : {
+						name : $("#client-name").val(),
+						signature : client[0][0].src
+					},
+					signature_adf : {
+						name : $("#adf-name").val(),
+						signature : adf[0][0].src
+					}
+				}
+
+				$.ajax({
+					url: "/work/update/"+work.id,
+					type: "PUT",
+					data: data
+				})
+				.done(function(data){
+					console.log(data);
+				})
+				.fail(function(data){
+					console.warn(data);
+				});
+
+			})
+			.fail(function(data){
+				console.warn(data);
+			});
+			return false;
+		})
 
 		$("#rendezvous").datetimepicker({
 			icons: {
