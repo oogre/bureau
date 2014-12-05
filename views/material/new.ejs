@@ -1,0 +1,128 @@
+<%
+	var id = req.session.location.controller + "-" + req.session.location.action;
+
+	if("undefined" == typeof(work)){
+		var material = {};
+	}
+
+%>
+
+<div class="container">
+	<div id="<%= id %>">
+		<h3>Créer un matériel</h3>
+
+		<hr/>
+
+		<form class="form-inline" role="form" action="/material/create" methode="post"> 
+			<input type="hidden" name="_csrf" value="<%= _csrf %>" />
+			<fieldset class="row">
+				<label class="col-sm-2">Identification</label>
+				<div class="form-group col-sm-5">
+					<div class="input-group col-sm-12">
+						<label class="input-group-addon" for="name" >Name</label>
+						<input class="form-control" type="text" id="name" name="name" value="">
+					</div>
+				</div>
+			</fieldset>
+
+			<fieldset class="row">
+				<label class="col-sm-2">Unité</label>
+				<div class="form-group col-sm-5">
+					<div class="input-group col-sm-12">
+						<label class="input-group-addon" for="unit" >Unité</label>
+						<select class="form-control" id="unit" name="unit" >
+							<option value=""></option>
+							<% units.map(function(unit){%>
+								<option value="<%= unit.id %>"><%= unit.shortname %> - <%= unit.name %></option>
+							<%})%>
+						</select>
+					</div>
+				</div>
+			</fieldset>
+
+			<hr/>	
+
+			<fieldset id="wiki" class="row">
+				<label class="col-sm-2">Wiki</label>
+				<div class="form-group col-sm-8">
+					<div class="input-group btn-group col-sm-12">
+						<button class="btn btn-default add-wiki" >
+							<i class="fa fa-file-text-o"></i>&nbsp; Ajouter un wiki
+						</button>
+					</div>
+				</div>
+			</fieldset>
+			
+			<hr/>	
+
+			<fieldset class="row">
+				<label class="col-sm-2"></label>
+				<div class="form-group col-sm-3">
+					<div class="input-group col-sm-12">
+						<button type="submit" name="submit" class="btn btn-default">Enregistrer</button>
+					</div>
+				</div>
+			</fieldset>
+
+		</form>
+
+
+
+	</div>
+</div>
+
+
+<script type="text/javascript">
+	var  documentLoaded = function (){
+		_.uniqueId('new_wiki_');
+		$("button.add-wiki").on("click", function(){
+			$(this)
+			.parent()
+			.parent()
+			.parent()
+			.after(JST["assets/templates/forms/wiki.ejs"]({
+				id : _.uniqueId('new_wiki_'),
+				_csrf : "<%= _csrf %>"
+			}));
+			return false;
+		});
+
+		$("form").on("submit", function(){
+
+			var data = {
+				_csrf : "<%= _csrf %>",
+				name : $("#name").val(),
+				unit : $("#unit").val(),
+				wiki : 	$("[id^='new_wiki_']")
+						.toArray()
+						.reverse()
+						.map(function(wiki){
+							var editor = CKEDITOR.instances[$(wiki).find("textarea").attr("name")];
+							return {
+								name : $(wiki).find("[name='name']").val(),
+								description : editor.innerHTML,
+								author : $(wiki).find("[name='author']").val(),
+							}
+						})
+			}
+
+			BUREAU.tools.api({
+				url : "/material/create",
+				type : "POST",
+				data : data
+			})
+			.done(function(data){
+				console.log(data);
+			});
+			return false;
+
+		});
+
+	}
+	window.addEventListener("load", documentLoaded);
+<% if(false === res.locals.layout){ %>
+	documentLoaded();
+<% } %>
+
+</script>
+

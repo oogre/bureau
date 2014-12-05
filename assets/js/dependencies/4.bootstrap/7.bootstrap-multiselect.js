@@ -236,7 +236,7 @@
             selectedClass: 'active',
             // Maximum height of the dropdown menu.
             // If maximum height is exceeded a scrollbar will be displayed.
-            maxHeight: false,
+            maxHeight: 300,
             checkboxName: false,
             includeSelectAllOption: false,
             includeSelectAllIfMoreThan: 0,
@@ -245,11 +245,11 @@
             selectAllName: false,
             enableFiltering: false,
             enableCaseInsensitiveFiltering: false,
-            enableClickableOptGroups: false,
+            enableClickableOptGroups: true,
             filterPlaceholder: 'Search',
             // possible options: 'text', 'value', 'both'
             filterBehavior: 'text',
-            includeFilterClearBtn: true,
+            includeFilterClearBtn: false,
             preventInputChangeEvent: false,
             nonSelectedText: 'None selected',
             nSelectedText: 'selected',

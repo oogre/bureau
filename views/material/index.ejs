@@ -1,0 +1,77 @@
+<%
+	var id = req.session.location.controller + "-" + req.session.location.action;
+%>
+
+<div class="container">
+	<div id="<%= id %>" class="table-list table-responsive">
+		<h3>Liste de matériel</h3>
+
+		<hr/>
+		
+		<div class="row">
+			<div class="col-sm-2">
+				<a href="/<%= req.session.location.controller %>/new" class="btn btn-primary new" type="button">
+					Créé un matériel
+				</a>
+			</div>
+			<div class="col-sm-3">
+				<div class="input-group">
+						<a class="input-group-addon btn btn-info bg-default"><i class="fa fa-filter"></i></a>
+						<input type="text" class="form-control findByName" placeholder="Rechercher un travail" />		
+					</div>
+			</div>
+		</div>
+
+		<hr/>
+
+		<table class="table" data-db-table-name="<%= req.session.location.controller %>" ></table>
+	</div>
+</div>
+
+<script type="text/javascript">
+	
+	var  documentLoaded = function (){
+		var table = $("#<%= id %> table[data-db-table-name='<%= req.session.location.controller %>']");
+		table.append(JST["assets/templates/list.ejs"]({
+			table : {
+				head : [{
+					name : "id",
+					label : "Id"
+				},{
+					name : "name",
+					label : "Name"
+				}],
+				body : [
+				<% materials && materials.map(function(row){ %>
+					{
+						id : "<%= row.id %>",
+						data : 
+						[
+							{
+								name : "id",
+								value : "<%= row.id %>"
+							},
+							{
+								name : "name",
+								value : "<%= row.name %>"
+							}
+						]
+					},
+				<% }) %>
+				],
+			},
+			parentSelector : table.selector,
+			sort : "<%= sort %>",
+			controller : "<%= req.session.location.controller %>",
+			_csrf : "<%= _csrf %>"
+ 		}));
+
+		BUREAU.tools.table.filter($("#<%= id %> table"), $("#<%= id %> .findByName"), ["name", "id"]);
+ 		
+	};
+
+	window.addEventListener("load", documentLoaded);
+	<% if(false === res.locals.layout){ %>
+		documentLoaded();
+	<% } %>
+</script>

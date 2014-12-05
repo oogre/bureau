@@ -30,7 +30,19 @@ module.exports = {
 			collection : 'task',
 			via : "id"
 		},
-		
+		material : {
+			type : "array"
+			/*
+				[
+					{
+						material : id
+						quantity :
+						date : 
+					}
+				]
+
+			*/
+		},
 		owner : {
 			model : 'shop',
 			required: true

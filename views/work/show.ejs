@@ -8,6 +8,10 @@
 	else{
 		title+="de "
 	}
+
+	if(typeof(session) == typeof(undefined)){
+		var session = {};
+	}
 	title += work.type.name;
 	
 %>
@@ -57,161 +61,19 @@
 
 			<hr/>
 
-			<fieldset class="row">
-				<label class="col-sm-2">Hommes</label>
-				<div class="form-group col-sm-10">
-					<div class="input-group col-sm-12">
-						<table class="table" data-db-table-name="<%= req.session.location.controller %>" >
-							<thead>
-								<tr>
-									<th data-db-row-name="worker_id">
-										Id
-									</th>
-									<th data-db-row-name="worker_name">
-										Nom
-									</th>
-									<th>
-										Action
-									</th>
-									<th>
-										Travail
-									</th>
-								</tr>
-							</thead>
-							<tbody>
-							<% 
-								work.worker.map(function(worker){
-							%>
-								<tr data-db-row-name="worker_id" data-db-row-value="<%= worker.id %>">
-									<td data-db-row-name="worker_id" data-db-row-value="<%= worker.id %>">
-										<%= worker.id %>
-									</td>
-									<td data-db-row-name="worker_name" data-db-row-value="<%= worker.name %>">
-										<%= worker.name %>
-									</td>
-									<td>
-										<%
-											var currentWorkerSchedule = _.find(work.schedule, function(schedule){
-												return schedule.worker == worker.id && !schedule.stoped
-											});
-											if(currentWorkerSchedule){ %>
-												<button class="btn btn-success schedule" data-worker-id="<%= worker.id %>" data-schedule-id="<%= currentWorkerSchedule.id %>">
-													<span class="scheduleStop"><i class="fa fa-stop"></i>&nbsp; Stop</span>
-													<span class="scheduleStart"><i class="fa fa-play"></i>&nbsp; Start</span>
-												</button>
-											<%}
-											else{ %>
-												<button class="btn btn-default schedule" data-worker-id="<%= worker.id %>" >
-													<span class="scheduleStop"><i class="fa fa-stop"></i>&nbsp; Stop</span>
-													<span class="scheduleStart"><i class="fa fa-play"></i>&nbsp; Start</span>
-												</button>
-											<%}
-										%>
-									</td>
-									<td>
-										<span class="schedule-worker" data-worker-id="<%= worker.id %>">00:00:00</span>
-										<button class="btn btn-link schedule-details" data-worker-id="<%= worker.id %>">
-											Détail
-										</button>
-									</td>
-								</tr>
-							<%	
-								}); 
-							%>
-
-							<tr>
-								<td>
-								</td>
-								<td>
-								</td>
-								<td>
-								</td>
-								<td>
-									<span class="schedule-total">00:00:00</span>
-								</td>
-							</tr>
-
-							<% if(workers.length > 0){%>
-								<tr>
-									<td>
-										<div class="input-group col-sm-12">
-											<label class="input-group-addon" for="workers" >Ajouter</label>
-											<select multiple="multiple" id="workers" name="workers">
-												<% workers.map(function(worker){%>
-													<option value="<%= worker.id %>" name="<%= worker.name.toLowerCase() %>" ><%= worker.name %></option>
-												<%})%>
-											</select>
-										</div>
-									</td>
-									<td>
-										<button class="btn btn-primary addWorkers hide">
-											Ajouter
-										</button>
-									</td>
-									<td>
-									</td>
-									</td>
-									<td>
-								</tr>
-							<%}%>
-							</tbody>
-						</table>
-					</div>
-				</div>
-			</fieldset>
+			<fieldset id="worker"></fieldset>
 
 			<hr/>
 			
-			<fieldset class="row">
-				<label class="col-sm-2">Object</label>
-				<div class="form-group col-sm-10">
-					<div class="input-group col-sm-12">
-						<label rel="elements" class="input-group-addon" >Element(s)</label>
-						<ol id="elements"></ol>
-					</div>
-				</div>
-			</fieldset>
+			<fieldset id="element"></fieldset>
 			
 			<hr/>
 
-			<fieldset class="row">
-				<div class="form-group col-sm-offset-2 col-sm-10">
-					<blockquote class="blockquote">Pour accord heures, matériaux, outillage</blockquote>
-				</div>
-			</fieldset>
-			<fieldset class="row">
-				<div class="form-group col-sm-offset-2 col-sm-5">
-					<div class="input-group col-sm-12">
-						<label class="input-group-addon" for="client-name" >Nom du client</label>
-						<input class="form-control" type="text" id="client-name" name="client-name" value="">
-					</div>
-				</div>
-				<div class="form-group col-sm-5">
-					<div class="input-group col-sm-12">
-						<label class="input-group-addon" for="adf-name" >Nom du technicien</label>
-						<input class="form-control" type="text" id="adf-name" name="adf-name" value="">
-					</div>
-				</div>
-			</fieldset>
-			<fieldset class="row">
-				<label class="col-sm-2">Signature</label>
-				<div class="form-group col-sm-5">
-					<div class="input-group col-sm-12">
-						<canvas class="signature" id="signature-client"></canvas>
-						<button class="btn btn-default reset" data-target="client" >
-							Reset
-						</button>
-					</div>
-				</div>
-				<div class="form-group col-sm-5">
-					<div class="input-group col-sm-12">
-						<canvas class="signature" id="signature-atelier-du-froid"></canvas>
-						<button class="btn btn-default reset" data-target="adf">
-							Reset
-						</button>
-					</div>
-				</div>
-			</fieldset>
+			<fieldset id="material"></fieldset>
+
+			<hr/>
+
+			<fieldset id="signature"></fieldset>			
 
 			<hr/>
 
@@ -224,7 +86,7 @@
 					</button>
 					</div>
 					<div class="input-group col-sm-6">
-					<blockquote class="blockquote">Ajouter un wiki si "non" <br/> expliquer la cause.</blockquote>
+					<blockquote class="blockquote">Ajouter un wiki si le travail n'est pas terminé, expliquer la cause.</blockquote>
 					</div>
 				</div>
 			</fieldset>
@@ -243,7 +105,7 @@
 						</button>
 					</div>
 					<div class="input-group col-sm-6">
-						<blockquote class="blockquote">Ajouter un wiki <br/>pour documenter les travaux réalisés constatation, cause, action prise, remarques...</blockquote>
+						<blockquote class="blockquote">Ajouter un wiki <br/>pour documenter les travaux réalisés, constatation, cause, action prise, remarques...</blockquote>
 					</div>
 					
 				</div>
@@ -271,67 +133,10 @@
 
 	var  documentLoaded = function (){
 
-		window.work = _("<%=JSON.stringify(work) %>").unescape().replace(/\n|\\/g, "");
+		window.work = JSON.parse(_("<%=JSON.stringify(work) %>").unescape().replace(/\n|\\/g, ""));
+		window.materials = JSON.parse(_("<%=JSON.stringify(materials) %>").unescape().replace(/\n|\\/g, ""));
+		window.workers = JSON.parse(_("<%=JSON.stringify(workers) %>").unescape().replace(/\n|\\/g, ""));
 
-		window.work = JSON.parse(work);
-
-
-
-		var signatureClient = $("#signature-client");
-		signatureClient.get(0).width = signatureClient.width();
-		signatureClient.get(0).height = 210;
-
-		var signatureADF = $("#signature-atelier-du-froid");
-		signatureADF.get(0).width = signatureADF.width();
-		signatureADF.get(0).height = 210;
-
-		window.signaturePad = {
-			client : new SignaturePad(signatureClient.get(0)),
-			adf : new SignaturePad(signatureADF.get(0))
-		}
-
-
-		window.signaturePad.client.onEnd = function(){
-			if(!window.signaturePad.adf.isEmpty()){
-				$(".finishWork").removeClass("disabled");
-			}else{
-				$(".finishWork").addClass("disabled");
-			}
-		}
-
-		window.signaturePad.adf.onEnd = function(){
-			if(!window.signaturePad.client.isEmpty()){
-				$(".finishWork").removeClass("disabled");
-			}else{
-				$(".finishWork").addClass("disabled");
-			}
-		}
-
-		$(".reset").on("click", function(){
-			if(prompt("Ecris SUPPRIMER pour confirmer") == "SUPPRIMER"){
-				window.signaturePad[$(this).attr("data-target")].clear();
-				$(".finishWork").addClass("disabled");
-			}
-			return false;
-		});
-
-		var sendSignature = function(canvas){
-			var form = new FormData();
-			form.append("_csrf", "<%= _csrf %>");
-			form.append("author", "<%= session.worker ? session.worker.id : ''  %>");
-			form.append("avatar", BUREAU.tools.canvasToForm(canvas), "signature.png");
-			
-
-			return $.ajax({
-				url: "/file/upload",
-				type: "POST",
-				data: form, // TAKE CARE TO PUSH ALL TEXTS PARAMETER BEFORE PICTURES
-				cache: false,
-				contentType: false,
-				processData: false
-			})
-		}
-		
 		$("button.finishWork").on("click", function(){
 			if(_.isEmpty($("#client-name").val())){
 				$("#client-name").parent().addClass("has-error");
@@ -342,7 +147,7 @@
 				return false;
 			}
 
-			$.when(sendSignature(window.signaturePad.client), sendSignature(window.signaturePad.adf))
+			signaturePad.send()
 			.done(function(client, adf){
 				var data = {
 					_csrf : "<%= _csrf %>",
@@ -387,28 +192,7 @@
 			defaultDate : moment(work.rendezvous)
 		});
 
-		var createTaskList = function($this, idRoot, element){
-			$this.children("ol").before(JST["assets/templates/show/task2.ejs"]({
-				id : _.uniqueId(idRoot),
-				element : element,
-				work : work,
-				_csrf : "<%= _csrf %>"
-			}));
-		};
-
-		var $elements = $("ol#elements");
-		$elements.empty();
-		work.element.map(function(element){
-			$elements.append(JST["assets/templates/show/element.ejs"]({element : element}));
-			createTaskList($("#"+element.id), "task_list", element);
-		});
-
-		$elements.find("li .elementHead").on("click", function(){
-			window.location.href = "/element/show/"+$(this).attr("id");
-			return false;
-		});
-
-
+		
 		$("button.deleteWiki").on("click", function(){
 			if(prompt("Ecris SUPPRIMER pour confirmer") == "SUPPRIMER"){
 				$(this)
@@ -475,156 +259,38 @@
 			return false;
 		});
 
-		$("#workers").multiselect({
-			buttonWidth: '100%', 
-			includeSelectAllOption: true,
-			allSelectedText: 'Tout le monde',
-			selectAllText : "Tout le monde",
-			nonSelectedText : "Aucun Homme",
-			onChange: function(option, checked, select) {
-                if(checked){
-                	$(".addWorkers").removeClass("hide");
-                }
-                else{
-                	$(".addWorkers").addClass("hide");
-                }
-            }
-		});
 
-		$("button.addWorkers").on("click", function(){
-			BUREAU.tools.api({
-				url : "/work/update/<%= work.id %>",
-				type : "PUT",
-				data : {
-					worker : 	work.worker.map(function(worker){ 
-									return worker.id 
-								}).concat($("#workers").val()),
-					_csrf : "<%= _csrf %>"
-				}
-			})
-			.done(function(data){
-				window.location.reload();
-			});
-			return false;
-		});
+		$("#element").append(JST["assets/templates/forms/element.ejs"]({
+			_csrf : "<%= _csrf %>",
+			show : true
+		}));
 
-		var realTime = new 	BUREAU.tools.realTime()
-							.display(function(duration){
-								$(".schedule-total")
-								.text(
-									_.pad(duration.hours(), 2, "0") + ":" +
-									_.pad(duration.minutes(), 2, "0") + ":" +
-									_.pad(duration.seconds(), 2, "0")
-								);
-							});
+		$("#material").append(JST["assets/templates/show/material.ejs"]({
+			work : work,
+			materials : materials,
+			_csrf : "<%= _csrf %>",
+			show : true
+		}));
 
-		var workerRealTime = {};
-
-		work.worker.map(function(worker){
-			workerRealTime[worker.id] = new	BUREAU.tools.realTime()
-											.display(function(duration){
-												$(".schedule-worker[data-worker-id='"+worker.id+"']")
-												.text(
-													_.pad(duration.hours(), 2, "0") + ":" +
-													_.pad(duration.minutes(), 2, "0") + ":" +
-													_.pad(duration.seconds(), 2, "0")
-												);
-											});
-		});
-
-
-
-
-		work.schedule.map(function(schedule){
-			var started = moment(new Date(schedule.started));
-			var stoped = schedule.stoped ? moment(new Date(schedule.stoped)) : moment(new Date());
-			var diff = stoped.diff(started, 'seconds');
-																			
-			workerRealTime[schedule.worker].inc(diff);
-			realTime.inc(diff);
-
-			if(!schedule.stoped){
-				realTime.startTimer();
-				workerRealTime[schedule.worker].startTimer(false);
+		$("#signature").append(JST["assets/templates/show/signature.ejs"]({
+			work : work,
+			_csrf : "<%= _csrf %>",
+			author_id : "<%= session.worker ? session.worker.id : '' %>",
+			complete : function(){
+				$(".finishWork").removeClass("disabled");
+			},
+			uncomplete : function(){
+				$(".finishWork").addClass("disabled");
 			}
-		});
+		}));
 
-		$("button.schedule-details")
-		.on("click", function(){
-			var _button = this;
-			
-			if($(_button).next("ul").length > 0){
-				$(_button).next("ul").remove();
-			}else{
-				$(_button).after("<ul class='list-unstyled'></ul>"); 
-				_.filter(work.schedule, function(schedule){
-					return schedule.worker == $(_button).attr('data-worker-id')
-				}).reverse().map(function(schedule){
-					var started = moment(new Date(schedule.started));
-					var stoped = schedule.stoped ? moment(new Date(schedule.stoped)) : moment(new Date());
-					$(_button).next("ul").append(	"<li>"+started.format("LLL") + stoped.format(" > HH:mm") + "</li>");
-				});
-			}
-			return false;
-			
-		});
-
-		$("button.schedule").on("click", function(){
-			var _button = this;
-			var scheduleId = $(_button).attr('data-schedule-id');
-			var deferred;
-			if (typeof scheduleId !== typeof undefined && scheduleId !== false) {
-				deferred = BUREAU.tools.api({
-					url : "/workSchedule/update/"+scheduleId,
-					type : "PUT",
-					data : {
-						stoped : moment().toISOString(),
-						_csrf : "<%= _csrf %>"
-					}
-				}).done(function(data){
-					realTime.stopTimer();
-					workerRealTime[data.worker.id].stopTimer();
-					work.schedule = work.schedule.map(function(schedule){
-						if(schedule.id = data.id){
-							schedule.stoped = data.stoped;
-						}
-						return schedule;
-					});
-					$(_button).removeAttr('data-schedule-id');
-				});
-			}
-			else{
-				deferred = BUREAU.tools.api({
-					url : "/workSchedule/create",
-					type : "POST",
-					data : {
-						worker : {
-							id : $(_button).attr("data-worker-id")
-						},
-						work : {
-							id : "<%= work.id %>"
-						},
-						started : moment().toISOString(),
-						_csrf : "<%= _csrf %>"
-					},
-				}).done(function(data){
-					realTime.startTimer();
-					workerRealTime[data.worker].startTimer();
-					work.schedule.push(data);
-					$(_button).attr('data-schedule-id', data.id);
-				});
-			}
-				
-			deferred.done(function(data){
-				$(_button)
-				.toggleClass("btn-default")
-				.toggleClass("btn-success");
-			})
-			.fail(function(message){
-				console.log(message);
-			});
-			 return false;
-		});
+		$("#worker").append(JST["assets/templates/show/worker.ejs"]({
+			work : work,
+			workers : workers,
+			_csrf : "<%= _csrf %>",
+			show : true
+		}));
+		
 	};
 
 	window.addEventListener("load", documentLoaded);

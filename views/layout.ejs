@@ -53,6 +53,7 @@
               <li><a href="/" class="<%= req.session.location.controller == 'index' ? 'active' : '' %>"><i class="fa fa-fw fa-2x fa-home"></i>&nbsp; Bureau</a></li>
               <li><a href="/shop" class="<%= req.session.location.controller == 'shop' ? 'active' : '' %>"><i class="fa fa-fw fa-2x fa-smile-o"></i>&nbsp; Magasins</a></li>
               <li><a href="/work" class="<%= req.session.location.controller == 'work' ? 'active' : '' %>"><i class="fa fa-fw fa-2x fa-wrench"></i>&nbsp; Travaux</a></li>
+              <li><a href="/material" class="<%= req.session.location.controller == 'material' ? 'active' : '' %>"><i class="fa fa-fw fa-2x fa-cogs"></i>&nbsp; Matériels</a></li>
             </ul>
         </div>
         <div class="col-xs-offset-1 col-xs-10">
@@ -126,7 +127,6 @@
     <script src="/js/dependencies/4.bootstrap/4.bootstrap.min.js"></script>
     <script src="/js/dependencies/4.bootstrap/7.bootstrap-datetimepicker.js"></script>
     <script src="/js/dependencies/4.bootstrap/7.bootstrap-multiselect.js"></script>
-    <script src="/js/dependencies/signature_pad.min.js"></script>
     <script src="/js/oogre/bureau.js"></script>
     <!--SCRIPTS END-->
     <script src="/js/ckeditor/ckeditor.js"></script>

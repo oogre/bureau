@@ -5,10 +5,10 @@
  * @help        :: See http://links.sailsjs.org/docs/controllers
  */
 
-var populateElementAndTask = function(res, next, work, workers){
+var populateElementAndTask = function(work, workers){
 	var promise = require('promised-io/promise');
 	var Deferred = promise.Deferred;
-
+	var deferred = new Deferred();
 	promise
 	.all([	promise
 			.all(	(work
@@ -22,7 +22,8 @@ var populateElementAndTask = function(res, next, work, workers){
 							return data;
 						})
 						.catch(function(err){
-							return next(err);
+							return deferred.reject(err);
+							//return next(err);
 						});
 					})
 			)
@@ -45,7 +46,8 @@ var populateElementAndTask = function(res, next, work, workers){
 								};
 						})
 						.catch(function(err){
-							return next(err);
+							return deferred.reject(err);
+							//return next(err);
 						});
 					})
 			)
@@ -76,11 +78,13 @@ var populateElementAndTask = function(res, next, work, workers){
 		});
 		delete work.task;
 
-		return res.view({
+		deferred.resolve({
 			work : work,
 			workers : workers
 		});
 	});
+
+	return deferred;
 };
 
 
@@ -155,7 +159,29 @@ module.exports = {
 			return [work, workers];
 		})
 		.spread(function (work, workers){
-			return populateElementAndTask(res, next, work, workers);
+			populateElementAndTask(work, workers)
+			.then(function(data){
+				Material
+				.find()
+				.populateAll()
+				.then(function(materials){
+					materials = _.clone(materials);
+					data.work.material =	(data.work.material || [])
+											.map(function(material){
+												var item = _.find(materials, function(item){ return item.id == material.id });
+												materials = _.without(materials, item);
+												item.quantity = material.quantity;
+												item.date = material.date;
+												return item;
+											});
+
+					data.materials = materials;
+					return res.view(data);
+				})
+				.catch(function(err){
+					return next(err);
+				})
+			});
 		})
 		.catch(function(err){
 			return next(err);
@@ -182,7 +208,29 @@ module.exports = {
 			return [work, workers];
 		})
 		.spread(function (work, workers){
-			return populateElementAndTask(res, next, work, workers);
+			populateElementAndTask(work, workers)
+			.then(function(data){
+				Material
+				.find()
+				.populateAll()
+				.then(function(materials){
+					materials = _.clone(materials);
+					data.work.material =	(data.work.material || [])
+											.map(function(material){
+												var item = _.find(materials, function(item){ return item.id == material.id });
+												materials = _.without(materials, item);
+												item.quantity = material.quantity;
+												item.date = material.date;
+												return item;
+											});
+
+					data.materials = materials;
+					return res.view(data);
+				})
+				.catch(function(err){
+					return next(err);
+				})
+			})
 		})
 		.catch(function(err){
 			return next(err);

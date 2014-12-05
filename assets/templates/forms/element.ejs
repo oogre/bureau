@@ -1,0 +1,191 @@
+<% 
+	if(typeof(show) == typeof(undefined)){
+		var show = false;
+	}
+%>
+
+
+<fieldset class="row">
+	<label class="col-sm-2">Object</label>
+	<div class="form-group <%= show ? "col-sm-10" : "col-sm-8"%>">
+		<div class="input-group col-sm-12">
+			<label rel="elements" class="input-group-addon" >Element(s)</label>
+			<ol id="elements"></ol>
+		</div>
+	</div>
+	<% if(!show){%>
+	<div class="btn-group-vertical col-sm-2" role="group" >
+		<button class="btn btn-default add-element">Modifier</button>
+		<button class="btn btn-primary save-element hide" >Enregistrer</button>
+	</div>
+	<% } %>
+</fieldset>
+
+
+<script type="text/javascript">
+
+	var createTaskList = function($this, elementId, idRoot, checkedTask){
+		BUREAU
+		.tools
+		.api({
+			url : "/element/find/",
+			data : {
+				where : JSON.stringify({id : elementId})
+			},
+			type : "GET"
+		})
+		.done(function(data){
+			if(data.length && data[0].task){
+				$this.children("ol").before(JST["assets/templates/show/task.ejs"]({
+					id : _.uniqueId(idRoot),
+					element : data[0],
+					checkedTask :checkedTask
+				}));
+			}
+		});
+	};
+
+	var createTask2List = function($this, idRoot, element){
+		$this
+		.children("ol")
+		.before(JST["assets/templates/show/task2.ejs"]({
+			id : _.uniqueId(idRoot),
+			element : element,
+			work : work,
+			_csrf : "<%= _csrf %>"
+		}));
+	};
+
+	var buildElementStructure = function(parent, array){
+		var $elements = $(parent).empty();
+		
+		array
+		.map(function(element){
+			$elements.append(JST["assets/templates/show/element.ejs"]({element : element}));
+		});
+
+		array
+		.map(function(element){
+			if(element.substructure){
+				element
+				.substructure
+				.map(function(subElementId){
+					subElementId = _.isObject(subElementId) ? subElementId.id : subElementId;
+					$("#"+element.id+" > ol").append($("#"+subElementId).remove());
+				})
+			}
+		});	
+
+		work
+		.element
+		.map(function(element){
+			var id = element.id;
+			var idRoot = "task_list_";
+			var task = element.task
+			createTaskList($elements.find("li#"+element.id).addClass("selected"), id, idRoot, task);
+		})
+
+		return $elements.find("li");
+	};
+
+	var destroyTaskList = function($this, idRoot){
+		$this.children("[id^='"+idRoot+"']").remove();
+	};
+
+	var elementToggleSelection = function(event){
+		event.stopPropagation();
+		var $this = $(event.target).parent();
+		var id = $this.attr("id");
+		var idRoot = "task_list_";
+		if($this.toggleClass("selected").hasClass("selected"))
+			createTaskList($this, id, idRoot);
+		else
+			destroyTaskList($this, idRoot);
+	};
+
+
+
+
+	var $elements =	$("ol#elements").empty();
+	
+	work
+	.element
+	.map(function(element){
+		$elements
+		.append(JST["assets/templates/show/element.ejs"]({
+			element : element
+		}));
+		<% if(!show){ %>
+			createTask2List($("#"+element.id), "task_list", element);
+		<% } %>
+	});
+
+	$elements
+	.find("li .elementHead")
+	.on("click", function(){
+		window.location.href = "/element/show/"+$(this).attr("id");
+		return false;
+	});
+
+	$(".save-element")
+	.on("click", function(){
+		var $this = $(this);
+		var data = {
+			_csrf : "<%= _csrf %>",
+			element : 	$("ol#elements>li.selected, ol#elements ol>li.selected")
+						.toArray()
+						.map(function(element){
+							return $(element).attr("id");
+						}),
+			task : _.flatten(	$("ol#elements>li.selected, ol#elements ol>li.selected")
+								.toArray()
+								.map(function(element){
+									var tasks =	$(element)
+												.children("[id^='task_list_']")
+												.find("select[name='task']")
+												.val() || [];
+									return	tasks
+											.map(function(task){
+												return {
+													element : $(element).attr("id"),
+													task : task
+												}
+											})
+								})
+					)
+		}
+
+		BUREAU.tools.api({
+			url : "/work/updateElementTask/"+work.id,
+			type : "PUT",
+			data : data,
+		})
+		.done(function(data){
+			window.location.href = window.location.href;
+		})
+		.fail(function(data){
+			console.error(data);
+		});
+		return false;
+	});
+
+	$(".add-element")
+	.one("click", function(){
+		var $this = $(this);
+		$(".save-element").removeClass("hide");
+		BUREAU.tools.find.element({
+			owner : work.shop.id
+		})
+		.done(function(data){
+			$this.text("Reset").on("click", function(){
+				window.location.href = window.location.href;
+				return false;
+			});
+			buildElementStructure("ol#elements", data)
+			.find(".elementHead")
+			.on("click", elementToggleSelection);
+		});
+
+		return false;
+	});
+</script>

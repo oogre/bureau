@@ -1,0 +1,164 @@
+<% 
+	if(typeof(show) == typeof(undefined)){
+		var show = false;
+	}
+%>
+
+<fieldset class="row">
+	<label class="col-sm-2">Matériel</label>
+	<div class="form-group col-sm-10">
+		<div class="input-group col-sm-12">
+			<table class="table" data-db-table-name="material" >
+				<thead>
+					<tr>
+						<th data-db-row-name="material_id">
+							Id
+						</th>
+						<th data-db-row-name="material_name">
+							Nom
+						</th>
+						<th>
+							Quantité
+						</th>
+					</tr>
+				</thead>
+				<tbody>
+				<% 
+					(work.material||[]).map(function(material, n){
+				%>
+					<tr data-db-row-name="material_id" data-db-row-value="<%= material.id %>">
+						<td data-db-row-name="material_id" data-db-row-value="<%= material.id %>">
+							<%= material.id %>
+						</td>
+						<td data-db-row-name="material_name" data-db-row-value="<%= material.name %>">
+							<%= material.name %>
+						</td>
+						<td>
+							<div class="input-group col-sm-4">
+								<input class="form-control" <%= show ? "disabled" : "" %> type="number" min="0" id="quantity_<%=n%>" name="quantity" value="<%= material.quantity || '' %>">
+								<% if(material.unit){%>
+									<label class="input-group-addon" for="quantity_<%=n%>" ><%=material.unit.name%></label>
+								<%}%>
+							</div>
+							<% if(material.wiki.length){ %>
+							<button class="btn btn-link detail-material">
+								détail
+							</button>
+							<% } %>
+						</td>
+					</tr>
+				<%	
+					}); 
+				%>
+
+				<% if(!show && materials.length > 0){%>
+					<tr>
+						<td>
+							<div class="input-group col-sm-12">
+								<label class="input-group-addon" for="materials" >Ajouter</label>
+								<select multiple="multiple" id="materials" name="materials">
+									<% materials.map(function(material){%>
+										<option value="<%= material.id %>" name="<%= material.name.toLowerCase() %>" ><%= material.name %></option>
+									<%})%>
+								</select>
+							</div>
+						</td>
+						<td>
+							<button class="btn btn-primary add-material hide">
+								Ajouter
+							</button>
+						</td>
+						<td>
+						</td>
+					</tr>
+				<%}%>
+				</tbody>
+			</table>
+		</div>
+	</div>
+</fieldset>
+
+<script type="text/javascript">
+	$("#materials").multiselect({
+		buttonWidth: '100%', 
+		includeSelectAllOption: true,
+		allSelectedText: 'Tout',
+		selectAllText : "Tout",
+		nonSelectedText : "Rien",
+		enableFiltering: true,
+		filterBehavior: 'text',
+		enableCaseInsensitiveFiltering : true,
+		onChange: function(option, checked, select) {
+			if(checked){
+				$(".add-material").removeClass("hide");
+			}
+			else{
+				$(".add-material").addClass("hide");
+			}
+		}
+	});
+
+	var updateMaterial = function(reload){
+		BUREAU.tools.api({
+			url : "/work/update/<%= work.id %>",
+			type : "PUT",
+			data : {
+			material : 	(work.material||[])
+						.map(function(material, n){ 
+							return {
+								id : material.id,
+								quantity : parseInt($("input#quantity_"+n).val())||0,
+								date : material.date
+							}
+						})
+						.concat(	($("#materials").val()||[])
+									.map(function(id){
+										return {
+											id : id,
+											quantity : 0,
+											date : moment().toISOString()
+										}
+									})
+						),
+			_csrf : "<%= _csrf %>"
+			}
+		})
+		.done(function(data){
+			if(reload!==false){
+				window.location.reload();
+			}
+		});
+		return false;
+	}
+
+	$("button.add-material")
+	.on("click", updateMaterial);
+
+	$("table[data-db-table-name='material'] input[name='quantity']")
+	.on("blur", function(){
+		updateMaterial(false)
+	});
+	$(".detail-material")
+	.on("click", function(){
+		var $this = $(this);
+		var wikis = $this.nextAll("fieldset");
+		if(wikis.length){
+			wikis.remove();
+		}
+		else{
+			var id = $this.parent().parent().attr("data-db-row-value");
+			var material = _.find(work.material, function(material){ return material.id == id});
+			material.wiki.map(function(wiki){
+				$this.after(	"<fieldset class='row'>"+
+							"	<div class='form-group col-sm-12'>"+
+							"		<div class='input-group col-sm-12'>"+
+							"			<label class='input-group-addon' for='wiki_"+wiki.id+"' >"+wiki.name+"</label>"+
+							"			<div class='form-control' id='wiki_"+ wiki.id+"' data-wiki-id='"+ wiki.id +"' name='wiki_"+ wiki.id +"'>"+ wiki.description+"</div>"+
+							"		</div>"+
+							"	</div>"+
+							"</fieldset>");
+			});
+		}
+		return false;
+	});
+</script>

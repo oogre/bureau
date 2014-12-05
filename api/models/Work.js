@@ -30,6 +30,20 @@ module.exports = {
 			*/ 
 		},
 
+		material : {
+			type : "array"
+			/*
+				[
+					{
+						id
+						quantity :
+						date : 
+					}
+				]
+
+			*/
+		},
+
 		type : {
 			model : 'workType',
 			required : true
@@ -48,7 +62,7 @@ module.exports = {
 			via : "work"
 		},
 		rendezvous : {
-			type: 'datetime'
+			type: 'datetime' // => array [datetime]
 		},
 		time : {
 			// theorical time needed to finish it in hour

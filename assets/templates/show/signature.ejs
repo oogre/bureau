@@ -1,0 +1,105 @@
+<fieldset class="row">
+	<div class="form-group col-sm-offset-2 col-sm-10">
+		<blockquote class="blockquote">Pour accord heures, matériaux, outillage</blockquote>
+	</div>
+</fieldset>
+<fieldset class="row">
+	<div class="form-group col-sm-offset-2 col-sm-5">
+		<div class="input-group col-sm-12">
+			<label class="input-group-addon" for="client-name" >Nom du client</label>
+			<input class="form-control" type="text" id="client-name" name="client-name" value="">
+		</div>
+	</div>
+	<div class="form-group col-sm-5">
+		<div class="input-group col-sm-12">
+			<label class="input-group-addon" for="adf-name" >Nom du technicien</label>
+			<input class="form-control" type="text" id="adf-name" name="adf-name" value="">
+		</div>
+	</div>
+</fieldset>
+<fieldset class="row">
+	<label class="col-sm-2">Signature</label>
+	<div class="form-group col-sm-5">
+		<div class="input-group col-sm-12">
+			<canvas class="signature" id="signature-client"></canvas>
+			<button class="btn btn-default reset" data-target="client" >
+				Reset
+			</button>
+		</div>
+	</div>
+	<div class="form-group col-sm-5">
+		<div class="input-group col-sm-12">
+			<canvas class="signature" id="signature-atelier-du-froid"></canvas>
+			<button class="btn btn-default reset" data-target="adf">
+				Reset
+			</button>
+		</div>
+	</div>
+</fieldset>
+
+
+
+<script type="text/javascript"src="/js/signature/signature_pad.min.js"></script>
+
+<script type="text/javascript">
+
+	var signatureClient = $("#signature-client");
+	signatureClient.get(0).width = signatureClient.width();
+	signatureClient.get(0).height = 210;
+
+	var signatureADF = $("#signature-atelier-du-froid");
+	signatureADF.get(0).width = signatureADF.width();
+	signatureADF.get(0).height = 210;
+
+	var signaturePad = {
+		client : new SignaturePad(signatureClient.get(0)),
+		adf : new SignaturePad(signatureADF.get(0)),
+		complete : <%= complete %>,
+		uncomplete : <%= uncomplete %>,
+		send : function(){
+			return $.when(	sendSignature(signaturePad.client), 
+							sendSignature(signaturePad.adf))
+		}
+	}
+	signaturePad.client.onEnd = function(){
+		if(!signaturePad.adf.isEmpty()){
+			signaturePad.complete();
+		}else{
+			signaturePad.uncomplete();
+		}
+	};
+
+	signaturePad.adf.onEnd = function(){
+		if(!signaturePad.client.isEmpty()){
+			signaturePad.complete();
+		}else{
+			signaturePad.uncomplete();
+		}
+	};
+
+	$(".signature")
+	.next("button.reset")
+	.on("click", function(){
+		if(prompt("Ecris SUPPRIMER pour confirmer") == "SUPPRIMER"){
+			signaturePad[$(this).attr("data-target")].clear();
+			signaturePad.uncomplete();
+		}
+		return false;
+	});
+
+	var sendSignature = function(canvas){
+		var form = new FormData();
+		form.append("_csrf", "<%= _csrf %>");
+		form.append("author", "<%= author_id ? author_id : ''  %>");
+		form.append("avatar", BUREAU.tools.canvasToForm(canvas), "signature.png");
+
+		return $.ajax({
+			url: "/file/upload",
+			type: "POST",
+			data: form, // TAKE CARE TO PUSH ALL TEXTS PARAMETER BEFORE PICTURES
+			cache: false,
+			contentType: false,
+			processData: false
+		})
+	};
+</script>
