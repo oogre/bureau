@@ -62,6 +62,19 @@ module.exports.routes = {
     return res.forbidden();
   },
 
+  "get /work" : function(req, res, next){
+    if(req.isSocket){
+      return Work.watch(req.socket);  
+    }
+    return next();
+  },
+  "get /workschedule" : function(req, res, next){
+    if(req.isSocket){
+      return WorkSchedule.watch(req.socket);  
+    }
+    return next();
+  }
+
   /***************************************************************************
   *                                                                          *
   * Custom routes here...                                                    *

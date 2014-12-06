@@ -34,7 +34,7 @@
 							<%= material.name %>
 						</td>
 						<td>
-							<div class="input-group col-sm-4">
+							<div class="input-group col-sm-6">
 								<input class="form-control" <%= show ? "disabled" : "" %> type="number" min="0" id="quantity_<%=n%>" name="quantity" value="<%= material.quantity || '' %>">
 								<% if(material.unit){%>
 									<label class="input-group-addon" for="quantity_<%=n%>" ><%=material.unit.name%></label>

@@ -107,6 +107,58 @@
 </fieldset>
 
 <script type="text/javascript">
+
+	io.socket.get('/workschedule');
+	// When a socket message about a user is received, display it
+	io.socket.on('workschedule', function(data) {
+		setTimeout(function(){
+			if(data.verb == "created"){
+				var _button = $("button.schedule[data-worker-id='"+data.data.worker+"']");
+				var attr = _button.attr('data-schedule-id');
+				if (typeof(attr) !== typeof(undefined) && attr !== false) {}
+				else{
+					_button.attr('data-schedule-id', data.data.id)
+					.removeClass("btn-default")
+					.addClass("btn-success");
+
+					realTime
+					.startTimer();
+					
+					workerRealTime[data.data.worker]
+					.startTimer();
+					
+					work
+					.schedule
+					.push(data.data);
+				}
+			}
+			else if(data.verb == "updated"){
+				var _button = $("button.schedule[data-worker-id='"+data.previous.worker.id+"']");
+				var attr = _button.attr('data-schedule-id');
+				if (typeof(attr) !== typeof(undefined) && attr !== false) {
+					_button.removeAttr('data-schedule-id')
+					.addClass("btn-default")
+					.removeClass("btn-success");
+					
+					realTime
+					.stopTimer();
+
+					workerRealTime[data.previous.worker.id]
+					.stopTimer();
+					
+					work.schedule =	work
+									.schedule
+									.map(function(schedule){
+										if(schedule.id === data.id){
+											schedule.stoped = data.data.stoped;
+										}
+										return schedule;
+									});
+				}
+			}
+		}, 500);
+	});
+
 	var realTime = new 	BUREAU.tools.realTime()
 						.display(function(duration){
 							$(".schedule-total")
@@ -222,6 +274,7 @@
 
 		var deferred;
 		if (typeof scheduleId !== typeof undefined && scheduleId !== false) {
+			$(_button).removeAttr('data-schedule-id');
 			deferred = BUREAU.tools.api({
 				url : "/workSchedule/update/"+scheduleId,
 				type : "PUT",
@@ -244,8 +297,6 @@
 									}
 									return schedule;
 								});
-				$(_button)
-				.removeAttr('data-schedule-id');
 			});
 		}
 		else{
@@ -263,6 +314,7 @@
 					_csrf : "<%= _csrf %>"
 				},
 			}).done(function(data){
+				$(_button).attr('data-schedule-id', data.id);
 				realTime
 				.startTimer();
 				
@@ -273,8 +325,6 @@
 				.schedule
 				.push(data);
 
-				$(_button)
-				.attr('data-schedule-id', data.id);
 			});
 		}
 			

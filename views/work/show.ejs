@@ -59,17 +59,24 @@
 				</div>
 			</fieldset>
 
-			<hr/>
+			<% if(work.worker.length){%>
 
-			<fieldset id="worker"></fieldset>
+				<hr/>
+				<fieldset id="worker"></fieldset>
+				
+			<%}%>
 
 			<hr/>
 			
 			<fieldset id="element"></fieldset>
 			
-			<hr/>
 
-			<fieldset id="material"></fieldset>
+			<% if(work.material.length){%>
+
+				<hr/>
+				<fieldset id="material"></fieldset>
+
+			<%}%>
 
 			<hr/>
 

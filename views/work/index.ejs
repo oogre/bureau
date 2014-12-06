@@ -31,6 +31,14 @@
 <script type="text/javascript">
 	
 	var  documentLoaded = function (){
+
+		io.socket.get('/work');
+		// When a socket message about a user is received, display it
+		io.socket.on('work', function(data) {
+			console.log(data);
+		});
+
+
 		var table = $("#<%= id %> table[data-db-table-name='<%= req.session.location.controller %>']");
 		table.append(JST["assets/templates/list.ejs"]({
 			table : {

@@ -1,3 +1,22 @@
+<% 
+
+  if(typeof(req) == typeof(undefined)){
+    req = {};
+  }
+
+  if(typeof(req.session) == typeof(undefined)){
+    req.session = {};
+  }
+
+  if(typeof(req.session.location) == typeof(undefined)){
+    req.session.location = {
+      controller : "index"
+    }
+  }
+
+%>
+
+
 <!DOCTYPE html>
 <html>
   <head>
@@ -49,7 +68,7 @@
         <div class="col-xs-2 sidebar-offcanvas" id="sidebar" role="navigation">
           
             <ul class="nav">
-              <li><a href="/back" class="<%= req.session.location.controller == 'index' ? 'active' : '' %>"><i class="fa fa-fw fa-2x fa-chevron-left"></i>&nbsp; Back</a></li>
+              <li><a href="/back" class="<%= req.session.location.controller == 'back' ? 'active' : '' %>"><i class="fa fa-fw fa-2x fa-chevron-left"></i>&nbsp; Back</a></li>
               <li><a href="/" class="<%= req.session.location.controller == 'index' ? 'active' : '' %>"><i class="fa fa-fw fa-2x fa-home"></i>&nbsp; Bureau</a></li>
               <li><a href="/shop" class="<%= req.session.location.controller == 'shop' ? 'active' : '' %>"><i class="fa fa-fw fa-2x fa-smile-o"></i>&nbsp; Magasins</a></li>
               <li><a href="/work" class="<%= req.session.location.controller == 'work' ? 'active' : '' %>"><i class="fa fa-fw fa-2x fa-wrench"></i>&nbsp; Travaux</a></li>
@@ -85,6 +104,17 @@
             + Internationalize your client-side templates using a server-side
               stringfile before they're served.
     -->
+
+
+    <!-- WHEN COME FROM NOWARE LOAD THE LAST VISITED PAGE -->
+    <script type="text/javascript">
+      if("" == document.referrer && null != localStorage.getItem("referrer")) {
+        window.location = localStorage.getItem("referrer");
+      }else{
+        localStorage.setItem("referrer", window.location.href);
+      }
+    </script>
+    <!-- STOP REDIRECTION -->
 
     <!--TEMPLATES-->
     <script type="text/javascript" src="/jst.js"></script>
@@ -129,8 +159,5 @@
     <script src="/js/dependencies/4.bootstrap/7.bootstrap-multiselect.js"></script>
     <script src="/js/oogre/bureau.js"></script>
     <!--SCRIPTS END-->
-    <script src="/js/ckeditor/ckeditor.js"></script>
-    <script src="/js/ckeditor/adapters/jquery.js"></script>
-    
   </body>
 </html>
