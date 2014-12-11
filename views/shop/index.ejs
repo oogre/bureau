@@ -9,30 +9,22 @@
 		<hr/>
 		
 		<div class="row">
-			<div class="col-sm-2">
-				<a href="/<%= req.session.location.controller %>/new" class="btn btn-primary new" type="button">
-					Créé un magasin
-				</a>
-			</div>
-			<div class="col-sm-3">
-				<div class="input-group">
-						<a class="input-group-addon btn btn-info bg-default"><i class="fa fa-filter"></i></a>
-						<input type="text" class="form-control findByName" placeholder="Rechercher un magasin" />		
-					</div>
+			<div class="btn-group col-sm-12">
+				<a href="/<%= req.session.location.controller %>/new" class="btn btn-primary new" type="button">Créé un magasin</a>
 			</div>
 		</div>
 
 		<hr/>
 
-		<table class="table" data-db-table-name="<%= req.session.location.controller %>" ></table>
+		<section></section>
+
 	</div>
 </div>
 
 <script type="text/javascript">
 	
 	var  documentLoaded = function (){
-		var table = $("#<%= id %> table[data-db-table-name='<%= req.session.location.controller %>']");
-		table.append(JST["assets/templates/list.ejs"]({
+		$("section").append(JST["assets/templates/list.ejs"]({
 			table : {
 				head : [{
 					name : "brand",
@@ -69,14 +61,11 @@
 				<% }) %>
 				],
 			},
-			parentSelector : table.selector,
+			parentSelector : "table.table",
 			sort : "<%= sort %>",
 			controller : "<%= req.session.location.controller %>",
 			_csrf : "<%= _csrf %>"
  		}));
-
-		BUREAU.tools.table.filter($("#<%= id %> table"), $("#<%= id %> .findByName"), ["name", "brand"]);
- 		
 	};
 
 	window.addEventListener("load", documentLoaded);

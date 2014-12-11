@@ -13,6 +13,27 @@
 		shops = [];
 	}
 	
+
+	var workerMultiselectOption = 	_
+									.chain(workers)
+									.groupBy( function(worker){ 
+										return worker.team 
+									})
+									.values()
+									.value()
+									.map(function(team, id){
+										return {
+											label : "Equipe : " + id,
+											children : 	team
+														.map(function(worker){
+															return {
+																label: worker.firstname + " " + worker.lastname, 
+																value: worker.id
+															}
+														})
+										};
+									});
+
 %>
 
 <form class="form-inline" role="form" action="<%= action %>"> 
@@ -65,14 +86,15 @@
 			<div class="form-group col-sm-5">
 				<div class="input-group col-sm-12">
 					<label class="input-group-addon" for="rendezvous">Rendez-vous</label>
-					<input class="form-control" type="text" name="rendezvous" id="rendezvous" value=""  data-date-format="<%= config.appconfig.format.datetime %>" readonly autocomplete="off" required>
+					<input class="form-control" type="text" name="rendezvous" id="rendezvous" value=""  data-date-format="<%= config.appconfig.format.datetime %>" readonly autocomplete="off" required data-toggle="popover" data-placement="top" data-content="Editez le travail pour ajouter des rendez-vous">
 				</div>
 			</div>
 			<div class="form-group col-sm-5">
 				<div class="input-group col-sm-12">
 					<label class="input-group-addon" for="time">Duré du travail</label>
-					<input class="form-control" type="number" name="time" id="time" value="0" autocomplete="off" required>
+					<input class="form-control" type="number" name="time" id="time" value="0" autocomplete="off" required data-toggle="popover" data-placement="top" data-content="Durée de travail en heure">
 				</div>
+				
 			</div>
 		</fieldset>
 	</div>
@@ -84,19 +106,19 @@
 			<div class="form-group col-sm-3">
 				<div class="input-group col-sm-12">
 					<label class="input-group-addon" for="interval">Intervale</label>
-					<input class="form-control" type="number" name="interval" id="interval" value="0" autocomplete="off" required>
+					<input class="form-control" type="number" name="interval" id="interval" value="0" autocomplete="off" required data-toggle="popover" data-placement="top" data-content="Interval entre 2 maintenances en mois">
 				</div>
 			</div>
 			<div class="form-group col-sm-3">
 				<div class="input-group col-sm-12">
 					<label class="input-group-addon" for="duration">Duré</label>
-					<input class="form-control" type="number" name="duration" id="duration" value="0" autocomplete="off" required>
+					<input class="form-control" type="number" name="duration" id="duration" value="0" autocomplete="off" required data-toggle="popover" data-placement="top" data-content="Durée du contrat de maintenance en année">
 				</div>
 			</div>
 			<div class="form-group col-sm-4">
 				<div class="input-group col-sm-12">
 					<label class="input-group-addon" for="deadLine">Première Echéhance</label>
-					<input class="form-control" type="text" name="deadLine" id="deadLine" value=""  data-date-format="<%= config.appconfig.format.date %>" readonly autocomplete="off" required>
+					<input class="form-control" type="text" name="deadLine" id="deadLine" value=""  data-date-format="<%= config.appconfig.format.date %>" readonly autocomplete="off" required data-toggle="popover" data-placement="top" data-content="Date de la première maintenance">
 				</div>
 			</div>
 		</fieldset>
@@ -104,23 +126,10 @@
 		
 	<div class="maintenance-hide">
 		<hr/>
-		<fieldset class="row">
-			<label class="col-sm-2">Homme(s)</label>
-			<div class="form-group col-sm-5">
-				<div class="input-group col-sm-12">
-					<label class="input-group-addon" for="workers" >Nom</label>
-					<select multiple="multiple" id="workers" name="workers">
-						<% workers.map(function(worker){%>
-							<option value="<%= worker.id %>" name="<%= worker.name.toLowerCase() %>" ><%= worker.name %></option>
-						<%})%>
-					</select>
-				</div>
-			</div>
-		</fieldset>
+		<fieldset id="worker"></fieldset>
 	</div>
 
 	<hr/>
-	
 
 	<fieldset id="wiki"></fieldset>
 	
@@ -138,9 +147,11 @@
 </form>
 
 <script type="text/javascript">
+	BUREAU.tools.popover();
 	BUREAU.tools.link();
 	var config = JSON.parse(_("<%- JSON.stringify(config) %>").unescape());
 	var work = JSON.parse(_("<%- JSON.stringify(work) %>").unescape());
+	var workers = JSON.parse(_("<%- JSON.stringify(workers) %>").unescape());
 	var shops = JSON.parse(_("<%- JSON.stringify(shops) %>").unescape());
 	var workTypes = JSON.parse(_("<%- JSON.stringify(workTypes) %>").unescape());
 	var routeTiming = 0;
@@ -188,13 +199,12 @@
 		defaultDate : moment().add(1, 'days').hour("08").minute("00")
 	});
 
-	$("#workers").multiselect({
-		buttonWidth: '100%', 
-		includeSelectAllOption: true,
-		allSelectedText: 'Tout le monde',
-		selectAllText : "Tout le monde",
-		nonSelectedText : "Aucun homme"
-	});
+	$("#worker").append(JST["assets/templates/forms/worker.ejs"]({
+		work : work,
+		workers : workers,
+		_csrf : "<%= _csrf %>",
+		create : true
+	}));
 
 	var buildElementStructure = function(parent, array){
 		var $elements = $(parent);

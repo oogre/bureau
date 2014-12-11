@@ -1,94 +1,110 @@
-<thead>
-	<tr>
-		<% table.head.map(function(col){%>
-		<th data-db-row-name="<%= col.name %>" data-db-row-order="" >
-			<i class="fa fa-sort"></i>&nbsp; <%= col.label %>
-		</th>
-		<% }) %>
-		<th>
-			Action
-		</th>
-	</tr>
-</thead>
-<tbody>
-<% 
-	table.body.map(function(row){
-%>
-	<tr data-db-row-name="id" data-db-row-value="<%= row.id %>">
-		<% 
-			row.data.map(function(data){
-		%>
-		<td data-db-row-name="<%= data.name %>" data-db-row-value="<%= data.value.toLowerCase() %>">
-			<%= data.value %>
-		</td>
-		<% }) %>
-		
-		<td>
-			<a href="/<%= controller %>/show/<%= row.id %>" class="btn btn-info" type="button">
-				Voir
-			</a>
-			<a href="/<%= controller %>/edit/<%= row.id %>" class="btn btn-warning" type="button">
-				Editer
-			</a>
-			<a href="/<%= controller %>/destroy/<%= row.id %>" class="btn btn-danger" type="button">
-				Supprimer
-			</a>
-		</td>
-	</tr>
-<%	
-	}); 
-%>
-</tbody>
+<div class="row">
+	<div class="col-sm-3">
+		<div class="input-group">
+			<a class="input-group-addon btn btn-info bg-default"><i class="fa fa-filter"></i></a>
+			<input type="text" class="form-control findByName" placeholder="Rechercher un travail" />		
+		</div>
+	</div>
+</div>
 
-<script type="text/javascript">
-	BUREAU.tools.link();
-		var $reference = $("<%= parentSelector %>");
-
-		var sort= "<%= sort %>";
-		if("null" != sort){
-			sort = sort.split(" ");
-			$reference
-			.find("thead [data-db-row-name='"+sort[0]+"']")
-			.attr("data-db-row-order", sort[1]||"desc")
-			.find(".fa")
-			.removeClass("fa-sort")
-			.addClass("fa-sort-"+(sort[1] == "desc" ? "asc" : "desc"));
-		}else{
-			$reference
-			.find("thead [data-db-row-name='createdAt']")
-			.attr("data-db-row-order", "desc")
-			.find(".fa")
-			.removeClass("fa-sort")
-			.addClass("fa-sort-desc");
-		}
-		$reference
-		.find("thead [data-db-row-order]")
-		.on("click", function(){
-			window.location = window.location.origin + window.location.pathname + '?sort="'+$(this).attr("data-db-row-name")+" "+ ($(this).attr("data-db-row-order") == "asc" ? "desc" : "asc")+'"';
-		});
-
-		$("a[href*=destroy]")
-		.on("click", function(event){
-			event.preventDefault();
-			if(prompt("Ecris SUPPRIMER pour confirmer") == "SUPPRIMER"){
+<table class="table">
+	<thead>
+		<tr>
+			<% table.head.map(function(col){%>
+			<th data-db-row-name="<%= col.name %>" data-db-row-order="" >
+				<i class="fa fa-sort"></i>&nbsp; <%= col.label %>
+			</th>
+			<% }) %>
+			<th>
+				Action
+			</th>
+		</tr>
+	</thead>
+	<tbody>
+	<% 
+		table.body.map(function(row){
+	%>
+		<tr data-db-row-name="id" data-db-row-value="<%= row.id %>">
+			<% 
+				row.data.map(function(data){
+			%>
+			<td data-db-row-name="<%= data.name %>" data-db-row-value="<%= data.value.toLowerCase() %>">
+				<%= data.value %>
+			</td>
+			<% }) %>
 			
-				var url = $(this).attr("href");
+			<td>
+				<a href="/<%= controller %>/show/<%= row.id %>" class="btn btn-info" type="button">
+					Voir
+				</a>
+				<a href="/<%= controller %>/edit/<%= row.id %>" class="btn btn-warning" type="button">
+					Editer
+				</a>
+				<a href="/<%= controller %>/destroy/<%= row.id %>" class="btn btn-danger" type="button">
+					Supprimer
+				</a>
+			</td>
+		</tr>
+	<%	
+		}); 
+	%>
+	</tbody>
 
-				BUREAU.tools.api({
-					url : url,
-					type : "DELETE",
-					data : {
-						_csrf : "<%= _csrf %>"
-					}
-				})
-				.done(function(){
-					window.location.reload();
-				})
-				.fail(function(message){
-					console.log("ERROR");
-				});
+	<script type="text/javascript">
+
+		var searchOnCols = JSON.parse(_("<%- JSON.stringify(table.head.map(function(col){ return col.name; })) %>").unescape());
+
+		BUREAU.tools.table.filter($("table.table"), $(".findByName"), searchOnCols);
+
+		BUREAU.tools.link();
+			var $reference = $("<%= parentSelector %>");
+
+			var sort= "<%= sort %>";
+			if("null" != sort){
+				sort = sort.split(" ");
+				$reference
+				.find("thead [data-db-row-name='"+sort[0]+"']")
+				.attr("data-db-row-order", sort[1]||"desc")
+				.find(".fa")
+				.removeClass("fa-sort")
+				.addClass("fa-sort-"+(sort[1] == "desc" ? "asc" : "desc"));
+			}else{
+				$reference
+				.find("thead [data-db-row-name='createdAt']")
+				.attr("data-db-row-order", "desc")
+				.find(".fa")
+				.removeClass("fa-sort")
+				.addClass("fa-sort-desc");
 			}
-			return false;
-		});
+			$reference
+			.find("thead [data-db-row-order]")
+			.on("click", function(){
+				window.location = window.location.origin + window.location.pathname + '?sort="'+$(this).attr("data-db-row-name")+" "+ ($(this).attr("data-db-row-order") == "asc" ? "desc" : "asc")+'"';
+			});
 
-</script>
+			$("a[href*=destroy]")
+			.on("click", function(event){
+				event.preventDefault();
+				if(prompt("Ecris SUPPRIMER pour confirmer") == "SUPPRIMER"){
+				
+					var url = $(this).attr("href");
+
+					BUREAU.tools.api({
+						url : url,
+						type : "DELETE",
+						data : {
+							_csrf : "<%= _csrf %>"
+						}
+					})
+					.done(function(){
+						window.location.reload();
+					})
+					.fail(function(message){
+						console.log("ERROR");
+					});
+				}
+				return false;
+			});
+
+	</script>
+</table>

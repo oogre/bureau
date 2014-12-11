@@ -9,22 +9,20 @@
 		<hr/>
 		
 		<div class="row">
-			<div class="col-sm-2">
-				<a href="/<%= req.session.location.controller %>/new" class="btn btn-primary new" type="button">
-					Créé un travail
-				</a>
-			</div>
-			<div class="col-sm-3">
-				<div class="input-group">
-						<a class="input-group-addon btn btn-info bg-default"><i class="fa fa-filter"></i></a>
-						<input type="text" class="form-control findByName" placeholder="Rechercher un travail" />		
-					</div>
+			<div class="col-sm-12">
+				<div class="btn-group">
+					<a href="/<%= req.session.location.controller %>/new" class="btn btn-primary new" type="button">Créé un travail</a>
+				</div>
+				<div class="btn-group">
+					<button class="btn btn-default calendar" type="button">Calendrier</button>
+				</div>
 			</div>
 		</div>
 
 		<hr/>
 
-		<table class="table" data-db-table-name="<%= req.session.location.controller %>" ></table>
+		<section></section>
+
 	</div>
 </div>
 
@@ -38,60 +36,80 @@
 			console.log(data);
 		});
 
+		var section = $("section");
+		var initList = function(){
 
-		var table = $("#<%= id %> table[data-db-table-name='<%= req.session.location.controller %>']");
-		table.append(JST["assets/templates/list.ejs"]({
-			table : {
-				head : [{
-					name : "type",
-					label : "Type"
-				},{
-					name : "brand",
-					label : "Enseigne"
-				},
-				{
-					name : "wiki",
-					label : "Instruction"
-				},
-				{
-					name : "deadLine",
-					label : "Date d'échéance"
-				}],
-				body : [
-				<% works && works.map(function(row){ %>
-					{
-						id : "<%= row.id %>",
-						data : 
-						[
-							{
-								name : "type",
-								value : "<%= row.type.name %>"
-							},
-							{
-								name : "brand",
-								value : "<%= row.shop.brand %>"
-							},
-							{
-								name : "name",
-								value : _("<%= row.wiki[0] && row.wiki[0].description %>").chain().unescapeHTML().stripTags().truncate(25).value()
-							},
-							{
-								name : "deadLine",
-								value : moment(new Date("<%= row.deadLine %>")).format("<%= sails.config.appconfig.format.datetime %>")
-							}
-						]
+			$("button.calendar")
+			.text("calendrier")
+			.one("click", initCalendar);
+
+			section.html(JST["assets/templates/list.ejs"]({
+				table : {
+					head : [{
+						name : "type",
+						label : "Type"
+					},{
+						name : "brand",
+						label : "Enseigne"
 					},
-				<% }) %>
-				],
-			},
-			parentSelector : table.selector,
-			sort : "<%= sort %>",
-			controller : "<%= req.session.location.controller %>",
-			_csrf : "<%= _csrf %>"
- 		}));
+					{
+						name : "name",
+						label : "Instruction"
+					},
+					{
+						name : "rendezvous",
+						label : "Rendez-vous"
+					},
+					{
+						name : "deadLine",
+						label : "Echéhance"
+					}],
+					body : [
+					<% works && works.map(function(row){ %>
+						{
+							id : "<%= row.id %>",
+							data : 
+							[
+								{
+									name : "type",
+									value : "<%= row.type.name %>"
+								},
+								{
+									name : "brand",
+									value : "<%= row.shop.brand %>"
+								},
+								{
+									name : "name",
+									value : _("<%= row.wiki[0] && row.wiki[0].description %>").chain().unescapeHTML().stripTags().truncate(25).value()
+								},
+								{
+									name : "rendezvous",
+									value : <% if(row.rendezvous){%>moment(new Date("<%= row.rendezvous %>")).format("<%= sails.config.appconfig.format.datetime %>")<%}else{%>""<%}%>
+								},
+								{
+									name : "deadLine",
+									value : moment(new Date("<%= row.deadLine %>")).format("<%= sails.config.appconfig.format.datetime %>")
+								}
+							]
+						},
+					<% }) %>
+					],
+				},
+				parentSelector : "table.table",
+				sort : "<%= sort %>",
+				controller : "<%= req.session.location.controller %>",
+				_csrf : "<%= _csrf %>"
+	 		}));
+		};
 
-		BUREAU.tools.table.filter($("#<%= id %> table"), $("#<%= id %> .findByName"), ["name", "brand", "type"]);
- 		
+		var initCalendar = function(){
+			$("button.calendar")
+			.text("liste")
+			.one("click", initList);
+			section.html(JST["assets/templates/calendar/calendar.ejs"]({}));
+		};
+
+		initCalendar();
 	};
 
 	window.addEventListener("load", documentLoaded);

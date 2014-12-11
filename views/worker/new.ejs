@@ -1,0 +1,199 @@
+<%
+	var id = req.session.location.controller + "-" + req.session.location.action;
+%>
+
+
+<div class="container">
+	<div id="<%= id %>">
+		<h3>Créer un travailleur</h3>
+
+		<hr/>
+
+		<form class="form-inline" role="form" action="/worker/create"> 
+
+			<input type="hidden" name="_csrf" value="<%= _csrf %>" />
+			
+
+			<fieldset class="row">
+				<label class="col-sm-2">Identification</label>
+				<div class="form-group col-sm-5">
+					<div class="input-group col-sm-12">
+						<label class="input-group-addon" for="lastname" >Nom</label>
+						<input type="text" class="form-control" id="lastname" name="lastname" autocomplete="off" required/>
+					</div>
+				</div>
+				<div class="form-group col-sm-5">
+					<div class="input-group col-sm-12">
+						<label class="input-group-addon" for="firstname" >Prénom</label>
+						<input type="text" class="form-control" id="firstname" name="firstname" autocomplete="off" required/>
+					</div>
+				</div>
+			</fieldset>
+
+			<fieldset class="row">
+				<div class="form-group col-sm-offset-2 col-sm-5">
+					<div class="input-group col-sm-12">
+						<label class="input-group-addon" for="role" >Rôle</label>
+						<select class="form-control" id="role" name="role" required pattern="[0,9]|\d">
+							<option disabled selected value="" >Séléctionner un rôle</option>
+							<% roles.map(function(role){%>
+									<option value="<%= role.id %>" ><%= role.name %></option>
+							<% }) %>
+						</select>
+					</div>
+				</div>
+			</fieldset>
+
+			<hr/>
+
+			<fieldset class="row">
+				<label class="col-sm-2">Contact</label>
+				<div class="form-group col-sm-5">
+					<div class="input-group col-sm-12">
+						<label class="input-group-addon" for="email" >email</label>
+						<input type="email" class="form-control" id="email" name="email" autocomplete="off" required/>
+					</div>
+				</div>
+				<div class="form-group col-sm-5">
+					<div class="input-group col-sm-12">
+						<label class="input-group-addon" for="phone" >N°de téléphone</label>
+						<input type="text" class="form-control" id="phone" name="phone" autocomplete="off" required/>
+					</div>
+				</div>
+			</fieldset>
+
+			<hr/>
+				
+			<fieldset class="row">
+				<label class="col-sm-2">Adresse</label>
+				<div class="form-group col-sm-6">
+					<div class="input-group col-sm-12">
+						<label class="input-group-addon" for="adress" >Rue + N°</label>
+						<input class="form-control" type="text" id="adress" name="adress" autocomplete="off" placeholder="" value="">
+					</div>
+				</div>
+			</fieldset>
+
+			<fieldset class="row">
+				<div class="form-group col-sm-offset-2 col-sm-6">
+					<div class="input-group col-sm-12">
+						<label class="input-group-addon" for="city" >Ville</label>
+						<input class="form-control" type="text" id="city" name="city" placeholder="" autocomplete="off" value="">
+					</div>
+				</div>
+				<div class="form-group col-sm-4">
+					<div class="input-group col-sm-12">
+						<label class="input-group-addon" for="zipcode" >Code Postale</label>
+						<input class="form-control" type="text" id="zipcode" name="zipcode" placeholder="" autocomplete="off" value="">
+					</div>
+				</div>
+			</fieldset>
+
+			<fieldset class="row">
+				<div class="form-group col-sm-offset-2 col-sm-6">
+					<div class="input-group col-sm-12">
+						<label class="input-group-addon" for="country" >Pays</label>
+						<input class="form-control" type="text" id="country" name="country" placeholder="" autocomplete="off" value="Belgique">
+					</div>
+				</div>
+			</fieldset>
+
+			<hr/>
+
+			<fieldset class="row">
+				<label class="col-sm-2">Wiki</label>
+				<div class="form-group col-sm-8">
+					<div class="input-group btn-group col-sm-12">
+						<button class="btn btn-default addWiki" >
+							<i class="fa fa-file-text-o"></i>&nbsp; Ajouter un wiki
+						</button>
+					</div>
+				</div>
+			</fieldset>
+			
+			<hr/>	
+
+			<fieldset class="row">
+				<label class="col-sm-2"></label>
+				<div class="form-group col-sm-3">
+					<div class="input-group col-sm-12">
+						<button type="submit" name="submit" class="btn btn-default">Enregistrer</button>
+					</div>
+				</div>
+			</fieldset>
+
+		</form>
+
+	</div>
+</div>
+
+<script type="text/javascript">
+	var  documentLoaded = function (){
+		_.uniqueId('new_wiki_');
+		$("button.addWiki").on("click", function(){
+			$(this)
+			.parent()
+			.parent()
+			.parent()
+			.after(JST["assets/templates/forms/wiki.ejs"]({
+				id : _.uniqueId('new_wiki_'),
+				_csrf : "<%= _csrf %>"
+			}));
+			return false;
+		});
+
+		BUREAU.tools.popover();
+		BUREAU.tools.link();
+		BUREAU.tools.input.focus();
+
+
+		$("form").on("submit", function(event){
+			var form = event.target;
+			var data = {
+				_csrf : form._csrf.value,
+				lastname : form.lastname.value,
+				firstname : form.firstname.value,
+				role : form.role.value,
+				email : form.email.value,
+				phone : form.phone.value,
+				adress : form.adress.value,
+				city : form.city.value,
+				zipcode : form.zipcode.value,
+				country : form.country.value,
+				wiki : 	$("[id^='new_wiki_']")
+						.toArray()
+						.reverse()
+						.map(function(wiki){
+							var editor = CKEDITOR.instances[$(wiki).find("textarea").attr("name")];
+							return {
+								name : $(wiki).find("[name='name']").val(),
+								description : editor.innerHTML,
+								author : $(wiki).find("[name='author']").val(),
+							}
+						})
+			};
+			console.log(data);
+			BUREAU.tools.api({
+				url : "/worker/create",
+				type : "POST",
+				data : data
+			})
+			.done(function(data){
+				console.log(data)
+			})
+			.fail(function(){
+
+			})
+			return false;
+		})
+
+	};
+
+	window.addEventListener("load", documentLoaded);
+	<% if(false === res.locals.layout){ %>
+		documentLoaded();
+	<% } %>
+</script>
+
+
+

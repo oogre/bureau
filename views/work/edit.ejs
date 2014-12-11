@@ -120,7 +120,7 @@
 				down: "fa fa-arrow-down"
 			},
 			language : "fr",
-			defaultDate : moment(work.rendezvous)
+			defaultDate : moment(work.rendezvous? work.rendezvous : work.deadLine)
 		}).on("dp.change",function (e) {
            $('.save-rendez-vous').removeClass("hide");
         });
@@ -217,7 +217,7 @@
 			_csrf : "<%= _csrf %>"
 		}));
 
-		$("#worker").append(JST["assets/templates/show/worker.ejs"]({
+		$("#worker").append(JST["assets/templates/forms/worker.ejs"]({
 			work : work,
 			workers : workers,
 			_csrf : "<%= _csrf %>"

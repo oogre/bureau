@@ -229,6 +229,26 @@ module.exports = {
 		return res.json({
 			success : true
 		});
+	},
+
+	"find" : function(req, res, next){
+		var where = req.param("where") && "undefined" != req.param("where") ? JSON.parse(req.param("where")) : null;
+		var limit = req.param("limit") && "undefined" != req.param("limit") ? JSON.parse(req.param("limit")) : null;
+		var sort = req.param("sort") && "undefined" != req.param("sort") ? JSON.parse(req.param("sort")) : null;
+		var skip = req.param("skip") && "undefined" != req.param("skip") ? JSON.parse(req.param("skip")) : null;
+
+		Element.find()
+		.where(where)
+		.sort(sort)
+		.limit(limit)
+		.skip(skip)
+		.populateAll()
+		.then(function foundElements(elements){
+			return res.json(elements);
+		})
+		.catch(function(err){
+			return next(err);
+		});
 	}
 };
 

@@ -147,6 +147,7 @@ module.exports = {
 		.populateAll()
 		.then(function (work){
 			if(!work) return res.redirect("/work/index");
+
 			var workers = 	Worker.find()
 							.where({
 								id: {
@@ -159,6 +160,8 @@ module.exports = {
 			return [work, workers];
 		})
 		.spread(function (work, workers){
+			if(!work) return res.redirect("/work/index");
+			
 			populateElementAndTask(work, workers)
 			.then(function(data){
 				Material
@@ -314,6 +317,60 @@ module.exports = {
 		.catch(function(err){
 			return next(err);
 		})	
+	},
+	finder : function(req, res, next){
+		var where = req.param("where") && "undefined" != req.param("where") ? JSON.parse(req.param("where")) : null;
+
+		where.or
+		.map(function(condition){
+			return Object.keys(condition)
+			.map(function(key){
+				condition[key]["<="] = new Date(condition[key]["<="]);
+				condition[key][">="] = new Date(condition[key][">="]);
+				return condition[key];
+			})
+		});
+
+		Work.find()
+		.where(where)
+		.populate("type")
+		.populate("wiki")
+		.populate("shop")
+		.then(function(works){
+
+			return res.json({
+				success : 1, 
+				result : works.map(function(work){
+
+					var classValue = function(){
+						if(work.closedAt)
+							return "event-success";
+						else if(!work.rendezvous)
+							return "event-important";
+						else
+							switch(work.type.name){
+								case "installation":
+								return "event-info";
+								case "maintenance":
+								return "event-special";
+								case "dépannage":
+								return "event-warning"
+							}
+					}();
+					return {
+						id : work.id,
+						url: "/work/edit/"+work.id,
+						title : work.type.name+" "+work.shop.brand+" "+_(work.wiki[0].description).chain().unescapeHTML().stripTags().truncate(25).value(),
+						class: classValue,
+						start : work.rendezvous ? new Date(work.rendezvous).valueOf() : new Date(work.deadLine).valueOf(),
+						end : (work.rendezvous ? new Date(work.rendezvous).valueOf() : new Date(work.deadLine).valueOf())+(work.time*60*60*1000)
+					}
+				})
+			});
+		})
+		.catch(function(err){
+			return next(err);
+		})
 	}
 };
 

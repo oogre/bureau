@@ -1,0 +1,108 @@
+<%
+	var id = req.session.location.controller + "-" + req.session.location.action;
+%>
+
+<div class="container">
+	<div id="<%= id %>" class="table-list table-responsive">
+		<h3>Liste des travailleurs</h3>
+
+		<hr/>
+		
+		<div class="row">
+			<div class="col-sm-12">
+				<div class="btn-group">
+					<a href="/<%= req.session.location.controller %>/new" class="btn btn-primary new" type="button">Créé un travailleur</a>
+				</div>
+			</div>
+		</div>
+
+		<hr/>
+
+		<section>
+			<ol id="workers"></ol>
+		</section>
+
+	</div>
+</div>
+
+<script type="text/javascript">
+	
+	var  documentLoaded = function (){
+
+		io.socket.get('/worker');
+		// When a socket message about a user is received, display it
+		io.socket.on('worker', function(data) {
+			console.log(data);
+		});
+
+		
+		window.workers = JSON.parse(_("<%=JSON.stringify(workers) %>").unescape().replace(/\n|\\/g, ""));
+		
+
+		var $workers = $("ol#workers");
+		var teams = _.values(	_
+								.groupBy(	window.workers, 
+											function(worker){ 
+												return worker.team 
+											}
+								)
+					)
+					.map(function(team, id){
+						var $team =	$workers
+									.append(	$workers
+												.append(JST["assets/templates/show/team.ejs"]({
+													team : id,
+												}))
+									)
+									.find("ol")
+									.last();
+
+						team.map(function(worker){
+							$team.append(	$team
+											.append(JST["assets/templates/show/worker.ejs"]({
+												worker : worker,
+											})));
+						});
+						return team;
+					});
+
+		BUREAU.tools.sortable($workers, function(item){
+
+			if("workers" == item.parent().attr("id")){
+				$workers
+				.append(JST["assets/templates/show/team.ejs"]({
+					team : teams.length,
+				}))
+				.find("ol")
+				.last()
+				.append(item);
+			};
+			teams =	$("li[id^=team_] ol")
+					.toArray()
+					.map(function(team, id){
+						return $(team)
+						.children("li")
+						.toArray()
+						.map(function(_worker){
+							var worker = _.find(window.workers, function(worker){ return $(_worker).attr("id") == worker.id })
+							if(worker){
+								BUREAU.tools.api({
+									url : "/worker/update/"+worker.id,
+									type : "PUT",
+									data : {
+										team : id,
+										_csrf : "<%= _csrf %>"
+									},
+								});
+							}
+							return worker;
+						});
+			})
+		});
+	};
+
+	window.addEventListener("load", documentLoaded);
+	<% if(false === res.locals.layout){ %>
+		documentLoaded();
+	<% } %>
+</script>

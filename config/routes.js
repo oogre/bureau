@@ -68,6 +68,12 @@ module.exports.routes = {
     }
     return next();
   },
+  "get /worker" : function(req, res, next){
+    if(req.isSocket){
+      return Worker.watch(req.socket);  
+    }
+    return next();
+  },
   "get /workschedule" : function(req, res, next){
     if(req.isSocket){
       return WorkSchedule.watch(req.socket);  

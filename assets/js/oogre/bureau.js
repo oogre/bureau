@@ -13,6 +13,51 @@
 			}
 			return new Blob([new Uint8Array(array)], {type: 'image/png'});
 		},
+		sortable : function(elem, callbackOndrop){
+			var adjustment;
+			$(elem).sortable({
+				onDrop: function  (item, targetContainer, _super) {
+					var clonedItem = $('<li/>').css({height: 0})
+					item.before(clonedItem)
+					clonedItem.animate({
+						'height': item.height(),
+						'width': item.width()
+					})
+					item.animate(clonedItem.position(), function  () {
+						clonedItem.detach();
+						_super(item);
+						item.css({
+		                    backgroundColor : "#"+adjustment.color
+		                });
+					});
+					callbackOndrop(item);
+				},
+				onDragStart: function ($item, container, _super) {
+					var offset = $item.offset();
+					var pointer = container.rootGroup.pointer;
+
+					adjustment = {
+						width : $item.width(),
+						height : $item.height(),
+						left: pointer.left - offset.left,
+						top: pointer.top - offset.top
+					};
+					_super($item, container);
+				},
+				onDrag: function ($item, position) {
+					$item.css({
+						width : adjustment.width,
+						height : adjustment.height,
+						left: position.left - adjustment.left,
+						top: position.top - adjustment.top
+					});
+					$("ol#elements li.placeholder").css({
+						width : adjustment.width,
+						height : adjustment.height,
+					});
+				}
+			});
+		},
 
 		realTime : function(){
 			var _timers = [];
@@ -47,6 +92,13 @@
 					return this;
 				}
 			}
+		},
+		popover : function(){
+			$('[data-toggle="popover"]').popover({
+				trigger:'focus',
+				html : true,
+				title : "<i class='fa fa-info-circle'></i>&nbsp; Info"
+			});
 		},
 		link : function(){
 			$("a:not([href*=destroy])").on("click", function(){
@@ -166,21 +218,28 @@
 			filter : function(table, input, selectors){
 				input.on("keyup", function(){
 					var needle = $(this).val();
+					console.log(needle);
 					if(needle){
 						needle = needle.toLowerCase();
 
 						var toShow = [];
 						var toHide = [];
 						selectors.map(function(selector){ 
-							toHide = toHide.concat(table.find("tbody [data-db-row-name='"+selector+"']:not([data-db-row-value*='"+needle+"'])")
+							toHide = toHide.concat(table.find("tbody td[data-db-row-name='"+selector+"']:not([data-db-row-value*='"+needle+"'])")
 							.parent()
 							.toArray());
-
-							toShow = toShow.concat(table.find("tbody [data-db-row-name='"+selector+"'][data-db-row-value*='"+needle+"']")
+							toShow = toShow.concat(table.find("tbody td[data-db-row-name='"+selector+"'][data-db-row-value*='"+needle+"']")
 							.parent()
 							.toArray());
 						});
 						
+
+						console.log("toHide");
+						console.log(toHide);
+
+						console.log("toShow");
+							console.log(toShow);
+
 						toHide.map(function(elem){
 							$(elem).addClass("hide");
 						});

@@ -1,0 +1,24 @@
+<span id="cal-slide-tick" style="display: none"></span>
+<div id="cal-slide-content" class="cal-event-list">
+	<ul class="unstyled list-unstyled">
+		<% _.each(events, function(event) { %>
+			<li>
+					<span class="pull-left event <%= event['class'] %>"></span>&nbsp;
+					<span data-event-id="<%= event.id %>" data-event-class="<%= event['class'] %>" class="event-item">
+						<%= event.title %>
+						<div class="btns pull-right">
+							<a href="/work/show/<%= event.id %>" class="btn btn-info" type="button">
+								Voir
+							</a>
+							<a href="/work/edit/<%= event.id %>" class="btn btn-warning" type="button">
+								Editer
+							</a>
+						</div>
+					</span>
+			</li>
+		<% }) %>
+	</ul>
+</div>
+<script type="text/javascript">
+	BUREAU.tools.link();
+</script>

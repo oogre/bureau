@@ -6,7 +6,7 @@
 		<div class="form-group col-sm-5">
 			<div class="input-group col-sm-12">
 				<label class="input-group-addon" for="tva" >N°TVA</label>
-				<input class="form-control" type="text" id="tva" name="tva" placeholder="ex : BE0849725938" value="<%= shop.tva || '' %>">
+				<input class="form-control" type="text" id="tva" name="tva" placeholder="ex : BE0849725938" value="<%= shop.tva || '' %>" data-toggle="popover" data-placement="bottom" data-content="Numéros de TVA Européen. Préfix du pays suivit du numéros.">
 			</div>
 		</div>
 	</fieldset>
@@ -14,13 +14,13 @@
 		<div class="form-group col-sm-offset-2 col-sm-5">
 			<div class="input-group col-sm-12">
 				<label class="input-group-addon" for="brand" >Enseigne</label>
-				<input class="form-control" type="text" id="brand" name="brand" placeholder="ex : Point Chaud" value="<%= shop.brand || '' %>">
+				<input class="form-control" type="text" id="brand" name="brand" placeholder="ex : Point Chaud" value="<%= shop.brand || '' %>" data-toggle="popover" data-placement="top" data-content="Le nom usuel du client">
 			</div>
 		</div>
 		<div class="form-group col-sm-5">
 			<div class="input-group col-sm-12">
 				<label class="input-group-addon" for="name" >Nom</label>
-				<input class="form-control" type="text" id="name" name="name" placeholder="ex : Point Chaud Waremme" value="<%= shop.name || '' %>">
+				<input class="form-control" type="text" id="name" name="name" placeholder="ex : Point Chaud Waremme" value="<%= shop.name || '' %>" data-toggle="popover" data-placement="top" data-content="Le nom officel du client - figurant sur les factures">
 			</div>
 		</div>
 	</fieldset>
@@ -118,7 +118,7 @@
 
 <script type="text/javascript">
 	BUREAU.tools.link();
-
+	BUREAU.tools.popover();
 	<% if(shop.id) {%>
 		var adjustment;
 		window.shop = JSON.parse(_("<%- JSON.stringify(shop) %>").unescape());
@@ -208,6 +208,21 @@
 		
 		buildElementStructure();
 
+
+		BUREAU.tools.sortable("ol#elements", function(item){
+			if($(".save-element").length == 0){
+				$(".add-element")
+				.after("<button class='btn btn-primary save-element'>Enregistrer&nbsp; <i class='fa fa-cogs'></i></button>")
+				.next()
+				.on("click", saveElement)
+				.after("<button class='btn btn-danger'>Annuler&nbsp; <i class='fa fa-cogs'></i></button>")
+				.next()
+				.on("click", function(){
+					window.location.reload();
+					return false
+				});
+			}
+		})
 		$("ol#elements").sortable({
 			onDrop: function  (item, targetContainer, _super) {
 				var clonedItem = $('<li/>').css({height: 0})
@@ -223,18 +238,7 @@
 	                    backgroundColor : "#"+adjustment.color
 	                });
 				});
-				if($(".save-element").length == 0){
-					$(".add-element")
-					.after("<button class='btn btn-primary save-element'>Enregistrer&nbsp; <i class='fa fa-cogs'></i></button>")
-					.next()
-					.on("click", saveElement)
-					.after("<button class='btn btn-danger'>Annuler&nbsp; <i class='fa fa-cogs'></i></button>")
-					.next()
-					.on("click", function(){
-						window.location.reload();
-						return false
-					});
-				}
+				
 			},
 			onDragStart: function ($item, container, _super) {
 				var offset = $item.offset();
