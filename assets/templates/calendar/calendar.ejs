@@ -49,10 +49,13 @@
 <script type="text/javascript" src="/js/calendar/js/calendar.js"></script>
 
 <script type="text/javascript">
+
+	var worker = "<%= typeof(worker) != typeof(undefined) ? ('?worker='+worker) : '' %>";
+
 	window.calendar = $("#calendar").calendar({
 		language: 'fr-FR',
 		tmpl_path: "/templates/calendar/tmpls/",
-		events_source: "/work/finder"
+		events_source: "/work/finder"+worker
 	});
 
 	$('.btn-group button[data-calendar-nav]').each(function() {

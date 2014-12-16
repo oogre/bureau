@@ -82,47 +82,57 @@
 
 			<fieldset id="signature"></fieldset>			
 
-			<hr/>
-
-			<fieldset class="row">
-				<label class="col-sm-2">Travail terminé</label>
-				<div class="form-group col-sm-10">
-					<div class="col-sm-5">
-					<button class="btn btn-primary finishWork disabled" >
-						travail terminé
-					</button>
-					</div>
-					<div class="input-group col-sm-6">
-					<blockquote class="blockquote">Ajouter un wiki si le travail n'est pas terminé, expliquer la cause.</blockquote>
-					</div>
-				</div>
-			</fieldset>
-
-			<hr/>
-
-			<fieldset class="row">
-				<label class="col-sm-2">Wiki</label>
-				<div class="form-group col-sm-10">
-					<div class="col-sm-5">
-						<button class="btn btn-default addWiki" >
-							<i class="fa fa-file-text-o"></i>&nbsp; Ajouter un wiki
+			<% if(!work.closedAt){%>
+				<hr/>
+				<fieldset class="row">
+					<label class="col-sm-2">Travail terminé</label>
+					<div class="form-group col-sm-10">
+						<div class="col-sm-5">
+						<button class="btn btn-primary finishWork disabled" >
+							travail terminé
 						</button>
-						<button class="btn btn-primary saveWiki hide" >
-							Enregistrer les wikis
-						</button>
+						</div>
+						<div class="input-group col-sm-6">
+						<blockquote class="blockquote">Ajouter un wiki si le travail n'est pas terminé, expliquer la cause.</blockquote>
+						</div>
 					</div>
-					<div class="input-group col-sm-6">
-						<blockquote class="blockquote">Ajouter un wiki <br/>pour documenter les travaux réalisés, constatation, cause, action prise, remarques...</blockquote>
+				</fieldset>
+			<%}%>
+
+			<% if(!work.closedAt){%>
+				<hr/>
+
+				<fieldset class="row">
+					<label class="col-sm-2">Wiki</label>
+					<div class="form-group col-sm-10">
+						<div class="col-sm-5">
+							<button class="btn btn-default addWiki" >
+								<i class="fa fa-file-text-o"></i>&nbsp; Ajouter un wiki
+							</button>
+							<button class="btn btn-primary saveWiki hide" >
+								Enregistrer les wikis
+							</button>
+						</div>
+						<div class="input-group col-sm-6">
+							<blockquote class="blockquote">Ajouter un wiki <br/>pour documenter les travaux réalisés, constatation, cause, action prise, remarques...</blockquote>
+						</div>
 					</div>
-					
-				</div>
-			</fieldset>
+				</fieldset>
+			<%}%>
 			<% 
 				var wikis = work.wiki.slice(0);
 				wikis.shift();
-				wikis.reverse().map(function(wiki){ %>
+				if(wikis.length){ %>
+					<hr/>
+				<%}
+				wikis.reverse().map(function(wiki, n){ %>
 					<fieldset class="row">
-						<div class="form-group col-sm-offset-2 col-sm-8">
+						<% if(work.closedAt && n==0){%>
+							<label class="col-sm-2">Wiki</label>
+							<div class="form-group col-sm-8">
+						<% } else{ %>
+							<div class="form-group col-sm-offset-2 col-sm-8">
+						<% }%>
 							<div class="input-group col-sm-12">
 								<label class="input-group-addon" for="wiki_<%= wiki.id %>" ><%= wiki.name %></label>
 								<div class="form-control" id="wiki_<%= wiki.id %>" data-wiki-id="<%= wiki.id %>" name="wiki_<%= wiki.id %>"><%- wiki.description %></div>
@@ -132,6 +142,21 @@
 					</fieldset>
 				<%})
 			%>
+
+			<% if(work.closedAt){%>
+				<hr/>
+				<fieldset class="row">
+					<label class="col-sm-2">Document(s)</label>
+					<div class="form-group col-sm-10">
+						<div class="col-sm-5">
+						<button class="btn btn-primary printwork" >
+							Imprimer la fiche
+						</button>
+						</div>
+					</div>
+				</fieldset>
+			<%}%>
+
 
 	</div>
 </div>
@@ -143,6 +168,19 @@
 		window.work = JSON.parse(_("<%=JSON.stringify(work) %>").unescape().replace(/\n|\\/g, ""));
 		window.materials = JSON.parse(_("<%=JSON.stringify(materials) %>").unescape().replace(/\n|\\/g, ""));
 		window.workers = JSON.parse(_("<%=JSON.stringify(workers) %>").unescape().replace(/\n|\\/g, ""));
+
+
+		$(".printwork").on("click", function(){
+			BUREAU.tools.api({
+				url : "/work/print/<%= work.id %>",
+				type : "GET",
+			})
+			.done(function(data){
+				//window.location.href = window.location.href;
+				console.log(data);
+			});
+			return false;
+		});
 
 		$("button.finishWork").on("click", function(){
 			if(_.isEmpty($("#client-name").val())){

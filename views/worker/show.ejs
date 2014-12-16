@@ -1,0 +1,32 @@
+<%
+	var id = req.session.location.controller + "-" + req.session.location.action;
+%>
+
+<div class="container">
+	<div id="<%= id %>" class="table-list table-responsive">
+		<h3>Fiche travailleur</h3>
+
+		<hr/>
+		
+		<section></section>
+		<hr/>
+
+	</div>
+</div>
+
+<script type="text/javascript">
+	var  documentLoaded = function (){
+		window.worker = JSON.parse(_("<%=JSON.stringify(worker) %>").unescape().replace(/\n|\\/g, ""));
+
+		$("section").html(JST["assets/templates/calendar/calendar.ejs"]({
+			worker : worker.id
+
+		}));
+	};
+
+	window.addEventListener("load", documentLoaded);
+	<% if(false === res.locals.layout){ %>
+		documentLoaded();
+	<% } %>
+
+</script>

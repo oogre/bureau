@@ -7,13 +7,13 @@
 	<div class="form-group col-sm-offset-2 col-sm-5">
 		<div class="input-group col-sm-12">
 			<label class="input-group-addon" for="client-name" >Nom du client</label>
-			<input class="form-control" type="text" id="client-name" name="client-name" value="">
+			<input class="form-control" type="text" id="client-name" name="client-name" value="<%= work.signature_client.name || ''%>">
 		</div>
 	</div>
 	<div class="form-group col-sm-5">
 		<div class="input-group col-sm-12">
 			<label class="input-group-addon" for="adf-name" >Nom du technicien</label>
-			<input class="form-control" type="text" id="adf-name" name="adf-name" value="">
+			<input class="form-control" type="text" id="adf-name" name="adf-name" value="<%= work.signature_adf.name || ''%>">
 		</div>
 	</div>
 </fieldset>
@@ -21,61 +21,72 @@
 	<label class="col-sm-2">Signature</label>
 	<div class="form-group col-sm-5">
 		<div class="input-group col-sm-12">
-			<canvas class="signature" id="signature-client"></canvas>
-			<button class="btn btn-default reset" data-target="client" >
+			<% if(work.signature_client){%>
+				<img class="signature" src="<%= work.signature_client.signature %>"/>
+			<%}else{%>
+				<canvas class="signature" id="signature-client"></canvas>
+				<button class="btn btn-default reset" data-target="client" >
 				Reset
 			</button>
+			<%}%>
+			
 		</div>
 	</div>
 	<div class="form-group col-sm-5">
 		<div class="input-group col-sm-12">
-			<canvas class="signature" id="signature-atelier-du-froid"></canvas>
-			<button class="btn btn-default reset" data-target="adf">
+			<% if(work.signature_client){%>
+				<img class="signature" src="<%= work.signature_adf.signature %>"/>
+			<%}else{%>
+				<canvas class="signature" id="signature-atelier-du-froid"></canvas>
+				<button class="btn btn-default reset" data-target="adf">
 				Reset
 			</button>
+			<%}%>
 		</div>
 	</div>
 </fieldset>
-
-
 
 <script type="text/javascript"src="/js/signature/signature_pad.min.js"></script>
 
 <script type="text/javascript">
 
-	var signatureClient = $("#signature-client");
-	signatureClient.get(0).width = signatureClient.width();
-	signatureClient.get(0).height = 210;
-
-	var signatureADF = $("#signature-atelier-du-froid");
-	signatureADF.get(0).width = signatureADF.width();
-	signatureADF.get(0).height = 210;
-
-	var signaturePad = {
-		client : new SignaturePad(signatureClient.get(0)),
-		adf : new SignaturePad(signatureADF.get(0)),
-		complete : <%= complete %>,
-		uncomplete : <%= uncomplete %>,
-		send : function(){
-			return $.when(	sendSignature(signaturePad.client), 
-							sendSignature(signaturePad.adf))
-		}
+	var signatureClient = $("#signature-client").get(0);
+	if(signatureClient){
+		signatureClient.width = signatureClient.width();
+		signatureClient.height = 210;
 	}
-	signaturePad.client.onEnd = function(){
-		if(!signaturePad.adf.isEmpty()){
-			signaturePad.complete();
-		}else{
-			signaturePad.uncomplete();
+	var signatureADF = $("#signature-atelier-du-froid").get(0);
+	if(signatureADF){
+		signatureADF.width = signatureADF.width();
+		signatureADF.height = 210;
+	}
+	if(signatureADF && signatureClient){
+		var signaturePad = {
+			client : new SignaturePad(signatureClient),
+			adf : new SignaturePad(signatureADF),
+			complete : <%= complete %>,
+			uncomplete : <%= uncomplete %>,
+			send : function(){
+				return $.when(	sendSignature(signaturePad.client), 
+								sendSignature(signaturePad.adf))
+			}
 		}
-	};
+		signaturePad.client.onEnd = function(){
+			if(!signaturePad.adf.isEmpty()){
+				signaturePad.complete();
+			}else{
+				signaturePad.uncomplete();
+			}
+		};
 
-	signaturePad.adf.onEnd = function(){
-		if(!signaturePad.client.isEmpty()){
-			signaturePad.complete();
-		}else{
-			signaturePad.uncomplete();
-		}
-	};
+		signaturePad.adf.onEnd = function(){
+			if(!signaturePad.client.isEmpty()){
+				signaturePad.complete();
+			}else{
+				signaturePad.uncomplete();
+			}
+		};
+	}
 
 	$(".signature")
 	.next("button.reset")

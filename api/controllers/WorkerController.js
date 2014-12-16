@@ -56,7 +56,41 @@ module.exports = {
 		.catch(function(err){
 			return next(err);
 		})
-		
 	},
+
+	"edit" : function(req, res, next){
+		Worker.findOne()
+		.where({ 
+			id : req.param("id")
+		})
+		.populateAll()
+		.then(function foundShop(worker){
+			if(!worker) return res.redirect("/worker/index");
+			return res.view({
+				worker : worker
+			});
+		})
+		.catch(function(err){
+			return next(err);
+		});
+	},
+
+	"show" : function(req, res, next){
+		Worker.findOne()
+		.where({ 
+			id : req.param("id")
+		})
+		.populateAll()
+		.then(function foundShop(worker){
+
+			if(!worker) return res.redirect("/worker/index");
+			return res.view({
+				worker : worker
+			});
+		})
+		.catch(function(err){
+			return next(err);
+		});
+	}
 };
 

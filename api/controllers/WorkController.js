@@ -319,58 +319,273 @@ module.exports = {
 		})	
 	},
 	finder : function(req, res, next){
-		var where = req.param("where") && "undefined" != req.param("where") ? JSON.parse(req.param("where")) : null;
-
-		where.or
-		.map(function(condition){
-			return Object.keys(condition)
-			.map(function(key){
-				condition[key]["<="] = new Date(condition[key]["<="]);
-				condition[key][">="] = new Date(condition[key][">="]);
-				return condition[key];
-			})
-		});
-
+		var from = req.param("from") && "undefined" != req.param("from") ? new Date(parseInt(req.param("from"))) : null;
+		var to = req.param("to") && "undefined" != req.param("to") ? new Date(parseInt(req.param("to"))) : null;
+		var worker = req.param("worker") && "undefined" != req.param("worker") ? req.param("worker") : null;
+		var where = {
+			or : [
+				{
+					rendezvous: {
+						'>=' : from,
+						'<=' : to
+					}
+				},
+				{
+					deadLine: {
+						'>=' : from,
+						'<=' : to
+					}
+				},
+				{
+					createdAt: {
+						'>=' : from,
+						'<=' : to
+					}
+				},
+				{
+					updatedAt: {
+						'>=' : from,
+						'<=' : to
+					}
+				},
+				{	
+					closedAt :{
+						'>=' : from,
+						'<=' : to	
+					}
+				}
+			]
+		};
 		Work.find()
 		.where(where)
 		.populate("type")
 		.populate("wiki")
 		.populate("shop")
+		.populate("worker")
 		.then(function(works){
-
 			return res.json({
 				success : 1, 
-				result : works.map(function(work){
-
-					var classValue = function(){
-						if(work.closedAt)
-							return "event-success";
-						else if(!work.rendezvous)
-							return "event-important";
-						else
-							switch(work.type.name){
-								case "installation":
-								return "event-info";
-								case "maintenance":
-								return "event-special";
-								case "dépannage":
-								return "event-warning"
+				result : _.chain(works).clone().filter(function(work){
+							work.worker = work.worker || [];
+							return  worker 
+									? 
+										_.contains( work.worker.map(function(_worker){
+												return _worker.id
+										}), worker) 
+									: 
+										true;
+						})
+						.value()
+						.map(function(work){
+							var classValue = function(){
+								if(work.closedAt)
+									return "event-success";
+								else if(!work.rendezvous)
+									return "event-important";
+								else
+									switch(work.type.name){
+										case "installation":
+										return "event-info";
+										case "maintenance":
+										return "event-special";
+										case "dépannage":
+										return "event-warning"
+									}
+							}();
+							return {
+								id : work.id,
+								url: "/work/edit/"+work.id,
+								title : work.type.name+" "+work.shop.brand+" "+_(work.wiki[0].description).chain().unescapeHTML().stripTags().truncate(25).value(),
+								class: classValue,
+								start : work.rendezvous ? new Date(work.rendezvous).valueOf() : new Date(work.deadLine).valueOf(),
+								end : (work.rendezvous ? new Date(work.rendezvous).valueOf() : new Date(work.deadLine).valueOf())+(work.time*60*60*1000)
 							}
-					}();
-					return {
-						id : work.id,
-						url: "/work/edit/"+work.id,
-						title : work.type.name+" "+work.shop.brand+" "+_(work.wiki[0].description).chain().unescapeHTML().stripTags().truncate(25).value(),
-						class: classValue,
-						start : work.rendezvous ? new Date(work.rendezvous).valueOf() : new Date(work.deadLine).valueOf(),
-						end : (work.rendezvous ? new Date(work.rendezvous).valueOf() : new Date(work.deadLine).valueOf())+(work.time*60*60*1000)
-					}
-				})
+						})
 			});
 		})
 		.catch(function(err){
 			return next(err);
 		})
+	},
+
+	"print" : function(req, res, next){
+		Work.findOne()
+		.where({ 
+			id : req.param("id")
+		})
+		.populateAll()
+		.then(function foundShop(work){
+			var _work = Material
+			.find()
+			.populateAll()
+			.then(function(materials){
+				materials = _.clone(materials);
+				work.material =	(work.material || [])
+								.map(function(material){
+									var item = _.find(materials, function(item){ return item.id == material.id });
+									materials = _.without(materials, item);
+									item.quantity = material.quantity;
+									item.date = material.date;
+									return item;
+								});
+				return work;
+			}).catch(function(err){
+				return err;
+			});
+			return [_work];
+		})
+		.spread(function(work){
+			work.closedAt = new Date(work.closedAt);
+			work.closedAt = work.closedAt.getDate() + "/" + (work.closedAt.getMonth()+1) + "/" + work.closedAt.getFullYear();
+			var pdfWork = new sails.config.pdf({
+				type : "work",
+				dest : "public/files/test.pdf",
+				line : {
+					height : 9,
+					padding : 2,
+					margin : 5
+				},
+				page : {
+					margins : {
+						left : 5,
+						right : 5,
+						bottom : 5,
+						top : 5
+					},
+					col : 7
+				},
+				
+				stroke : {
+					bold : 2,
+					thin : 0.2
+				},
+				fill : {
+					grey : "#dedede",
+					black : "#000000"
+				}
+			})
+			.title([{
+					size : 5,
+					text : [{
+						align : "center",
+						value : "Fiche de travail : " + work.type.name
+					}]
+				}, {
+					size : 2,
+					text : [{
+						align : "center",
+						value : work.id
+					}]
+				}
+			], function position (doc){
+				return {
+					x : doc.page.margins.left,
+					y : doc.page.margins.top
+				}
+			})
+			.moveBottom(5)
+			.row([{
+					size :4, 
+					text : [{ 
+						align : "left",
+						value : "Client : "
+					},{
+						align : "center",
+						value : work.shop.name
+					}]
+				},{
+					size : 3,
+					text : [{ 
+						align : "left",
+						value : "Date rapport : "
+					},{
+						align : "center",
+						value : work.closedAt
+					}]
+				}
+			])
+			.row([{
+					size :4, 
+					text : [{ 
+						align : "left",
+						value : "Adresse : "
+					},{
+						align : "center",
+						value : _(work.shop.addres +", " + work.shop.zipcode + " " + work.shop.city).titleize()
+					}]
+				}
+			])
+			.row([{
+					size :4, 
+					text : [{ 
+						align : "left",
+						value : "Personne de contact : "
+					},{
+						align : "center",
+						value : work.shop.contact && work.shop.contact[0] ? work.shop.contact[0].name : "x"
+					}]
+				}
+			])
+			.row([{
+					size :4, 
+					text : [{ 
+						align : "left",
+						value : "Nom technicien : "
+					},{
+						align : "center",
+						value : work.signature_adf.name
+					}]
+				}
+			])
+			.moveBottom(5)
+			.line()
+			.row([{
+					size :7, 
+					text : [{
+						align : "center",
+						value : "Heures prestées par technicien"
+					}]
+				}
+			])
+			.row([{
+					size :3, 
+					text : [{
+						align : "center",
+						value : "Nom technicien"
+					}]
+				},{
+					size :1, 
+					text : [{
+						align : "center",
+						value : "Heure arrivée"
+					}]
+				},{
+					size :1, 
+					text : [{
+						align : "center",
+						value : "Heure départ"
+					}]
+				},{
+					size :1, 
+					text : [{
+						align : "center",
+						value : "Temps déplac."
+					}]
+				},{
+					size :1, 
+					text : [{
+						align : "center",
+						value : "Heure prest."
+					}]
+				}
+			])
+			.end()
+			return res.json(work);
+			
+		})
+		.catch(function(err){
+			return next(err);
+		});
 	}
 };
 
