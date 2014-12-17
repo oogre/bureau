@@ -435,8 +435,6 @@ module.exports = {
 			return [_work];
 		})
 		.spread(function(work){
-			work.closedAt = new Date(work.closedAt);
-			work.closedAt = work.closedAt.getDate() + "/" + (work.closedAt.getMonth()+1) + "/" + work.closedAt.getFullYear();
 			var pdfWork = new sails.config.pdf({
 				type : "work",
 				dest : "public/files/test.pdf",
@@ -447,14 +445,13 @@ module.exports = {
 				},
 				page : {
 					margins : {
-						left : 5,
-						right : 5,
-						bottom : 5,
-						top : 5
+						left : 15,
+						right : 15,
+						bottom : 50,
+						top : 50
 					},
 					col : 7
 				},
-				
 				stroke : {
 					bold : 2,
 					thin : 0.2
@@ -464,8 +461,78 @@ module.exports = {
 					black : "#000000"
 				}
 			})
+			.footer([{
+				size : 1.75,
+					text : [{
+						align : "left",
+						value : "Atelier\n\nrue des technologies 2ter\nB-4432 Alleur"
+					}]
+				},{
+					size : 1.75,
+					text : [{
+						align : "left",
+						value : "Siège Social\n\nrue Emille Vendervelde 59\nB-4431 Loncin"
+					}]
+				},{
+					size : 1.75,
+					text : [{
+						align : "left",
+						value : "Téléphone & Fax\n\nFixe : 04 366.13.18\nFax : 04 239.20.89"
+					}]
+				},{
+					size : 1.75,
+					text : [{
+						align : "left",
+						value : "Internet\n\nMail : info@atelierdufroid.be\nSite : www.atelierdufroid.be"
+					}]
+				}
+			],function position (doc){
+				return {
+					x : doc.page.margins.left,
+					y : doc.page.height-50
+				}
+			})
+			.header([{
+				size : 1.75,
+					text : [{
+						align : "left",
+						value : "Atelier\n\nrue des technologies 2ter\nB-4432 Alleur"
+					}]
+				},{
+					size : 1.75,
+					text : [{
+						align : "left",
+						value : "Siège Social\n\nrue Emille Vendervelde 59\nB-4431 Loncin"
+					}]
+				},{
+					size : 1.75,
+					text : [{
+						align : "left",
+						value : "Téléphone & Fax\n\nFixe : 04 366.13.18\nFax : 04 239.20.89"
+					}]
+				},{
+					size : 1.75,
+					text : [{
+						align : "left",
+						value : "Internet\n\nMail : info@atelierdufroid.be\nSite : www.atelierdufroid.be"
+					}]
+				}
+			],function position (doc){
+				return {
+					x : doc.page.margins.left,
+					y : 5
+				}
+			})
+
 			.title([{
-					size : 5,
+					size : 1,
+					text : [{
+						align : "center",
+						value : "/",
+						folio : true
+					}]
+				},{
+					size : 4,
 					text : [{
 						align : "center",
 						value : "Fiche de travail : " + work.type.name
@@ -483,7 +550,6 @@ module.exports = {
 					y : doc.page.margins.top
 				}
 			})
-			.moveBottom(5)
 			.row([{
 					size :4, 
 					text : [{ 
@@ -500,7 +566,11 @@ module.exports = {
 						value : "Date rapport : "
 					},{
 						align : "center",
-						value : work.closedAt
+						value : (function(){
+							var date = new Date(work.closedAt);
+							return date.getDate() + "/" + (date.getMonth()+1) + "/" + date.getFullYear();
+			
+						})()
 					}]
 				}
 			])
@@ -578,8 +648,259 @@ module.exports = {
 						value : "Heure prest."
 					}]
 				}
+			]);
+			work.worker
+			.map(function(worker){
+				_.filter( work.schedule, function(schedule){ return schedule.worker == worker.id })
+				.map(function(schedule, n){
+					pdfWork.row([{
+									size :3, 
+									text : [{
+										align : "center",
+										value : _(worker.firstname +" "+worker.lastname).titleize()
+									}]
+								},{
+									size : 1, 
+									text : [{
+										align : "center",
+										value : (function(){
+											var started = new Date(schedule.started);
+											return started.getHours()+":"+started.getMinutes();
+										})()
+									}]
+								},{
+									size : 1, 
+									text : [{
+										align : "center",
+										value : (function(){
+											var stoped = new Date(schedule.stoped);
+											return stoped.getHours()+":"+stoped.getMinutes();
+										})()
+									}]
+								},{
+									size : 1, 
+									text : [{
+										align : "center",
+										value : (function(){
+											return _.pad(Math.floor(work.route/(60*60)), 2, "0") + ":"+ _.pad((Math.round(work.route/60))%60, 2, "0");
+										})()
+									}]
+								},{
+									size : 1, 
+									text : [{
+										align : "center",
+										value : (function(){
+											var started = new Date(schedule.started);
+											var stoped = new Date(schedule.stoped);
+											var worked = ((stoped - started)/1000);
+											return _.pad(Math.floor(worked/(60*60)), 2, "0") + ":"+ _.pad((Math.round(worked/60))%60, 2, "0");
+										})()
+									}]
+								}]
+					);
+				});
+			});
+			pdfWork
+			.moveBottom(5)
+			.line()
+			.row([{
+					size : 7, 
+					text : [{
+						align : "center",
+						value : "Matériaux"
+					}]
+				}
 			])
-			.end()
+			.row([{
+					size : 1, 
+					text : [{
+						align : "center",
+						value : "Quantité"
+					}]
+				},{
+					size : 6, 
+					text : [{
+						align : "center",
+						value : "Description"
+					}]
+				}
+			]);
+			work.material
+			.map(function(material){
+				pdfWork.row([{
+									size : 1, 
+									text : [{
+										align : "center",
+										value : material.quantity + " " + material.unit.shortname
+									}]
+								},{
+									size : 6, 
+									text : [{
+										align : "center",
+										value : material.name
+									}]
+								}
+				]);
+			});
+			pdfWork
+			.moveBottom(5)
+			.line()
+			.row([{
+					size :7, 
+					text : [{
+						align : "center",
+						value : "Travaux réalisées : constatation, cause, action prise, remarque"
+					}]
+				}
+			]);
+			work.wiki
+			.map(function(wiki){
+				pdfWork.row([{
+								size : 7, 
+								text : (function(){
+									return [{
+										align : "center",
+										value : wiki.name
+									}].concat( 	wiki.description
+												.split("<img")
+												.map(function(elem, n){
+													if(n%2==1){
+														elem = elem.split("src=")[1].split(" ")[0];
+														elem = elem.substr(2, elem.length-3);
+														return {
+															align : "center",
+															value : {
+																src : elem,
+																param : {
+																	fit : [100, 100]
+																}
+															}
+														}
+													}
+													else{
+														return { 
+															align : "center",
+															value : _(elem.replace(/<\/p>|<\/br>|<br>/g, "\n")).stripTags()
+														}
+													}
+												}))
+								})()
+							}
+				]);
+			});
+			pdfWork
+			.moveBottom(5);
+			console.log(pdfWork.doc().y);
+			pdfWork
+			.line()
+			.row([{
+					size :7, 
+					text : [{
+						align : "center",
+						value : "Signature pour accord heures, matériaux, outillage"
+					}]
+				}
+			])
+			.row([{
+					size : 3, 
+					text : [{
+						align : "center",
+						value : "Client"
+					}]
+				},{
+					size : 2, 
+					text : [{
+						align : "center",
+						value : "Atelier du froid"
+					}]
+				},{
+					size : 2, 
+					text : [{
+						align : "center",
+						value : "Contrôle Management"
+					}]
+				}
+			])
+			.row([{
+					size : 3, 
+					text : [{
+						align : "left",
+						value : "Nom : "
+					},{
+						align : "center",
+						value : work.signature_client.name
+					}]
+				},{
+					size : 2, 
+					text : [{
+						align : "left",
+						value : "Nom : "
+					},{
+						align : "center",
+						value : work.signature_adf.name
+					}]
+				},{
+					size : 2, 
+					text : [{
+						align : "left",
+						value : "Management : "
+					},{
+						align : "center",
+						value : (function(){
+							var date = new Date();
+							return date.getDate() + "/" + (date.getMonth()+1) + "/" + date.getFullYear();
+						})()
+					}]
+				}
+			])
+			.row([{
+					size : 3, 
+					text : [{
+						align : "left",
+						value : "Signature : "
+					},{
+						align : "center",
+						value : {
+							src : work.signature_client.signature.substr(1),
+							param : {
+								fit : [100, 100]
+							}
+						}
+					}]
+				},{
+					size : 2, 
+					text : [{
+						align : "left",
+						value : "Signature : "
+					},{
+						align : "center",
+						value : {
+							src : work.signature_adf.signature.substr(1),
+							param : {
+								fit : [100, 100]
+							}
+						}
+					}]
+				},{
+					size : 2, 
+					text : [{
+						align : "left",
+						value : "Signature : "
+					},{
+						align : "center",
+						value : {
+							src : work.signature_adf.signature.substr(1),
+							param : {
+								fit : [100, 100]
+							}
+						}
+					}]
+				}
+			]);
+			console.log(pdfWork.doc().y);
+			pdfWork
+
+			pdfWork.end();
 			return res.json(work);
 			
 		})
