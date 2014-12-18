@@ -176,8 +176,7 @@
 				type : "GET",
 			})
 			.done(function(data){
-				//window.location.href = window.location.href;
-				console.log(data);
+				window.open(window.location.protocol+"//"+window.location.host+"/"+data.url);
 			});
 			return false;
 		});

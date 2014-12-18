@@ -1,3 +1,19 @@
+<%
+
+	if(typeof(work.signature_client) == typeof(undefined)){
+		work.signature_client = {};
+	}
+
+	if(typeof(work.signature_adf) == typeof(undefined)){
+		work.signature_adf = {};
+	}
+
+
+
+%>
+
+
+
 <fieldset class="row">
 	<div class="form-group col-sm-offset-2 col-sm-10">
 		<blockquote class="blockquote">Pour accord heures, matériaux, outillage</blockquote>
@@ -21,7 +37,7 @@
 	<label class="col-sm-2">Signature</label>
 	<div class="form-group col-sm-5">
 		<div class="input-group col-sm-12">
-			<% if(work.signature_client){%>
+			<% if(work.signature_client.signature){%>
 				<img class="signature" src="<%= work.signature_client.signature %>"/>
 			<%}else{%>
 				<canvas class="signature" id="signature-client"></canvas>
@@ -34,7 +50,7 @@
 	</div>
 	<div class="form-group col-sm-5">
 		<div class="input-group col-sm-12">
-			<% if(work.signature_client){%>
+			<% if(work.signature_client.signature){%>
 				<img class="signature" src="<%= work.signature_adf.signature %>"/>
 			<%}else{%>
 				<canvas class="signature" id="signature-atelier-du-froid"></canvas>
@@ -52,12 +68,12 @@
 
 	var signatureClient = $("#signature-client").get(0);
 	if(signatureClient){
-		signatureClient.width = signatureClient.width();
+		signatureClient.width = $(signatureClient).width();
 		signatureClient.height = 210;
 	}
 	var signatureADF = $("#signature-atelier-du-froid").get(0);
 	if(signatureADF){
-		signatureADF.width = signatureADF.width();
+		signatureADF.width = $(signatureADF).width();
 		signatureADF.height = 210;
 	}
 	if(signatureADF && signatureClient){

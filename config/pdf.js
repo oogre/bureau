@@ -7,6 +7,11 @@ module.exports.pdf = function(param){
 		bufferPages: true
 	});
 
+	if(!fs.existsSync(_dest)){
+		fs.mkdirSync(_dest, 0777, true);
+	}	
+	_dest += "/"+param.filename;
+	
 	doc.pipe(fs.createWriteStream(_dest));
 		
 	doc.page.margins = param.page.margins;
@@ -61,12 +66,15 @@ module.exports.pdf = function(param){
 				position : position
 			}
 		}
-		_setPosition(position);
-
 		var tmp = doc.page.margins.bottom;
 		doc.page.margins.bottom = 0;
 		data.frame = false;
+
+		_setPosition(position);
+
+
 		_line(null, param.line.margin);
+		
 		_row(data, false);
 
 		doc.x = doc.page.margins.left;
@@ -85,6 +93,10 @@ module.exports.pdf = function(param){
 			}
 		}
 		_setPosition(position);
+
+		if(_.isUndefined(data)){
+			return ;
+		}
 
 		var tmp = doc.page.margins.top;
 		doc.page.margins.top = 0;
@@ -149,13 +161,11 @@ module.exports.pdf = function(param){
 		doc._y = doc.y = doc.page.margins.top,
 		doc._x = doc.x = doc.page.margins.left;
 		
-		_header();
-		_footer();
 		_title();
 	};
 
 	var _hasToNextPage = function(flag){
-		return flag !==false && maxDocY-doc.y < 110;
+		return flag !== false && maxDocY-doc.y < 110;
 	}
 
 	var _row = function(data, flag){
@@ -185,21 +195,22 @@ module.exports.pdf = function(param){
 		if(_dataFolio){
 			var range = doc.bufferedPageRange();
 			for(var i = range.start ; i < range.start + range.count ; i++){
+				
 				doc.switchToPage(i);
 				doc.x = _dataFolio.position.x;
 				doc.y = _dataFolio.position.y;
-					doc.text((i+1)+"/"+range.count, {
-						width : _dataFolio.width,
-						align: _dataFolio.align
-					});
+				doc.text((i+1)+"/"+range.count, {
+					width : _dataFolio.width,
+					align: _dataFolio.align
+				});
+				_header();
+				_footer();
 			}
 			doc.flushPages();
 		}
 	};
 	var _line = function(position, move){
-		if(_hasToNextPage()){
-			_addPage();
-		}
+		
 		_setPosition(position);
 
 		doc
@@ -234,15 +245,25 @@ module.exports.pdf = function(param){
 			return this;
 		},
 		footer : function(data, position){
-			_footer(data, position);
+			_dataFooter = {
+				data : data,
+				position : position
+			};
+
 			return this;
 		},
 		header : function(data, position){
-			_header(data, position);
+			_dataHeader = {
+				data : data,
+				position : position
+			};
 			return this;
 		},
 		doc : function(){
 			return doc;
+		},
+		getUrl : function(){
+			return _dest;
 		}
 	}
 };

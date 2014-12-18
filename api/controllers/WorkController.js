@@ -435,9 +435,11 @@ module.exports = {
 			return [_work];
 		})
 		.spread(function(work){
+
 			var pdfWork = new sails.config.pdf({
 				type : "work",
-				dest : "public/files/test.pdf",
+				dest : "public/files/works/",
+				filename : work.id+".pdf",
 				line : {
 					height : 9,
 					padding : 2,
@@ -492,38 +494,12 @@ module.exports = {
 					y : doc.page.height-50
 				}
 			})
-			.header([{
-				size : 1.75,
-					text : [{
-						align : "left",
-						value : "Atelier\n\nrue des technologies 2ter\nB-4432 Alleur"
-					}]
-				},{
-					size : 1.75,
-					text : [{
-						align : "left",
-						value : "Siège Social\n\nrue Emille Vendervelde 59\nB-4431 Loncin"
-					}]
-				},{
-					size : 1.75,
-					text : [{
-						align : "left",
-						value : "Téléphone & Fax\n\nFixe : 04 366.13.18\nFax : 04 239.20.89"
-					}]
-				},{
-					size : 1.75,
-					text : [{
-						align : "left",
-						value : "Internet\n\nMail : info@atelierdufroid.be\nSite : www.atelierdufroid.be"
-					}]
-				}
-			],function position (doc){
+			.header([],function position (doc){
 				return {
 					x : doc.page.margins.left,
 					y : 5
 				}
 			})
-
 			.title([{
 					size : 1,
 					text : [{
@@ -789,9 +765,7 @@ module.exports = {
 				]);
 			});
 			pdfWork
-			.moveBottom(5);
-			console.log(pdfWork.doc().y);
-			pdfWork
+			.moveBottom(5)
 			.line()
 			.row([{
 					size :7, 
@@ -897,11 +871,12 @@ module.exports = {
 					}]
 				}
 			]);
-			console.log(pdfWork.doc().y);
-			pdfWork
 
 			pdfWork.end();
-			return res.json(work);
+			return res.json({
+				success : true, 
+				url : pdfWork.getUrl()
+			});
 			
 		})
 		.catch(function(err){

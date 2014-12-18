@@ -160,6 +160,7 @@
 						realTime
 						.startTimer();
 						
+						workerRealTime[data.data.worker]&&
 						workerRealTime[data.data.worker]
 						.startTimer();
 						
@@ -179,6 +180,7 @@
 						realTime
 						.stopTimer();
 
+						workerRealTime[data.previous.worker.id]&&
 						workerRealTime[data.previous.worker.id]
 						.stopTimer();
 						
@@ -206,7 +208,7 @@
 								);
 							});
 
-		var workerRealTime = {};
+		window.workerRealTime = {};
 
 		work
 		.worker
@@ -230,8 +232,8 @@
 			var stoped = schedule.stoped ? moment(new Date(schedule.stoped)) : moment(new Date());
 			var diff = stoped.diff(started, 'seconds');
 																			
-			workerRealTime[schedule.worker]
-			.inc(diff);
+			workerRealTime[schedule.worker] && 
+			workerRealTime[schedule.worker].inc(diff);
 
 			realTime
 			.inc(diff);
@@ -240,6 +242,7 @@
 				realTime
 				.startTimer();
 				
+				workerRealTime[schedule.worker] &&
 				workerRealTime[schedule.worker]
 				.startTimer(false);
 			}
@@ -306,6 +309,7 @@
 					realTime
 					.stopTimer();
 
+					workerRealTime[data.worker] && 
 					workerRealTime[data.worker]
 					.stopTimer();
 					
@@ -338,6 +342,7 @@
 					realTime
 					.startTimer();
 					
+					workerRealTime[data.worker] &&
 					workerRealTime[data.worker]
 					.startTimer();
 					
