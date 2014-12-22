@@ -149,9 +149,9 @@
 					<label class="col-sm-2">Document(s)</label>
 					<div class="form-group col-sm-10">
 						<div class="col-sm-5">
-						<button class="btn btn-primary printwork" >
-							Imprimer la fiche
-						</button>
+							<button class="btn btn-primary printwork" >
+								Fiche de travail
+							</button>
 						</div>
 					</div>
 				</fieldset>
@@ -322,6 +322,7 @@
 			author_id : "<%= session.worker ? session.worker.id : '' %>",
 			complete : function(){
 				$(".finishWork").removeClass("disabled");
+				realTime.stopAll();
 			},
 			uncomplete : function(){
 				$(".finishWork").addClass("disabled");

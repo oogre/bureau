@@ -123,7 +123,7 @@
 	$elements
 	.find("li .elementHead")
 	.on("click", function(){
-		window.location.href = "/element/show/"+$(this).attr("id");
+		window.location.href = "/element/show/"+$(this).parent().attr("id");
 		return false;
 	});
 

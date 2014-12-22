@@ -1,7 +1,22 @@
+<style type="text/css">
+	.cal-week-box [data-event-class].ogre{
+		height: auto;
+	}
+
+</style>
+
 <% _.each(events, function(event){ %>
 <div class="cal-row-fluid">
-	<div class="cal-cell<%= event.days%> cal-offset<%= event.start_day %> day-highlight dh-<%= event['class'] %>" data-event-class="<%= event['class'] %>">
-		<a href="<%= event.url ? event.url : 'javascript:void(0)' %>" data-event-id="<%= event.id %>" class="cal-event-week event<%= event.id %>"><%= event.title %></a>
+	<div class="cal-cell<%= event.days%> cal-offset<%= event.start_day %> day-highlight dh-<%= event['class'] %> ogre" data-event-class="<%= event['class'] %>" >
+		<%= event.title %>
+		<div class="btns">
+			<a href="/work/show/<%= event.id %>" class="btn btn-info" type="button">
+				Voir
+			</a>
+			<a href="/work/edit/<%= event.id %>" class="btn btn-warning" type="button">
+				Editer
+			</a>
+		</div>
 	</div>
 </div>
 <% }); %>

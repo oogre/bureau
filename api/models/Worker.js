@@ -55,6 +55,60 @@ module.exports = {
 		wiki : {
 			collection : 'wiki',
 			via : "id"
+		},
+
+		toJSON: function(){
+			var  obj = this.toObject();
+			delete obj.password;
+			delete obj.confirmation;
+			delete obj.encryptedPassword;
+			delete obj._csrf;
+			return obj;
+		},
+
+		cleanSession : function(){
+			var  obj = this.toObject();
+			delete obj._csrf;
+			return obj;
+		},
+
+		initSession : function(session){
+			var birthDate = new Date()
+			var deathDate = new Date(birthDate.getTime() + sails.config.session.cookie.maxAge);
+			session.cookie.expires = deathDate;
+			session.authenticated = true;
+			session.worker = this.cleanSession();
+			this.online = true;
+			return this;
+		},
+
+	    destroySession : function(session){
+	      this.online = false;
+	      session.destroy();
+	      return this;
+	    },
+
+		signin : function(session, next){
+			this
+			.initSession(session)
+			.save(function saved(err, worker){
+				if(err){
+					worker.destroySession(session);
+					return callback(err); 
+				}
+				return next(null, worker);
+			});
+		},
+
+		signout : function (session, next){
+			this
+			.destroySession(session)
+			.save(function saved(err, worker){
+				if(err){
+					return next(err);
+				}
+				return next(null, worker);
+			});
 		}
 	},
 	beforeCreate : function(values, next){

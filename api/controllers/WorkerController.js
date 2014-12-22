@@ -6,6 +6,7 @@
  */
 
 module.exports = {
+
 	"index" : function(req, res, next){
 		var where = req.param("where") && "undefined" != req.param("where") ? JSON.parse(req.param("where")) : null;
 		var limit = req.param("limit") && "undefined" != req.param("limit") ? JSON.parse(req.param("limit")) : null;
@@ -41,16 +42,8 @@ module.exports = {
 			return [roles]
 		})
 		.spread(function (roles){
-			var teams = 	Team.find()
-							.then(function(teams){
-								return teams;
-							});
-			return [roles, teams];
-		})
-		.spread(function (roles, teams){
 			return res.view({
-				roles : roles,
-				teams : teams
+				roles : roles
 			});
 		})
 		.catch(function(err){

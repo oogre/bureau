@@ -48,5 +48,10 @@ module.exports.policies = {
 		// before letting any users feed our rabbits
 		// feed : ['isNiceToAnimals', 'hasRabbitFood']
 	// }
-    '*': ['flash', "location"],
+    '*': ['flash', "location", "authenticated"],
+
+    "session": {
+      "new" : ["flash", "location"],
+      "create" : ["flash", "location"],
+    },
 };

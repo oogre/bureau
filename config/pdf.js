@@ -222,6 +222,10 @@ module.exports.pdf = function(param){
 		_moveBottom(move || param.stroke.bold);
 	}
 	return {
+		addPage : function(){
+			_addPage();
+			return this;
+		},
 		end : function(){
 			_folio();
 			doc.end();

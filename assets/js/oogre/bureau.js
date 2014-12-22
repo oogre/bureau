@@ -63,6 +63,11 @@
 			var _timers = [];
 			var _value = moment.duration(0, "seconds");
 			var _display = function(duration){};
+			var _events = {
+				"stop" : [],
+				"start" : []
+			};
+			var _data = {};
 			return {
 				display : function(cb){
 					_display = cb;
@@ -75,7 +80,19 @@
 					}
 					return this;
 				},
-				startTimer : function(multiTimer){
+				data : function(name, data){
+					if(_.isUndefined(name) || _.isNull(name)){
+						return _data;
+					}
+					else if(_.isUndefined(data)){
+						return _data[name];	
+					}
+					else{
+						_data[name] = data;	
+						return this;
+					}
+				},
+				startTimer : function(multiTimer, disableEvent){
 					multiTimer = multiTimer || _.isUndefined(multiTimer) || _.isNull(multiTimer) ? true : false; 
 					var _this = this;
 					if(multiTimer || _timers.length == 0){
@@ -84,13 +101,37 @@
 							}, 1000)
 						);
 					}
+					if(!disableEvent){
+						this.fire("start");
+					}
+
 					return this;
 				},
 				stopTimer : function(){
 					clearInterval(_timers[0]);
 					_timers.shift();
+					this.fire("stop");
 					return this;
-				}
+				},
+				addEvent : function(name){
+					_events[name] = [];
+					return this;
+				},
+				fire : function(event, data){
+					var _this = this;
+					_.isArray(_events[event])&&
+					_events[event]
+					.map(function(cb){
+						cb(_this, data);
+					});
+					return _this;
+				},
+				on : (function(type, cb){
+					if(_.isFunction(cb) && _.isArray(_events[type])){
+						_events[type].push(cb);
+					}
+					return this;
+				})
 			}
 		},
 		popover : function(){
@@ -101,6 +142,11 @@
 			});
 		},
 		link : function(){
+			if(document.referrer == window.location.href){
+				$("a[href='/back'").addClass("hide");
+			}
+
+
 			$("a:not([href*=destroy])").on("click", function(){
 				var href = $(this).attr("href")
 				if(href == "/back"){

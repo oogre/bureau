@@ -35,6 +35,10 @@ module.exports.session = {
   //   maxAge: 24 * 60 * 60 * 1000
   // }
 
+  cookie: {
+    maxAge: 1000 * 60 * 60 * 24
+  },
+
   /***************************************************************************
   *                                                                          *
   * In production, uncomment the following lines to set up a shared redis    *

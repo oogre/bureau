@@ -33,9 +33,17 @@ module.exports.routes = {
   ***************************************************************************/
 
   '/': {
-    view: 'homepage'
+    controller: 'session',
+    action : "new"
   },
-
+  '/create': {
+    controller: 'session',
+    action : "create"
+  },
+  "/signout" :{
+    controller: 'session',
+    action : "destroy"
+  },
 
   'get /public/files/*': function(req, res, next) {
     return res.sendfile(sails.config.appPath+req.path);

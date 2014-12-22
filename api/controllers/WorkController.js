@@ -435,10 +435,18 @@ module.exports = {
 			return [_work];
 		})
 		.spread(function(work){
+			var data = populateElementAndTask(work, null)
+			.then(function(data){
+				return data;
+			})
+			return [data];
+		})
+		.spread(function(data){
+			var work = data.work;
 
 			var pdfWork = new sails.config.pdf({
 				type : "work",
-				dest : "public/files/works/",
+				dest : "public/files/works",
 				filename : work.id+".pdf",
 				line : {
 					height : 9,
@@ -703,20 +711,22 @@ module.exports = {
 			]);
 			work.material
 			.map(function(material){
-				pdfWork.row([{
-									size : 1, 
-									text : [{
-										align : "center",
-										value : material.quantity + " " + material.unit.shortname
-									}]
-								},{
-									size : 6, 
-									text : [{
-										align : "center",
-										value : material.name
-									}]
-								}
-				]);
+				if(material.quantity>0){
+					pdfWork.row([{
+										size : 1, 
+										text : [{
+											align : "center",
+											value : material.quantity + (material.unit ? (" " + material.unit.shortname)  : "")
+										}]
+									},{
+										size : 6, 
+										text : [{
+											align : "center",
+											value : material.name
+										}]
+									}
+					]);
+				}
 			});
 			pdfWork
 			.moveBottom(5)
@@ -872,12 +882,197 @@ module.exports = {
 				}
 			]);
 
+			if(work.type.name == "maintenance"){
+				(work.element||[])
+				.map(function(element){
+					pdfWork
+					.addPage()
+					.row([{
+							size : 4, 
+							text : [{
+								align : "left",
+								value : "Date de l'entretien : "
+							},{
+								align : "center",
+								value : "."
+							}]
+						},{
+							size : 3, 
+							text : [{
+								align : "left",
+								value : (function(){
+									var date = new Date(work.rendezvous);
+									return date.getDate() + "/" + (date.getMonth()+1) + "/" + date.getFullYear();
+								})()
+							},{
+								align : "center",
+								value : "."
+							}]
+						}
+					])
+					.row([{
+							size : 4, 
+							text : [{
+								align : "left",
+								value : "Magasin : "
+							},{
+								align : "center",
+								value : "."
+							}]
+						},
+						{
+							size : 3, 
+							text : [{
+								align : "left",
+								value : work.shop.name
+							},{
+								align : "center",
+								value : "."
+							}]
+						}
+					])
+					.row([{
+							size : 4, 
+							text : [{
+								align : "left",
+								value : "N°de la société : "
+							},{
+								align : "center",
+								value : "."
+							}]
+						},{
+							size : 3, 
+							text : [{
+								align : "left",
+								value : work.shop.id
+							},{
+								align : "center",
+								value : "."
+							}]
+						}
+					])
+					.row([{
+							size : 4, 
+							text : [{
+								align : "left",
+								value : "N° technicien : "
+							},{
+								align : "center",
+								value : "."
+							}]
+						},{
+							size : 3, 
+							text : [{
+								align : "left",
+								value : work.worker.map(function(worker){return worker.id}).join(", ")
+							},{
+								align : "center",
+								value : "."
+							}]
+						}
+					])
+					.row([{
+							size : 4, 
+							text : [{
+								align : "left",
+								value : "Elément"
+							},{
+								align : "center",
+								value : "."
+							}]
+						},{
+							size : 3, 
+							text : [{
+								align : "left",
+								value : element.name
+							},{
+								align : "center",
+								value : "."
+							}]
+						}
+					])
+					.moveBottom(5)
+					.line();
+					(element.task||[])
+					.map(function(elem){
+						pdfWork
+						.row([{
+								size : 4, 
+								text : [{
+									align : "left",
+									value : elem.task.name
+								},{
+									align : "center",
+									value : "."
+								}]
+							},{
+								size : 3, 
+								text : [{
+									align : "left",
+									value : _.isString(elem.task.value) && elem.task.value!=="true" ? elem.task.value : (elem.task.value === "true" ? "V" : "X" )
+								},{
+									align : "center",
+									value : "."
+								}]
+							}
+						]);
+					});
+					(element.wiki||[])
+					.map(function(wiki){
+
+
+						console.log(new Date(wiki.createdAt));
+						console.log(new Date(work.closedAt));
+						console.log(new Date(wiki.createdAt) - new Date(work.closedAt));
+						console.log("");
+						console.log(new Date(wiki.createdAt));
+						console.log(new Date(work.rendezvous));
+						console.log(new Date(wiki.createdAt) - new Date(work.rendezvous));
+						console.log("");
+						console.log("");
+						if( new Date(wiki.createdAt) - new Date(work.rendezvous) >= 0 && new Date(wiki.createdAt) - new Date(work.closedAt) >= 0){
+							pdfWork.row([{
+											size : 7, 
+											text : (function(){
+												return [{
+													align : "center",
+													value : wiki.name
+												}].concat( 	wiki.description
+															.split("<img")
+															.map(function(elem, n){
+																if(n%2==1){
+																	elem = elem.split("src=")[1].split(" ")[0];
+																	elem = elem.substr(2, elem.length-3);
+																	return {
+																		align : "center",
+																		value : {
+																			src : elem,
+																			param : {
+																				fit : [100, 100]
+																			}
+																		}
+																	}
+																}
+																else{
+																	return { 
+																		align : "center",
+																		value : _(elem.replace(/<\/p>|<\/br>|<br>/g, "\n")).stripTags()
+																	}
+																}
+															}))
+											})()
+										}
+							]);
+						}
+					});				
+				})
+			}
+
 			pdfWork.end();
 			return res.json({
 				success : true, 
 				url : pdfWork.getUrl()
 			});
-			
 		})
 		.catch(function(err){
 			return next(err);

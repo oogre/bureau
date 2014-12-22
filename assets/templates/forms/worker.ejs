@@ -144,61 +144,8 @@
 
 <script type="text/javascript">
 	<% if(!create){ %>
-		io.socket.get('/workschedule');
-		// When a socket message about a user is received, display it
-		io.socket.on('workschedule', function(data) {
-			setTimeout(function(){
-				if(data.verb == "created"){
-					var _button = $("button.schedule[data-worker-id='"+data.data.worker+"']");
-					var attr = _button.attr('data-schedule-id');
-					if (typeof(attr) !== typeof(undefined) && attr !== false) {}
-					else{
-						_button.attr('data-schedule-id', data.data.id)
-						.removeClass("btn-default")
-						.addClass("btn-success");
-
-						realTime
-						.startTimer();
-						
-						workerRealTime[data.data.worker]&&
-						workerRealTime[data.data.worker]
-						.startTimer();
-						
-						work
-						.schedule
-						.push(data.data);
-					}
-				}
-				else if(data.verb == "updated"){
-					var _button = $("button.schedule[data-worker-id='"+data.previous.worker.id+"']");
-					var attr = _button.attr('data-schedule-id');
-					if (typeof(attr) !== typeof(undefined) && attr !== false) {
-						_button.removeAttr('data-schedule-id')
-						.addClass("btn-default")
-						.removeClass("btn-success");
-						
-						realTime
-						.stopTimer();
-
-						workerRealTime[data.previous.worker.id]&&
-						workerRealTime[data.previous.worker.id]
-						.stopTimer();
-						
-						work.schedule =	work
-										.schedule
-										.map(function(schedule){
-											if(schedule.id === data.id){
-												schedule.stoped = data.data.stoped;
-											}
-											return schedule;
-										});
-					}
-				}
-			}, 500);
-		});
-	
-
-		var realTime = new 	BUREAU.tools.realTime()
+		
+		window.realTime = new BUREAU.tools.realTime()
 							.display(function(duration){
 								$(".schedule-total")
 								.text(
@@ -210,10 +157,61 @@
 
 		window.workerRealTime = {};
 
+
+		var saveStart = function(realtime){
+			var schedule = _.find(work.schedule, function(schedule){ return !schedule.stoped && schedule.worker == realtime.data("worker")});
+			if(!schedule){
+				return BUREAU.tools.api({
+					url : "/workSchedule/create",
+					type : "POST",
+					data : {
+						worker : {
+							id : realtime.data("worker")
+						},
+						work : {
+							id : "<%= work.id %>"
+						},
+						started : moment().toISOString(),
+						_csrf : "<%= _csrf %>"
+					},
+				}).done(function(data){
+					work
+					.schedule
+					.push(data);
+				});
+			}else{
+				return new $.Deferred().reject();
+			}
+		};
+		var saveStop = function(realtime){
+			var schedule = _.find(work.schedule, function(schedule){ return !schedule.stoped && schedule.worker == realtime.data("worker")});
+			if(schedule){
+				BUREAU.tools.api({
+					url : "/workSchedule/update/"+schedule.id,
+					type : "PUT",
+					data : {
+						stoped : moment().toISOString(),
+						_csrf : "<%= _csrf %>"
+					}
+				}).done(function(data){
+					work.schedule =	work
+									.schedule
+									.map(function(schedule){
+										if(schedule.id === data.id){
+											schedule.stoped = data.stoped;
+										}
+										return schedule;
+									});
+				});
+			}
+		};
+
+
 		work
 		.worker
 		.map(function(worker){
 			workerRealTime[worker.id] = new	BUREAU.tools.realTime()
+											.data("worker", worker.id)
 											.display(function(duration){
 												$(".schedule-worker[data-worker-id='"+worker.id+"']")
 												.text(
@@ -221,9 +219,51 @@
 													_.pad(duration.minutes(), 2, "0") + ":" +
 													_.pad(duration.seconds(), 2, "0")
 												);
+											})
+											.on("start", function(realtime){
+												var _this = this;
+												saveStart(realtime)
+												.done(function(data){
+													realtime.fire("saved", data);
+												})
+											})
+											.addEvent("saved")
+											.on("saved", function(realtime, data){
+												$("button.schedule[data-worker-id='worker.id']")
+												.attr('data-schedule-id', data.id);
+											})
+											.on("stop", function(realtime){
+												saveStop(realtime)
 											});
 		});
 
+		realTime.startAll = function(){
+			work
+			.worker
+			.map(function(worker){
+				workerRealTime[worker.id] &&
+				workerRealTime[worker.id]
+				.startTimer(false);
+			});
+			this.startTimer(false);
+			$("button.schedule")
+			.removeClass("btn-default")
+			.addClass("btn-success");
+		};
+
+		realTime.stopAll = function(){
+			work
+			.worker
+			.map(function(worker){
+				workerRealTime[worker.id] &&
+				workerRealTime[worker.id]
+				.stopTimer();
+			});
+			this.stopTimer();
+			$("button.schedule")
+			.addClass("btn-default")
+			.removeClass("btn-success");
+		};
 
 		work
 		.schedule
@@ -244,7 +284,7 @@
 				
 				workerRealTime[schedule.worker] &&
 				workerRealTime[schedule.worker]
-				.startTimer(false);
+				.startTimer(false, true);
 			}
 		});
 
@@ -295,73 +335,33 @@
 			var scheduleId = 	$(_button)
 								.attr('data-schedule-id');
 
-			var deferred;
 			if (typeof scheduleId !== typeof undefined && scheduleId !== false) {
-				$(_button).removeAttr('data-schedule-id');
-				deferred = BUREAU.tools.api({
-					url : "/workSchedule/update/"+scheduleId,
-					type : "PUT",
-					data : {
-						stoped : moment().toISOString(),
-						_csrf : "<%= _csrf %>"
-					}
-				}).done(function(data){
-					realTime
-					.stopTimer();
+				var workerId = 	$(_button)
+								.removeAttr('data-schedule-id')
+								.attr("data-worker-id");;
+				realTime
+				.stopTimer();
 
-					workerRealTime[data.worker] && 
-					workerRealTime[data.worker]
-					.stopTimer();
-					
-					work.schedule =	work
-									.schedule
-									.map(function(schedule){
-										if(schedule.id === data.id){
-											schedule.stoped = data.stoped;
-										}
-										return schedule;
-									});
-				});
+				
+				workerRealTime[workerId] &&
+				workerRealTime[workerId]
+				.stopTimer();
 			}
 			else{
-				deferred = BUREAU.tools.api({
-					url : "/workSchedule/create",
-					type : "POST",
-					data : {
-						worker : {
-							id : $(_button).attr("data-worker-id")
-						},
-						work : {
-							id : "<%= work.id %>"
-						},
-						started : moment().toISOString(),
-						_csrf : "<%= _csrf %>"
-					},
-				}).done(function(data){
-					$(_button).attr('data-schedule-id', data.id);
-					realTime
-					.startTimer();
-					
-					workerRealTime[data.worker] &&
-					workerRealTime[data.worker]
-					.startTimer();
-					
-					work
-					.schedule
-					.push(data);
+				var workerId = $(_button).attr("data-worker-id");
 
-				});
+				realTime
+				.startTimer();
+			
+				workerRealTime[workerId] &&
+				workerRealTime[workerId]
+				.startTimer(false);
 			}
 				
-			deferred
-			.done(function(data){
-				$(_button)
-				.toggleClass("btn-default")
-				.toggleClass("btn-success");
-			})
-			.fail(function(message){
-				console.log(message);
-			});
+			$(_button)
+			.toggleClass("btn-default")
+			.toggleClass("btn-success");
+			
 			 return false;
 		});
 

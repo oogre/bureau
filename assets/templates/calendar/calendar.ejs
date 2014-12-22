@@ -50,12 +50,12 @@
 
 <script type="text/javascript">
 
-	var worker = "<%= typeof(worker) != typeof(undefined) ? ('?worker='+worker) : '' %>";
+	
 
 	window.calendar = $("#calendar").calendar({
 		language: 'fr-FR',
 		tmpl_path: "/templates/calendar/tmpls/",
-		events_source: "/work/finder"+worker
+		events_source: "/work/finder"+"<%= typeof(worker) != typeof(undefined) ? ('?worker='+worker) : '' %>"
 	});
 
 	$('.btn-group button[data-calendar-nav]').each(function() {
