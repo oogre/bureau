@@ -398,7 +398,7 @@ module.exports = {
 								title : work.type.name+" "+work.shop.brand+" "+_(work.wiki[0].description).chain().unescapeHTML().stripTags().truncate(25).value(),
 								class: classValue,
 								start : work.rendezvous ? new Date(work.rendezvous).valueOf() : new Date(work.deadLine).valueOf(),
-								end : (work.rendezvous ? new Date(work.rendezvous).valueOf() : new Date(work.deadLine).valueOf())+(work.time*60*60*1000)
+								end : (work.rendezvous ? new Date(work.rendezvous).valueOf() : new Date(work.deadLine).valueOf())+((work.time||1)*60*60*1000)
 							}
 						})
 			});

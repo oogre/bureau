@@ -1,14 +1,16 @@
 <style type="text/css">
 	.cal-week-box [data-event-class].ogre{
 		height: auto;
+		padding: 10px;
+		min-width: 140px;
 	}
 
 </style>
 
 <% _.each(events, function(event){ %>
 <div class="cal-row-fluid">
-	<div class="cal-cell<%= event.days%> cal-offset<%= event.start_day %> day-highlight dh-<%= event['class'] %> ogre" data-event-class="<%= event['class'] %>" >
-		<%= event.title %>
+	<div class="cal-cell<%= event.days%> cal-offset<%= event.start_day %> day-highlight dh-<%= event['class'] %> ogre text-center" data-event-class="<%= event['class'] %>" >
+		<%= event.title.split(" ").splice(1).join(" ") %>
 		<div class="btns">
 			<a href="/work/show/<%= event.id %>" class="btn btn-info" type="button">
 				Voir

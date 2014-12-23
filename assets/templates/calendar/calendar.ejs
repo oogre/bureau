@@ -50,34 +50,24 @@
 
 <script type="text/javascript">
 
-	
-
 	window.calendar = $("#calendar").calendar({
 		language: 'fr-FR',
 		tmpl_path: "/templates/calendar/tmpls/",
 		events_source: "/work/finder"+"<%= typeof(worker) != typeof(undefined) ? ('?worker='+worker) : '' %>"
+	})
+	.on("yearShow monthShow weekShow dayShow", function(event){
+		$("button[data-calendar-view='"+event.hide+"']").removeClass("active");
+		$("button[data-calendar-view='"+event.show+"']").addClass("active");
 	});
 
-	$('.btn-group button[data-calendar-nav]').each(function() {
-		var $this = $(this);
-		$this.click(function() {
-			calendar.navigate($this.data('calendar-nav'));
-		});
+	$('.btn-group button[data-calendar-nav]')
+	.on("click", function() {
+		calendar.navigate($(this).attr('data-calendar-nav'));
 	});
 
-	$('.btn-group button[data-calendar-view]').each(function() {
-		var $this = $(this);
-		$this.click(function() {
-			calendar.view($this.data('calendar-view'));
-			$this
-			.parent()
-			.find(".active")
-			.removeClass("active")
-			.end()
-			.end()
-			.addClass("active");
-		})
-		
+	$('.btn-group button[data-calendar-view]')
+	.on("click", function() {
+		calendar.view($(this).attr('data-calendar-view'));
 	});
 </script>
 

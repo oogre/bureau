@@ -1,3 +1,13 @@
+<style type="text/css">
+	#cal-day-box .ogre{
+		height: auto;
+		padding: 10px;
+		min-width: 140px;
+		min-height: 115px;
+	}
+
+</style>
+
 <h3 class="cal-row-fluid cal-row-head text-center month-name">
 	<%=day_name%> <%=day_number%> <%=month_name%> <%= year %>
 </h3>
@@ -50,9 +60,9 @@
 		</div>
 		
 		<% _.each(by_hour, function(event){ %>
-			<div class="pull-left day-event day-highlight dh-<%= event['class'] %>" style="margin-top: <%= (event.top * 30) %>px; height: <%= (event.lines * 30) %>px">
-				<span class="cal-hours"><%= event.start_hour %> - <%= event.end_hour %></span>
-				<%= event.title %>
+			<div class="pull-left day-event day-highlight dh-<%= event['class'] %> ogre text-center" style="margin-top: <%= (event.top * 30) %>px; height: <%= (event.lines * 30) %>px">
+				<div class="cal-hours"><%= event.start_hour %> - <%= event.end_hour %></div>
+				<%= event.title.split(" ").splice(1).join(" ") %>
 				<div class="btns">
 					<a href="/work/show/<%= event.id %>" class="btn btn-info" type="button">
 						Voir
