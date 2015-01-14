@@ -1,5 +1,6 @@
 <%
 	var id = req.session.location.controller + "-" + req.session.location.action;
+	var isBoss = req.session.worker.role >= 99;
 %>
 
 <div class="container">
@@ -8,15 +9,16 @@
 
 		<hr/>
 		
-		<div class="row">
-			<div class="col-sm-12">
-				<div class="btn-group">
-					<a href="/<%= req.session.location.controller %>/new" class="btn btn-primary new" type="button">Créé un travailleur</a>
+		<% if(isBoss){ %>
+			<div class="row">
+				<div class="col-sm-12">
+					<div class="btn-group">
+						<a href="/<%= req.session.location.controller %>/new" class="btn btn-primary new" type="button">Créé un travailleur</a>
+					</div>
 				</div>
 			</div>
-		</div>
-
-		<hr/>
+			<hr/>
+		<% } %>
 
 		<section>
 			<ol id="workers"></ol>
@@ -66,39 +68,42 @@
 						return team;
 					});
 
-		BUREAU.tools.sortable($workers, function(item){
 
-			if("workers" == item.parent().attr("id")){
-				$workers
-				.append(JST["assets/templates/show/team.ejs"]({
-					team : teams.length,
-				}))
-				.find("ol")
-				.last()
-				.append(item);
-			};
-			teams =	$("li[id^=team_] ol")
-					.toArray()
-					.map(function(team, id){
-						return $(team)
-						.children("li")
+		<% if(isBoss){ %>
+			BUREAU.tools.sortable($workers, function(item){
+
+				if("workers" == item.parent().attr("id")){
+					$workers
+					.append(JST["assets/templates/show/team.ejs"]({
+						team : teams.length,
+					}))
+					.find("ol")
+					.last()
+					.append(item);
+				};
+				teams =	$("li[id^=team_] ol")
 						.toArray()
-						.map(function(_worker){
-							var worker = _.find(window.workers, function(worker){ return $(_worker).attr("id") == worker.id })
-							if(worker){
-								BUREAU.tools.api({
-									url : "/worker/update/"+worker.id,
-									type : "PUT",
-									data : {
-										team : id,
-										_csrf : "<%= _csrf %>"
-									},
-								});
-							}
-							return worker;
-						});
-			})
-		});
+						.map(function(team, id){
+							return $(team)
+							.children("li")
+							.toArray()
+							.map(function(_worker){
+								var worker = _.find(window.workers, function(worker){ return $(_worker).attr("id") == worker.id })
+								if(worker){
+									BUREAU.tools.api({
+										url : "/worker/update/"+worker.id,
+										type : "PUT",
+										data : {
+											team : id,
+											_csrf : "<%= _csrf %>"
+										},
+									});
+								}
+								return worker;
+							});
+				})
+			});
+		<% } %>
 	};
 
 	window.addEventListener("load", documentLoaded);

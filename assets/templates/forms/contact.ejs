@@ -32,11 +32,13 @@
 				<input class="form-control" type="text" id="contact_<%= id %>_email" name="contact_<%= id %>_email" placeholder="" value="<%= contact.email || '' %>">
 			</div>
 		</div>
+		<% if(role>=99){ %>
 		<div class="form-group col-sm-1">
 			<div class="input-group col-sm-12">
 				<button class="btn btn-danger remove-contact" >Supprimer&nbsp; <i class="fa fa-user"></i></button>
 			</div>
 		</div>
+		<% } %>
 	</fieldset>
 </fieldset>
 

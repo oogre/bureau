@@ -59,8 +59,18 @@ module.exports = {
 		.populateAll()
 		.then(function foundShop(worker){
 			if(!worker) return res.redirect("/worker/index");
+
+
+			var roles = Role.find()
+						.then(function(roles){
+							return roles
+						});
+			return [worker, roles];
+		})
+		.spread(function (worker, roles){
 			return res.view({
-				worker : worker
+				worker : worker,
+				roles : roles
 			});
 		})
 		.catch(function(err){

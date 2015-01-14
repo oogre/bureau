@@ -15,7 +15,9 @@
 	</div>
 	<% if(!show){%>
 	<div class="btn-group-vertical col-sm-2" role="group" >
-		<button class="btn btn-default add-element">Modifier</button>
+		<% if(role >= 99){ %>
+			<button class="btn btn-default add-element">Modifier</button>
+		<% } %>
 		<button class="btn btn-primary save-element hide" >Enregistrer</button>
 	</div>
 	<% } %>

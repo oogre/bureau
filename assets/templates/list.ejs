@@ -40,9 +40,11 @@
 				<a href="/<%= controller %>/edit/<%= row.id %>" class="btn btn-warning" type="button">
 					Editer
 				</a>
+				<% if(role>=99){%>
 				<a href="/<%= controller %>/destroy/<%= row.id %>" class="btn btn-danger" type="button">
 					Supprimer
 				</a>
+				<%}%>
 			</td>
 		</tr>
 	<%	

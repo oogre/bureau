@@ -106,7 +106,7 @@
 						<td><span class="schedule-total">00:00:00</span></td>
 					</tr>
 
-					<% if(!show && workers.length > 0){%>
+					<% if(!show && workers.length > 0 && role>=99){%>
 						<tr>
 							<td>
 								<div class="input-group col-sm-12">
@@ -229,7 +229,7 @@
 											})
 											.addEvent("saved")
 											.on("saved", function(realtime, data){
-												$("button.schedule[data-worker-id='worker.id']")
+												$("button.schedule[data-worker-id='"+worker.id+"']")
 												.attr('data-schedule-id', data.id);
 											})
 											.on("stop", function(realtime){

@@ -1,5 +1,6 @@
 <%
 	var id = req.session.location.controller + "-" + req.session.location.action;
+	var isBoss = req.session.worker.role >= 99;
 %>
 
 <div class="container">
@@ -8,13 +9,14 @@
 
 		<hr/>
 		
+		<% if(isBoss){%>
 		<div class="row">
 			<div class="btn-group col-sm-12">
 				<a href="/<%= req.session.location.controller %>/new" class="btn btn-primary new" type="button">Créé un magasin</a>
 			</div>
 		</div>
-
 		<hr/>
+		<% }%>
 
 		<section></section>
 
@@ -25,6 +27,7 @@
 	
 	var  documentLoaded = function (){
 		$("section").append(JST["assets/templates/list.ejs"]({
+			role : <%= req.session.worker.role %>,
 			table : {
 				head : [{
 					name : "brand",

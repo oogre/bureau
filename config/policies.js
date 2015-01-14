@@ -54,4 +54,9 @@ module.exports.policies = {
       "new" : ["flash", "location"],
       "create" : ["flash", "location"],
     },
+
+    "worker" : {
+      "update" : ["flash", "location", "authenticated", "adminOrOwner"],
+      "*" : ['flash', "location", "authenticated"],
+    }
 };

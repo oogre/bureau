@@ -119,20 +119,9 @@ module.exports = {
 		values.id = require('shortid').generate();
 		values.password = values.id;
 
-		var promise = require('promised-io/promise');
+		
 
-		var encryptPassword = function(password){
-			var deferred = new promise.Deferred();
-			require("bcrypt")
-			.hash(values.password, 10, function passwordEncrypted(err, encryptedPassword){
-				if(err) {
-					deferred.reject(err);
-				}
-				deferred.resolve(encryptedPassword);
-			});
-
-			return deferred;
-		};
+		
 
 		encryptPassword(values.password)
 		.then(function(encryptedPassword){
@@ -141,6 +130,35 @@ module.exports = {
 		}, function(err){
 			return next(err)
 		})
+	},
+
+	beforeUpdate : function(values, next){
+		if(values.password){
+			encryptPassword(values.password)
+			.then(function(encryptedPassword){
+				values.encryptedPassword = encryptedPassword;
+				return next();
+			}, function(err){
+				return next(err)
+			})
+		}else{
+			console.log(values);
+			return next();
+		}
 	}
+};
+
+var encryptPassword = function(password){
+	var promise = require('promised-io/promise');
+	var deferred = new promise.Deferred();
+	require("bcrypt")
+	.hash(password, 10, function passwordEncrypted(err, encryptedPassword){
+		if(err) {
+			deferred.reject(err);
+		}
+		deferred.resolve(encryptedPassword);
+	});
+
+	return deferred;
 };
 

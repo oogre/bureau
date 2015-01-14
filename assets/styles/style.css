@@ -4,6 +4,9 @@
 	-moz-transition: width .3s linear;
 	-o-transition: width .3s linear;
 }
+#brand{
+	padding: 10px;
+}
 .navbar{
 	border-radius: 0;
 	margin: 0;

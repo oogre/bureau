@@ -54,7 +54,9 @@
 						<div class="form-control" id="wiki_<%= work.wiki[0].id %>" data-wiki-id="<%= work.wiki[0].id %>" name="wiki_<%= work.wiki[0].id %>"><%- work.wiki[0].description %></div>
 					</div>
 				</div>
+				<% if(req.session.worker.role >= 99){ %>
 				<label class="col-sm-2"><button class="btn btn-default edit-wiki-0 disabled">Editer</button></label>
+				<%}%>
 			</fieldset>
 
 			<hr/>
@@ -95,7 +97,9 @@
 								<div class="form-control" id="wiki_<%= wiki.id %>" data-wiki-id="<%= wiki.id %>" name="wiki_<%= wiki.id %>"><%- wiki.description %></div>
 							</div>
 						</div>
+						<% if(req.session.worker.role>=99){%>
 						<label class="col-sm-2"><button class="btn btn-danger deleteWiki">Supprimer</button></label>
+						<% } %>
 					</fieldset>
 				<%})
 			%>
@@ -208,6 +212,7 @@
 		});
 
 		$("#element").append(JST["assets/templates/forms/element.ejs"]({
+			role : <%= req.session.worker.role %>,
 			_csrf : "<%= _csrf %>"
 		}));
 
@@ -218,6 +223,7 @@
 		}));
 
 		$("#worker").append(JST["assets/templates/forms/worker.ejs"]({
+			role : <%= req.session.worker.role %>,
 			work : work,
 			workers : workers,
 			_csrf : "<%= _csrf %>"

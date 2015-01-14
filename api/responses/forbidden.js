@@ -13,10 +13,9 @@
  */
 
 module.exports = function forbidden (data, options) {
-
-  // Get access to `req`, `res`, & `sails`
-  var res = this.res;
-  
-  return res.redirect("/");
+	// Get access to `req`, `res`, & `sails`
+	var res = this.res;
+	res.status(403);
+	return res.redirect("/");
 };
 

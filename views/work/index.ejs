@@ -44,6 +44,7 @@
 			.one("click", initCalendar);
 
 			section.html(JST["assets/templates/list.ejs"]({
+				role : <%= req.session.worker.role %>,
 				table : {
 					head : [{
 						name : "type",

@@ -1,0 +1,292 @@
+<%
+	var id = req.session.location.controller + "-" + req.session.location.action;
+
+	var isOwnerOrAdmin = (req.session.worker.id === req.param("id")) || (req.session.worker.role == 100);
+
+
+%>
+
+<div class="container">
+	<div id="<%= id %>">
+		<h3>Editer un travailleur</h3>
+		<hr/>
+
+		<form class="form-inline" role="form" > 
+
+			<input type="hidden" name="_csrf" value="<%= _csrf %>" />
+			<fieldset class="row">
+				<label class="col-sm-2">Identification</label>
+				<div class="form-group col-sm-5">
+					<div class="input-group col-sm-12">
+						<label class="input-group-addon" for="firstname" >Prénom</label>
+						<input class="form-control" type="text" id="firstname" name="firstname" value="<%= worker.firstname || '' %>">
+					</div>
+				</div>
+				<div class="form-group col-sm-5">
+					<div class="input-group col-sm-12">
+						<label class="input-group-addon" for="lastname" >Nom</label>
+						<input class="form-control" type="text" id="lastname" name="lastname" value="<%= worker.lastname || '' %>">
+					</div>
+				</div>
+			</fieldset>
+
+			<fieldset class="row">
+				<div class="form-group col-sm-offset-2 col-sm-5">
+					<div class="input-group col-sm-12">
+						<label class="input-group-addon" for="email" >email</label>
+						<input class="form-control" type="text" id="email" name="email" value="<%= worker.email || '' %>">
+					</div>
+				</div>
+				<div class="form-group col-sm-5">
+					<div class="input-group col-sm-12">
+						<% if(isOwnerOrAdmin) {%>
+							<button class="btn btn-default changepwd" >Changer le mot de passe</button>
+						<%}%>
+					</div>
+					<div class="input-group col-sm-12 hide">
+							<label class="input-group-addon" for="password" >Mot de passe</label>
+							<input class="form-control" type="password" id="password" name="password">
+					</div>
+				</div>
+			</fieldset>
+
+			<fieldset class="row">
+				<div class="form-group col-sm-offset-2 col-sm-5">
+					<div class="input-group col-sm-12">
+						<label class="input-group-addon" for="phone" >Téléphone</label>
+						<input class="form-control" type="text" id="phone" name="phone" placeholder="" value="<%= worker.phone || '' %>">
+					</div>
+				</div>
+				<div class="form-group col-sm-5">
+					<div class="input-group col-sm-12 repwd hide">
+						<label class='input-group-addon' for='repassword' >réécrivez mot de passe</label>
+						<input class='form-control' type='password' id='repassword' name='repassword'>
+					</div>
+				</div>
+			</fieldset>
+
+			<fieldset class="row hide submitpwd">
+				<div class="form-group col-sm-offset-7 col-sm-5">
+						<button type="submit" name="submit" class="btn btn-primary savepwd">Enregistrer mot de passe</button>
+						<button class="btn btn-danger cancelpwd" >Annuler</button>
+				</div>
+			</fieldset>
+		
+			<hr/>
+			
+			<fieldset class="row">
+				<input class="form-control" type="hidden" name="addres">
+				<label class="col-sm-2">Rôle</label>
+				<div class="form-group col-sm-6">
+					<div class="input-group col-sm-12">
+						<label class="input-group-addon" for="role" >Rôle</label>
+						<select class='form-control' id="role" name="role">
+							<% (roles||[]).map(function(role){ 
+								%>
+								<option 
+									value="<%= role.id %>" 
+									<%= (role.id == worker.role.id) ? 'selected="selected"' : '' %> 
+									<%= (role.id > req.session.worker.role || worker.role.id > req.session.worker.role) 
+										? 
+											'disabled="disabled"'
+										: 
+											''
+										 %>
+								>
+									<%= role.name%>
+								</option>
+							<%})%>
+						</select>
+					</div>
+				</div>
+				
+			</fieldset>
+			<hr/>
+			
+			<fieldset class="row">
+				<label class="col-sm-2">Adresse</label>
+				<div class="form-group col-sm-6">
+					<div class="input-group col-sm-12">
+						<label class="input-group-addon" for="addres_street" >Rue</label>
+						<input class="form-control" type="text" id="addres_street" name="addres_street" placeholder="" value="<%= worker.adress || '' %>">
+					</div>
+				</div>
+				<div class="form-group col-sm-4">
+					<div class="input-group col-sm-12">
+						<label class="input-group-addon" for="numero" >Numéro</label>
+						<input class="form-control" type="text" id="addres_numero" name="addres_numero" placeholder="">
+					</div>
+				</div>
+			</fieldset>
+			<fieldset class="row">
+				<div class="form-group col-sm-offset-2 col-sm-6">
+					<div class="input-group col-sm-12">
+						<label class="input-group-addon" for="city" >Ville</label>
+						<input class="form-control" type="text" id="city" name="city" placeholder="" value="<%= worker.city || '' %>">
+					</div>
+				</div>
+				<div class="form-group col-sm-4">
+					<div class="input-group col-sm-12">
+						<label class="input-group-addon" for="zipcode" >Code Postale</label>
+						<input class="form-control" type="text" id="zipcode" name="zipcode" placeholder="" value="<%= worker.zipcode || '' %>">
+					</div>
+				</div>
+			</fieldset>
+			<fieldset class="row">
+				<div class="form-group col-sm-offset-2 col-sm-6">
+					<div class="input-group col-sm-12">
+						<label class="input-group-addon" for="country" >Pays</label>
+						<input class="form-control" type="text" id="country" name="country" placeholder="" value="<%= worker.country || '' %>">
+					</div>
+				</div>
+			</fieldset>
+			
+			<hr/>
+			<% if(isOwnerOrAdmin) {%>
+				<fieldset class="row">
+					<label class="col-sm-2"></label>
+					<div class="form-group col-sm-3">
+						<div class="input-group col-sm-12">
+							<button type="submit" name="submit" class="btn btn-default updateUser">Enregistrer</button>
+						</div>
+					</div>
+				</fieldset>
+			<% } %>
+		</form>
+	</div>
+</div>
+
+<script type="text/javascript">
+	var documentLoaded = function(){
+		$(".changepwd")
+		.on("click", function(){
+			$(this)
+			.parent()
+			.addClass("hide")
+			.next()
+			.removeClass("hide");
+			$(".repwd, .submitpwd")
+			.removeClass("hide");
+			return false;
+		});
+		$(".cancelpwd")
+		.on("click", function(){
+			$("#repassword, #password").parent().removeClass("has-error")
+			$("[type='password']").val("");
+			$(".changepwd")
+			.parent()
+			.removeClass("hide")
+			.next()
+			.addClass("hide");
+			$(".repwd, .submitpwd")
+			.addClass("hide");
+			return false;
+		});
+
+		$("#repassword, #password")
+		.on("blur", function(){
+			$(this).parent().removeClass("has-error")
+			if($("#repassword").val() != $("#password").val()){
+				$("#repassword")
+				.parent()
+				.addClass("has-error");
+			}
+			if(!$(this).val()){
+				$(this)
+				.parent()
+				.addClass("has-error");
+			}
+		});
+
+
+		$(".savepwd")
+		.on("click", function(){
+
+			if(!$("#password").val()){
+				$("#password").parent().addClass("has-error");
+				return false;	
+			} 
+			if(!$("#repassword").val()){
+				$("#repassword").parent().addClass("has-error");
+				return false;	
+			}
+			if($("#repassword, #password").parent().hasClass("has-error")) return false;
+
+			$.ajax({
+				url : "/worker/update/<%= worker.id %>",
+				type : "PUT",
+				data : {
+					_csrf : "<%= _csrf %>",
+					password :  $("#password").val()
+				},
+				dataType : "json"
+			})
+			.then(function(data){
+				if(!_.isObject(data)){
+					return new $.Deferred().reject()	
+				}else{
+					return new $.Deferred().resolve(data)
+				}
+			})
+			.done(function(data){
+				$("[type='password']").val("");
+				$(".changepwd")
+				.parent()
+				.removeClass("hide")
+				.next()
+				.addClass("hide");
+				$(".repwd, .submitpwd")
+				.addClass("hide");
+			})
+			.fail(function(){
+				alert("error");
+			});
+			return false;
+		});
+
+
+		$(".updateUser")
+		.on("click", function(){
+			$.ajax({
+				url : "/worker/update/<%= worker.id %>",
+				type : "PUT",
+				data : {
+					_csrf : "<%= _csrf %>",
+					firstname : $("#firstname").val(),
+					lastname : $("#lastname").val(),
+					email : $("#email").val(),
+					phone : $("#phone").val(),
+					addres : $("#addres_street").val() + " " +$("#addres_numero").val(),
+					city : $("#city").val(),
+					zipcode : $("#zipcode").val(),
+					country : $("#country").val(),
+					role : $("#role").val()||"<%= req.session.worker.role %>",
+				},
+				dataType : "json"
+			})
+			.then(function(data){
+				if(!_.isObject(data)){
+					return new $.Deferred().reject()	
+				}else{
+					return new $.Deferred().resolve(data)
+				}
+			})
+			.done(function(data){
+				//window.location.reload();
+			})
+			.fail(function(){
+				//alert("error");
+			});
+			return false;
+		})
+	};
+
+
+
+
+	window.addEventListener("load", documentLoaded);
+	<% if(false === res.locals.layout){ %>
+		documentLoaded();
+	<% } %>
+
+</script>

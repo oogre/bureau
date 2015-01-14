@@ -86,11 +86,13 @@
 			<label class="col-sm-2">Elements frigorifique</label>
 			<div class="form-group col-sm-10">
 				<div class="input-group col-sm-12">
+					<% if( role >= 99 ){ %>,
 					<div class="btn-group">
 						<a href="/element/new/?shop=<%= shop.id %>" class="btn btn-default add-element" type="button">
 							Créer &nbsp; <i class="fa fa-cog"></i>
 						</a>
 					</div>
+					<% } %>
 				</div>
 			</div>
 		</fieldset>
@@ -275,12 +277,14 @@
 	<% if(shop.contacts && shop.contacts.length > 0 ){ %>
 		<% shop.contacts.map(function(contact, n){ %>
 			$("#contacts").append(JST["assets/templates/forms/contact.ejs"]({
+				role : <%= role %>,
 				id : "<%= n %>",
 				contact : JSON.parse(_('<%= JSON.stringify(contact) %>').unescape())
 			}));
 		<% });%>
 	<% } else{ %>
 		$("#contacts").append(JST["assets/templates/forms/contact.ejs"]({
+			role : <%= role %>,
 			id : "0",
 			contact : {}
 		}));
@@ -291,6 +295,7 @@
 	$(".add-contact")
 	.on("click", function(){
 		$("#contacts").append(JST["assets/templates/forms/contact.ejs"]({
+			role : 100,
 			id : $("fieldset#contacts fieldset[data-contact-id]").length,
 			contact : {}
 		}));

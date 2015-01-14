@@ -16,6 +16,7 @@
 		var shop = JSON.parse(_("<%= JSON.stringify(shop) %>").unescape());
 		shop.element = JSON.parse(_("<%= JSON.stringify(element) %>").unescape());
 		$("#<%= id %>").append(JST["assets/templates/forms/shop.ejs"]({
+			role : <%= req.session.worker.role %>,
 			_csrf : "<%= _csrf %>",
 			shop : shop,
 			method : "PUT",
