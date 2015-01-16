@@ -275,7 +275,7 @@
 
 
 	<% if(shop.contacts && shop.contacts.length > 0 ){ %>
-		<% shop.contacts.map(function(contact, n){ %>
+		<% shop.contacts||[].map(function(contact, n){ %>
 			$("#contacts").append(JST["assets/templates/forms/contact.ejs"]({
 				role : <%= role %>,
 				id : "<%= n %>",
@@ -346,11 +346,17 @@
 							.find("[data-contact-id]")
 							.toArray()
 							.map(function(contact){
-								return {
-									position : ($(contact).find("[name$='_position']").val() || "").trim(),
-									name : ($(contact).find("[name$='_name']").val() || "").trim(),
-									tel : ($(contact).find("[name$='_tel']").val() || "").trim(),
-									email : ($(contact).find("[name$='_email']").val() || "").trim(),
+								var position  = ($(contact).find("[name$='_position']").val() || "").trim();
+								var name = ($(contact).find("[name$='_name']").val() || "").trim();
+								var tel = ($(contact).find("[name$='_tel']").val() || "").trim();
+								var email = ($(contact).find("[name$='_email']").val() || "").trim();
+								if(position && name && tel && email){
+									return {
+										position : position,
+										name : name,
+										tel : tel,
+										email : email,
+									}
 								}
 							})
 			};

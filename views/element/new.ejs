@@ -216,7 +216,12 @@
 						data : data,
 					})
 					.done(function(data){
-						console.log("done");
+						<% if(shops.length == 1){ %>
+							window.location = "/shop/edit/<%= shops[0].id %>";
+						<% } 
+						else { %>
+							window.location.reload();
+						<% } %>
 					})
 					.fail(function(message){
 						console.log("fails");

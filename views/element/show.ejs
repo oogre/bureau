@@ -2,6 +2,23 @@
 	var id = req.session.location.controller + "-" + req.session.location.action;
 
 
+	var taskMultiselectOption = 
+	_
+	.keys(tasks)
+	.map(function(groupName){
+		return {
+			label : groupName,
+			children : 	tasks[groupName]
+						.map(function(task){
+							return {
+								label: task.name, 
+								value: task.id,
+								selected: _.find(element.task, function(_task){ return _task.id == task.id }) ? true : false 
+							}
+						})
+		};
+	});
+
 %>
 
 <div class="container">
@@ -18,7 +35,7 @@
 				<div class="form-group col-sm-4">
 					<div class="input-group col-sm-12">
 						<label class="input-group-addon" for="serial" >N° de serie</label>
-						<input class="form-control" type="text" id="serial" name="serial" value="<%= element.serial || '' %>">
+						<input class="form-control" type="text" disabled="disabled" id="serial" name="serial" value="<%= element.serial || '' %>">
 					</div>
 				</div>
 			</fieldset>
@@ -26,13 +43,13 @@
 				<div class="form-group col-sm-offset-2 col-sm-4">
 					<div class="input-group col-sm-12">
 						<label class="input-group-addon" for="name" >Nom</label>
-						<input class="form-control" type="text" id="name" name="element_name" value="<%= element.name || '' %>">
+						<input class="form-control" type="text" disabled="disabled" id="name" name="element_name" value="<%= element.name || '' %>">
 					</div>
 				</div>
 				<div class="form-group col-sm-4">
 					<div class="input-group col-sm-12">
 						<label class="input-group-addon" for="elementType" >Type</label>
-						<input type="text" class="form-control" id="elementType" name="elementType" value="<%=element.type.name%>" />
+						<input type="text" class="form-control" disabled="disabled" id="elementType" name="elementType" value="<%=element.type.name%>" />
 					</div>
 				</div>	
 			</fieldset>
@@ -41,7 +58,7 @@
 				<div class="form-group col-sm-offset-2 col-sm-4">
 					<div class="input-group col-sm-12">
 						<label class="input-group-addon" for="owner" >Propriétaire</label>
-						<input type="text" class="form-control" id="elementType" name="elementType" value="<%=element.owner.name%>" />
+						<input type="text" class="form-control" disabled="disabled" id="ownerName" name="ownerName" value="<%=element.owner.name%>" />
 					</div>
 				</div>
 			</fieldset>
@@ -116,6 +133,97 @@
 	var  documentLoaded = function (){
 		_.uniqueId('new_wiki_');
 		window.element = JSON.parse(_("<%= JSON.stringify(element) %>").unescape());
+
+		window.taskMultiselectOption = JSON.parse(_("<%= JSON.stringify(taskMultiselectOption) %>").unescape());
+
+		$("#tasks").multiselect({
+			buttonWidth: '100%', 
+			includeSelectAllOption: true,
+			allSelectedText: 'Toute les tâches',
+			selectAllText : "Toute les tâches",
+			nonSelectedText : "Aucune tâche"
+		});
+		
+		$("#tasks").multiselect('dataprovider', taskMultiselectOption);
+
+		$(".add-task").on("click", function(){
+			$("#newTasks").append(JST["assets/templates/forms/task.ejs"]({
+				id : _.uniqueId('new_task_'),
+			}));
+			BUREAU.tools.input.focus();
+			return false;
+
+		});
+
+
+		$("form")
+		.on("submit", function(event){
+			try{
+				
+				BUREAU.tools.form.submitWaiter.start(event.target.submit);
+				
+				var data = {
+					_csrf : event.target._csrf.value,
+					task: 	($("#tasks").val() || [])
+							.concat( 	$("[id^='new_task_']")
+										.toArray()
+										.map(function(task){
+											return{
+												name : $(task).find("[name='task_name']").val(),
+												link : $(task).find("[name='typeLinked']").is(":checked")
+											}
+										})),
+					wiki : 	[ $(	$("[id^=wiki_]")
+								.toArray()
+								.shift()
+							)
+							.attr("data-wiki-id")
+						]
+						.concat(	$("[id^=wiki_]")
+									.toArray()
+									.slice(1)
+									.reverse()
+									.map(function(wiki){
+										return $(wiki).attr("data-wiki-id");
+									}))
+						.concat(	$("[id^='new_wiki_']")
+									.toArray()
+									.reverse()
+									.map(function(wiki){
+										var editor = CKEDITOR.instances[$(wiki).find("textarea").attr("name")];
+										return {
+											name : $(wiki).find("[name='name']").val(),
+											description : editor.innerHTML,
+											author : "<%= session.worker ? session.worker.id : ''  %>" || null
+										}
+									})
+						)
+				};
+
+				console.log(data);
+
+				BUREAU.tools.api({
+					url : "/element/update/<%= element.id %>",
+					type : "PUT",
+					data : data,
+				})
+				.done(function(data){
+					window.location.reload();
+				})
+				.fail(function(message){
+					console.log("fails");
+					BUREAU.tools.form.submitErrorHandler(message);
+					BUREAU.tools.form.submitWaiter.stop(event.target.submit);
+				});
+
+				return false;
+			}
+			catch(e){
+				console.error(e);
+				console.error("ERROR");
+				return false;
+			}
+		});
 
 		$("button.addWiki").on("click", function(){
 			$("button.saveWiki").removeClass("hide");

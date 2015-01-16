@@ -54,11 +54,11 @@
 					</div>
 				</div>
 			</fieldset>
-			
+			<% if(shop.contacts) {%>
 			<hr/>
 
 			<fieldset id="contacts"></fieldset>
-
+			<% } %>
 			<hr/>
 
 			<fieldset class="row">
@@ -115,7 +115,7 @@
 			});
 		}
 
-		<% shop.contacts.map(function(contact, n){ %>
+		<% shop.contacts||[].map(function(contact, n){ %>
 			$("#contacts").append(JST["assets/templates/show/contact.ejs"]({
 				id : "<%= n %>",
 				contact : JSON.parse(_('<%= JSON.stringify(contact) %>').unescape())

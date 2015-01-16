@@ -23,6 +23,7 @@
 	var  documentLoaded = function (){
 
 		$("#<%= id %>").append(JST["assets/templates/forms/shop.ejs"]({
+			role : <%= req.session.worker.role %>,
 			_csrf : "<%= _csrf %>",
 			shop : JSON.parse("<%- JSON.stringify(shop) %>"),
 			method : "POST",

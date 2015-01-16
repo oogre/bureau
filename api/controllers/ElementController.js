@@ -33,8 +33,26 @@ module.exports = {
 		.populateAll()
 		.then(function (element){
 			if(!element) return res.redirect("/element/index");
+
+			return [element]
+		})
+		.spread(function (element){
+			var tasks = Task.find()
+						.populateAll()
+						.then(function foundTasks(tasks){
+							return _.groupBy(tasks, function(task){
+								return task.elementType != undefined ? task.elementType.name : "-";
+							});
+						})
+						.catch(function(err){
+							return next(err);
+						});
+			return [element, tasks];
+		})
+		.spread(function (element, tasks){
 			return res.view({
-				element : element
+				element : element,
+				tasks : tasks
 			});
 		})
 		.catch(function(err){

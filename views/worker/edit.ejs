@@ -247,6 +247,8 @@
 
 		$(".updateUser")
 		.on("click", function(){
+			var submit = $(this)[0];
+			BUREAU.tools.form.submitWaiter.start(submit);
 			$.ajax({
 				url : "/worker/update/<%= worker.id %>",
 				type : "PUT",
@@ -272,10 +274,11 @@
 				}
 			})
 			.done(function(data){
-				//window.location.reload();
+				window.location.reload();
 			})
 			.fail(function(){
-				//alert("error");
+				BUREAU.tools.form.submitErrorHandler(message);
+				BUREAU.tools.form.submitWaiter.stop(submit);
 			});
 			return false;
 		})

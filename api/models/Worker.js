@@ -142,7 +142,6 @@ module.exports = {
 				return next(err)
 			})
 		}else{
-			console.log(values);
 			return next();
 		}
 	}
