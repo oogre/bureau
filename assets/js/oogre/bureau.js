@@ -270,22 +270,20 @@
 
 						var toShow = [];
 						var toHide = [];
-						selectors.map(function(selector){ 
-							toHide = toHide.concat(table.find("tbody td[data-db-row-name='"+selector+"']:not([data-db-row-value*='"+needle+"'])")
-							.parent()
-							.toArray());
-							toShow = toShow.concat(table.find("tbody td[data-db-row-name='"+selector+"'][data-db-row-value*='"+needle+"']")
-							.parent()
-							.toArray());
+						selectors
+						.map(function(selector){ 
+							toHide = 	toHide
+										.concat(	table
+													.find("tbody td[data-db-row-name='"+selector+"']:not([data-db-row-value*='"+needle+"'])")
+													.parent()
+													.toArray() );
+							toShow = 	toShow
+										.concat(	table
+													.find("tbody td[data-db-row-name='"+selector+"'][data-db-row-value*='"+needle+"']")
+													.parent()
+													.toArray() );
 						});
 						
-
-						console.log("toHide");
-						console.log(toHide);
-
-						console.log("toShow");
-							console.log(toShow);
-
 						toHide.map(function(elem){
 							$(elem).addClass("hide");
 						});

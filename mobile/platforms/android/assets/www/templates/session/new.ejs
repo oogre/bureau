@@ -1,0 +1,64 @@
+<h3>Connection</h3>
+
+<hr/>
+
+<form class="form-inline" role="form" action="http://ogre.local:1337/create" method="POST" id="signin"> 
+
+	<fieldset class="row">
+		<label class="col-sm-2">Identification</label>
+		<div class="form-group col-sm-5">
+			<div class="input-group col-sm-12">
+				<label class="input-group-addon" for="email" >Email</label>
+				<input type="text" class="form-control" id="email" name="email" autocomplete="off" required/>
+			</div>
+		</div>
+		<div class="form-group col-sm-5">
+			<div class="input-group col-sm-12">
+				<label class="input-group-addon" for="password" >Mot de passe</label>
+				<input type="password" class="form-control" id="password" name="password" autocomplete="off" required/>
+			</div>
+		</div>
+	</fieldset>
+	
+	<hr/>	
+
+	<fieldset class="row">
+		<label class="col-sm-2"></label>
+		<div class="form-group col-sm-3">
+			<div class="input-group col-sm-12">
+				<button type="submit" name="submit" class="btn btn-default">Enregistrer</button>
+			</div>
+		</div>
+	</fieldset>
+
+</form>
+
+<script type="text/javascript">
+	"use strict";
+	/*global $ : false */
+	/*global OOGRE : false */
+
+	$("form#signin")
+	.on("submit", function(){
+		var $self = $(this);
+		$.ajax({
+			url : $self.attr("action"),
+			type : "GET",
+			dataType : "JSON",
+			data : {
+				email : $self.find("#email").val(),
+				password : $self.find("#password").val()
+			}
+		})
+		.done(function(data){
+			OOGRE.setLogged(data);
+		})
+		.fail(function(){
+			console.warn("errror");	
+		});
+
+
+
+		return false;
+	});
+</script>

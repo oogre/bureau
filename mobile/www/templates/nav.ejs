@@ -1,0 +1,66 @@
+<ul class="nav">
+	<li>
+		<img id="brand" src="img/logo.png">
+	</li>
+	<li class="logged">
+		<a href="/back" class="">
+			<i class="fa fa-fw fa-2x fa-chevron-left"></i>&nbsp; Back
+		</a>
+	</li>
+	<li class="logged" data-controller="worker">
+		<a href="/worker">
+			<i class="fa fa-fw fa-2x fa-users"></i>&nbsp; Travailleurs
+		</a>
+	</li>
+	<li class="logged" data-controller="shop">
+		<a href="/shop">
+			<i class="fa fa-fw fa-2x fa-smile-o"></i>&nbsp; Magasins
+		</a>
+	</li>
+	<li class="logged" data-controller="work">
+		<a href="/work">
+			<i class="fa fa-fw fa-2x fa-wrench"></i>&nbsp; Travaux
+		</a>
+	</li>
+	<li class="logged" data-controller="material">
+		<a href="/material">
+			<i class="fa fa-fw fa-2x fa-cogs"></i>&nbsp; Matériels
+		</a>
+	</li>
+	<li class="logged">
+		<a href="/signout">
+			<i class="fa fa-fw fa-2x fa-sign-out"></i>&nbsp; Déconnection
+		</a>
+	</li>
+	<li data-controller="session">
+		<a href="/">
+			<i class="fa fa-fw fa-2x fa-sign-in"></i>&nbsp; Connection
+		</a>
+	</li>
+</ul>
+
+
+<script type="text/javascript">
+	(function(){
+		"use strict";
+		/*global $ : false */
+		/*global OOGRE : false */
+
+		OOGRE
+		.on("controllerChange", function(controller){
+			if(!OOGRE.isLogged()){
+				$("ul.nav li.logged").hide();
+				$("ul.nav li:not(.logged)").show();
+			}
+			else {
+				$("ul.nav li.logged").show();
+				$("ul.nav li:not(.logged)").hide();
+			}
+			$("ul.nav li")
+			.removeClass("active");
+			$("ul.nav li[data-controller='"+controller+"'] a")
+			.addClass("active");
+		});
+
+	}());
+</script>

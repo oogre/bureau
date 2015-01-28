@@ -4,6 +4,10 @@
  * @description :: Server-side logic for managing sessions
  * @help        :: See http://links.sailsjs.org/docs/controllers
  */
+"use strict";
+	/*global module : false */
+	/*global require : false */
+	
 
 var bcrypt = require("bcrypt");
 
@@ -17,10 +21,12 @@ module.exports = {
 		if(!req.param("email") || !req.param("password")){
 			req.session.flash = {
 				err : {
-					error : 'userEmailPasswordRequiredError',
+					error : "userEmailPasswordRequiredError",
 					data : null
 				}
-			}
+			};
+			res.status(403);
+			return res.json(req.session.flash);
 			return res.redirect("/session/new");
 		}
 		Worker.findOne()
@@ -31,12 +37,14 @@ module.exports = {
 			if(!worker){
 				req.session.flash = {
 					err : {
-						error : 'noAccountError',
+						error : "noAccountError",
 						data : {
 							email : req.param("email")
 						}
 					}
-				}
+				};
+				res.status(404);
+				return res.json(req.session.flash);
 				return res.redirect("/session/new");
 			}
 			bcrypt.compare(req.param("password"), worker.encryptedPassword, function(err, valid){
@@ -44,16 +52,20 @@ module.exports = {
 				if(!valid){
 					req.session.flash = {
 						err : {
-							error : 'userEmailPasswordMismatchError',
+							error : "userEmailPasswordMismatchError",
 							data : {
 								email : req.param("email")
 							}
 						}
-					}
+					};
+					res.status(404);
+					return res.json(req.session.flash);
 					return res.redirect("/session/new");
 				}
 				worker.signin(req.session, function (err, onlineUser){
 					if(err) return next(err);
+					res.status(200);
+					return res.json(onlineUser);
 
 					if(onlineUser.role.id >= 99){
 						return res.redirect("work/index/");
@@ -73,16 +85,16 @@ module.exports = {
 		})
 		.then(function(worker){
 			if(worker){
-				worker.signout(req.session, function (err, offlineUser){
+				worker.signout(req.session, function (err){
 					if(err)return next(err);
 					return res.redirect("/");
 				});
-			}else{;
+			}else{
 				req.session.destroy();
 				return res.redirect("/");
 			}
 		})
-		.catch(function(err){
+		.catch(function(){
 			req.session.destroy();
 			return res.redirect("/");
 		});
